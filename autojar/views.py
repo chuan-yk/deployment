@@ -39,6 +39,7 @@ def upload_file(request):
                     f.close()
             Resultdic1 = RunCommd(ptid,appid,File.name,f.name,action)
             Resultdic = deldicNullkey(Resultdic1)
+            messages.success(request, '发布成功！', 'alert-success')
             return render(request, 'autojar/upload.html', Resultdic)
                 #return redirect('/deoply/jar', messages.error(request, '发布失败!', 'alert-danger'))
                 #return render(request, 'upload.html', Resultdict[0], Resultdict[1].success(request, '发布成功', 'alert-success'))
