@@ -1,0 +1,14 @@
+.content div{
+    width: 33.3%;
+    float: left;
+    height: 260px;
+    font-size: 20px;
+    padding-top: 50px;
+}
+.content div label{
+    margin-right: 10px;
+    vertical-align: middle;
+}
+.up input{
+    float: left;
+}
