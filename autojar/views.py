@@ -7,8 +7,9 @@ from django.contrib.auth.decorators import login_required
 from tempfile import TemporaryFile,NamedTemporaryFile
 
 
-
-def prepareConfig(section, appname, filenames='D:\\deloyment\\autojar\\host.conf'):
+hostConf = 'D:\\Projects\\deployment\\autojar\\host.conf'
+appConf = 'D:\\Projects\\deployment\\autojar\\apppath.conf'
+def prepareConfig(section, appname, filenames=hostConf):
 
     configdata = configparser.ConfigParser()
     configdata.read(filenames)
@@ -23,7 +24,7 @@ def prepareConfig(section, appname, filenames='D:\\deloyment\\autojar\\host.conf
 
 @login_required
 def upload_file(request):
-    upload_path = "D:\\deloyment\\autojar\\static\\upload"
+    upload_path = "D:\\Projects\\deployment\\autojar\static\\upload"
     if request.method == "POST":
         ptid = request.POST.get('plafrom')         #获取平台
         appid = request.POST.get('appname')        #获取app项目
@@ -37,8 +38,8 @@ def upload_file(request):
                 for chunk in File.chunks():         # 分块写入文件;
                     f.write(chunk)
                     f.close()
-            Resultdic1 = RunCommd(ptid,appid,File.name,f.name,action)
-            Resultdic = deldicNullkey(Resultdic1)
+            ResultdicExe = RunCommd(ptid,appid,File.name,f.name,action)
+            Resultdic = deldicNullkey(ResultdicExe)
             messages.success(request, '发布成功！', 'alert-success')
             return render(request, 'autojar/upload.html', Resultdic)
                 #return redirect('/deoply/jar', messages.error(request, '发布失败!', 'alert-danger'))
@@ -60,7 +61,7 @@ def RunCommd(ptid,appid,Fname,fname,action=0):
                 jar -uvf {apppath}lib/{name}.jar {name}
                 '''.format(url=url, tmpname1='jstl.zip', tmpname=os.path.split(fname)[1],
                 name=os.path.splitext(Fname)[0], expath=path,
-                apppath=prepareConfig(ptid, appid, 'D:\\deloyment\\autojar\\apppath.conf')))
+                apppath=prepareConfig(ptid, appid,appConf)))
 
     Resultdic = {'Title': '执行结果', 'Resultstdout': execResult[0][:-1].split('\n'),
                  'Resultstderr': execResult[1][0:-1].split('\n')}
@@ -72,7 +73,7 @@ def RunCommd(ptid,appid,Fname,fname,action=0):
         result = t.ssh_exec_cmd('''
         ps -ef|grep {apppath}conf|grep -v grep |grep -v tail|xargs kill -9;
         {apppath}bin/startup.sh
-        '''.format(apppath=prepareConfig(ptid, appid, 'D:\\Projects\github\\orders\\apppath.conf')))
+        '''.format(apppath=prepareConfig(ptid, appid,appConf)))
         print(result)
     return  Resultdic
 

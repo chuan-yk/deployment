@@ -12,6 +12,7 @@ class SSHManager(object):
         self.user = user
         self.port = port
         self._ssh = paramiko.SSHClient()
+        self._sshkey = 'C:\\keys\\id_rsa_2048_shine'
 
     def __del__(self):
 
@@ -26,7 +27,7 @@ class SSHManager(object):
             # 指定本地的RSA私钥文件,如果建立密钥对时设置的有密码，password为设定的密码，如无不用指定password参数
             # pkey = paramiko.RSAKey.from_private_key_file('/home/super/.ssh/id_rsa', password='12345')
             #pkey = paramiko.RSAKey.from_private_key_file(r'E:\id_rsa_2048_shine')
-            pkey = paramiko.RSAKey.from_private_key_file(r'C:\Users\ice\.ssh\id_rsa')
+            pkey = paramiko.RSAKey.from_private_key_file(self._sshkey)
             #连接服务器
             self._ssh.connect(hostname=self.host, port = self.port,username = self.user,pkey = pkey, timeout = 5)
         except Exception:
