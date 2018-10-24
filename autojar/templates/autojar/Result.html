@@ -1,0 +1,18 @@
+{% if Resultstdout %}
+    <div class="line ">
+        发布详情
+    </div>
+    {% for variable in Resultstdout %}
+        <p> {{ variable }} </p>
+    {% endfor %}
+{% endif %}
+
+{% if Resultstderr %}
+    <div class="line">
+        错误信息
+    </div>
+
+    {% for variable in Resultstderr %}
+        <p> {{ variable }} </p>
+    {% endfor %}
+{% endif %}

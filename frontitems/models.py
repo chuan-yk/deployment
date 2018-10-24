@@ -13,11 +13,11 @@ class ProjectInfo(models.Model):
     file_save_base_dir = models.CharField(max_length=200,default='')
     backup_file_dir = models.CharField(max_length=200,default='')
     validate_user = models.CharField(max_length=500,default='')
-    ssh_server = models.IPAddressField(default='')
-    ssh_port = models.IntegerField(default=22)
+    # ssh_server = models.IPAddressField(default='')
+    # ssh_port = models.IntegerField(default=22)
 
-    def connect_sshserver(self, pk):
-        pass
+    # def connect_sshserver(self, pk):
+    #     pass
 
 class RecordOfStatic(models.Model):
 

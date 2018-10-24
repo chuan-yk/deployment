@@ -19,12 +19,14 @@ from django.contrib.auth import views as auth
 from django.contrib.auth.decorators import login_required
 from . import views
 
+
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^users/login/$', auth.login, {'template_name': 'login.html'}, name='login'),
     url(r'^users/logout/$', auth.logout, {'next_page': '/'}, name='logout'),
     url(r'^users/change_password/$', login_required(auth.password_change), {'post_change_redirect' : '/','template_name': 'change_password.html'}, name='change_password'),
-    url(r'frontitems/', include('frontitems.urls')),
+    url(r'^frontitems/', include('frontitems.urls')),
+    url(r'^autojar/', include('autojar.urls')),
     url(r'^$', views.indexpage, name='indexhome'),
     url(r'coming_soon$', views.comingsoon, name='not_finish_page'),
 ]
