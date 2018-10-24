@@ -100,21 +100,8 @@
 
     <!-- BEGIN CONTENT-->
     <div id="content">
- ======== {{ messages.get_messages }} ========
         {% if messages %}
             {% for message in messages %} <br>
-               xxxxxxxx {{ message.get_messages }} xxxxxget_messages <br>
-                yyyyy {{ message.info }} infoyyyyy <br>
-                <p>---- {{ message.level }}  -----</p>
-                <p>----xx {{ message }}  xx-----</p>
-                {% if message.level > 2  %}
-                    message
-                {% endif %}
-                {% if message.level == 25  %}
-                    {% for i in message %}
-                        there for in message , sub {{ i }} <br>
-                    {% endfor %}
-                {% endif %}
                 <div {% if message.tags %} class="alert {{ message.tags }} text-center"{% endif %}>
                     <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
                     {{ message }}
@@ -185,6 +172,7 @@
                     <!--start submenu -->
                     <ul>
                        {% comment %} <li><a href="{% url 'change_password' %}"><span class="title">项目发布</span></a></li>{% endcomment %}
+                        <li><a href="{% url 'autojar:jar_upload' %}"><span class="title">Jar包发布</span></a></li>
                         <li><a href="{% url 'not_finish_page' %}"><span class="title">项目发布</span></a></li>
                         <li><a href="{% url 'not_finish_page' %}"><span class="title">版本回滚</span></a></li>
                     </ul><!--end /submenu -->
