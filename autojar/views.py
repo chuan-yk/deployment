@@ -40,40 +40,45 @@ def upload_file(request):
                     f.close()
             ResultdicExe = RunCommd(ptid,appid,File.name,f.name,action)
             Resultdic = deldicNullkey(ResultdicExe)
+            if len(ResultdicExe['Resultstderr']) > 0:
+                messages.error(request,'发布失败','alert-danger')
+                return render(request, 'autojar/upload.html', Resultdic)
             messages.success(request, '发布成功！', 'alert-success')
             return render(request, 'autojar/upload.html', Resultdic)
-                #return redirect('/deoply/jar', messages.error(request, '发布失败!', 'alert-danger'))
+
                 #return render(request, 'upload.html', Resultdict[0], Resultdict[1].success(request, '发布成功', 'alert-success'))
                 #return redirect('/deoply/jar', messages.error(request, '发布失败!', 'alert-danger'))
     else:
         return render(request, 'autojar/upload.html')
 
-def RunCommd(ptid,appid,Fname,fname,action=0):
-
+def RunCommd(ptname,appname,Fname,fname,action=0):
+    datenow = datetime.datetime.now().strftime('%Y%m%d-%H%M')
     t = SSHManager(prepareConfig(ptid, appid), 22)
     t.ssh_connect()
     url = 'http://127.0.0.1/'
     path = '/tmp/' + os.path.split(fname)[1]
 
     execResult = t.ssh_exec_cmd('''wget -T 3 -q {url}{tmpname1} -P /tmp/{tmpname};
+               cp {apppath}webapps/{appname};
                unzip -q /tmp/{tmpname}/{tmpname1} -d /tmp/{tmpname}/{name};
                 cd {expath};
                 jar -uvf {apppath}lib/{name}.jar {name}
                 '''.format(url=url, tmpname1='jstl.zip', tmpname=os.path.split(fname)[1],
-                name=os.path.splitext(Fname)[0], expath=path,
-                apppath=prepareConfig(ptid, appid,appConf)))
+                name=os.path.splitext(Fname)[0], expath=path,appname=appname,
+                apppath=prepareConfig(ptname, appname,appConf)))
 
     Resultdic = {'Title': '执行结果', 'Resultstdout': execResult[0][:-1].split('\n'),
                  'Resultstderr': execResult[1][0:-1].split('\n')}
 
     if execResult[2] != 0:
+        print(Resultdic)
         return Resultdic
     if action == '1':
         print('restart')
         result = t.ssh_exec_cmd('''
         ps -ef|grep {apppath}conf|grep -v grep |grep -v tail|xargs kill -9;
         {apppath}bin/startup.sh
-        '''.format(apppath=prepareConfig(ptid, appid,appConf)))
+        '''.format(apppath=prepareConfig(ptname, appname,appConf)))
         print(result)
     return  Resultdic
 
