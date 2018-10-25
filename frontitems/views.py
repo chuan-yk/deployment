@@ -90,17 +90,13 @@ def upload(request):
             messages.error(request, '未知错误： '+str(e), 'alert-danger')
         finally:
             #return render(request, 'frontitems/upload.html', context)
-            return redirect(reverse(upload))
+            #return redirect(reverse(upload))
+            pass
 
     elif request.method == 'GET':
         # if request.user.is_authenticated():
         #     #print(request.user.username, '====')
         #     pass
         #return HttpResponse(template.render(context, request))
-        messages.add_message(request, messages.ERROR, 'aaaaaaaaaaaaaaaaaa', 'alert-danger')
-        messages.add_message(request, messages.DEBUG, 'bbbbbbbbbbbbbbbbb', 'alert-success')
-        #messages.add_message(request, messages.INFO, 'iiiiiiiiiiiii', 'alert-success')
-        messages.add_message(request, messages.INFO, [i for i in range(10)], 'alert-success')
-        messages.add_message(request, messages.SUCCESS, 'ddddddddddddddddddd', 'alert-danger')
         context = {'platformlist': platformlist, 'items': items, }
         return render(request,'frontitems/upload.html',context)
