@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'widget_tweaks',
     'frontitems',
     'autojar',
+    'cmdb',
     # 'django.conf.OrdersConfig'
 ]
 
