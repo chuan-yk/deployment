@@ -1,8 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
+<<<<<<< HEAD
     <list default="true" id="2d257041-a4a6-49c8-a81a-d47ba7bc0ab3" name="Default" comment="" />
     <ignored path=".idea/" />
+=======
+    <list default="true" id="2d257041-a4a6-49c8-a81a-d47ba7bc0ab3" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/deloyment.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deloyment.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/autojar/remote_run.py" beforeDir="false" afterPath="$PROJECT_DIR$/autojar/remote_run.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/autojar/static/upload/1.txt2vat9dmj" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/autojar/static/upload/1.txt_nn1htn4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/autojar/static/upload/1.txtc7wylul0" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/autojar/static/upload/1.txtcqh6bbl_" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/autojar/static/upload/1.txthcqlb6v2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/autojar/static/upload/1.txthennjlj8" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/autojar/static/upload/1.txtm80ajeb7" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/autojar/static/upload/1.txto2wnhfwu" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/autojar/static/upload/1.txtqqdlomnl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/autojar/static/upload/1.txtrdyakio1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/autojar/static/upload/1.txts0nrue6e" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/autojar/static/upload/1.txtx1v009ec" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/autojar/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/autojar/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+    </list>
+>>>>>>> 77ad65989ee84ff2e9e4808fa48d0d786cf82f89
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -12,6 +37,7 @@
   </component>
   <component name="CoverageDataManager">
     <SUITE FILE_PATH="coverage/deloyment$remotepubstatic.coverage" NAME="remotepubstatic Coverage Results" MODIFIED="1540279942295" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/frontitems" />
+    <SUITE FILE_PATH="coverage/deployment$remote_run.coverage" NAME="remote_run Coverage Results" MODIFIED="1540373553463" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/autojar" />
   </component>
   <component name="DatabaseView">
     <option name="SHOW_INTERMEDIATE" value="true" />
@@ -57,14 +83,37 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="views.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/frontitems/views.py">
+      <file leaf-file-name="settings.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/deloyment/settings.py">
           <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
             <state relative-caret-position="268">
               <caret line="99" column="63" selection-start-line="99" selection-start-column="63" selection-end-line="99" selection-end-column="63" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
+=======
+            <state relative-caret-position="114">
+              <caret line="6" column="55" selection-start-line="6" selection-start-column="55" selection-end-line="6" selection-end-column="55" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="host.conf" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/autojar/host.conf">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="152">
+              <caret line="8" selection-start-line="8" selection-end-line="8" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="models.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/autojar/models.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="228">
+              <caret line="12" selection-start-line="12" selection-end-line="12" />
+>>>>>>> 77ad65989ee84ff2e9e4808fa48d0d786cf82f89
             </state>
           </provider>
         </entry>
@@ -72,8 +121,13 @@
       <file leaf-file-name="views.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/autojar/views.py">
           <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
             <state>
               <caret line="42" column="63" selection-start-line="42" selection-start-column="63" selection-end-line="42" selection-end-column="63" />
+=======
+            <state relative-caret-position="1444">
+              <caret line="76" column="21" selection-start-line="76" selection-start-column="21" selection-end-line="76" selection-end-column="21" />
+>>>>>>> 77ad65989ee84ff2e9e4808fa48d0d786cf82f89
               <folding>
                 <element signature="e#0#22#0" expanded="true" />
               </folding>
@@ -81,6 +135,7 @@
           </provider>
         </entry>
       </file>
+<<<<<<< HEAD
       <file leaf-file-name="settings.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/deloyment/settings.py">
           <provider selected="true" editor-type-id="text-editor">
@@ -98,10 +153,18 @@
               <folding>
                 <element signature="e#0#28#0" expanded="true" />
               </folding>
+=======
+      <file leaf-file-name=".gitignore" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/.gitignore">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="143">
+              <caret line="162" column="22" lean-forward="true" selection-start-line="162" selection-start-column="22" selection-end-line="162" selection-end-column="22" />
+>>>>>>> 77ad65989ee84ff2e9e4808fa48d0d786cf82f89
             </state>
           </provider>
         </entry>
       </file>
+<<<<<<< HEAD
       <file leaf-file-name="tests.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/cmdb/tests.py">
           <provider selected="true" editor-type-id="text-editor" />
@@ -134,10 +197,18 @@
           <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
             <state>
               <filtering enabled="true" />
+=======
+      <file leaf-file-name="manage.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/manage.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="228">
+              <caret line="13" column="16" selection-start-line="13" selection-start-column="16" selection-end-line="13" selection-end-column="16" />
+>>>>>>> 77ad65989ee84ff2e9e4808fa48d0d786cf82f89
             </state>
           </provider>
         </entry>
       </file>
+<<<<<<< HEAD
       <file leaf-file-name="models.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/frontitems/models.py">
           <provider selected="true" editor-type-id="text-editor">
@@ -145,6 +216,15 @@
               <caret line="28" column="60" selection-start-line="28" selection-start-column="35" selection-end-line="28" selection-end-column="60" />
               <folding>
                 <element signature="e#0#28#0" expanded="true" />
+=======
+      <file leaf-file-name="remote_run.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/autojar/remote_run.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="342">
+              <caret line="18" column="21" selection-start-line="18" selection-start-column="21" selection-end-line="18" selection-end-column="21" />
+              <folding>
+                <element signature="e#22#44#0" expanded="true" />
+>>>>>>> 77ad65989ee84ff2e9e4808fa48d0d786cf82f89
               </folding>
             </state>
           </provider>
@@ -215,12 +295,17 @@
         <option value="$PROJECT_DIR$/autojar/templates/autojar/urls.py" />
         <option value="$PROJECT_DIR$/autojar/urls.py" />
         <option value="$PROJECT_DIR$/autojar/templates/autojar/upload.html" />
-        <option value="$PROJECT_DIR$/autojar/remote_run.py" />
         <option value="$PROJECT_DIR$/templates/layout.html" />
+        <option value="$PROJECT_DIR$/requirements.txt" />
+        <option value="$PROJECT_DIR$/autojar/remote_run.py" />
         <option value="$PROJECT_DIR$/autojar/views.py" />
+<<<<<<< HEAD
         <option value="$PROJECT_DIR$/deloyment/settings.py" />
         <option value="$PROJECT_DIR$/frontitems/views.py" />
         <option value="$PROJECT_DIR$/cmdb/models.py" />
+=======
+        <option value="$PROJECT_DIR$/.gitignore" />
+>>>>>>> 77ad65989ee84ff2e9e4808fa48d0d786cf82f89
       </list>
     </option>
   </component>
@@ -252,6 +337,7 @@
         <subPane>
           <expand>
             <path>
+<<<<<<< HEAD
               <item name="deloyment" type="b2602c69:ProjectViewProjectNode" />
               <item name="deloyment" type="462c0819:PsiDirectoryNode" />
             </path>
@@ -264,34 +350,21 @@
               <item name="deloyment" type="b2602c69:ProjectViewProjectNode" />
               <item name="deloyment" type="462c0819:PsiDirectoryNode" />
               <item name="cmdb" type="462c0819:PsiDirectoryNode" />
+=======
+              <item name="deployment" type="b2602c69:ProjectViewProjectNode" />
+              <item name="deployment" type="462c0819:PsiDirectoryNode" />
+>>>>>>> 77ad65989ee84ff2e9e4808fa48d0d786cf82f89
             </path>
             <path>
-              <item name="deloyment" type="b2602c69:ProjectViewProjectNode" />
-              <item name="deloyment" type="462c0819:PsiDirectoryNode" />
-              <item name="deloyment" type="462c0819:PsiDirectoryNode" />
+              <item name="deployment" type="b2602c69:ProjectViewProjectNode" />
+              <item name="deployment" type="462c0819:PsiDirectoryNode" />
+              <item name="autojar" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
-              <item name="deloyment" type="b2602c69:ProjectViewProjectNode" />
-              <item name="deloyment" type="462c0819:PsiDirectoryNode" />
-              <item name="frontitems" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="deloyment" type="b2602c69:ProjectViewProjectNode" />
-              <item name="deloyment" type="462c0819:PsiDirectoryNode" />
-              <item name="frontitems" type="462c0819:PsiDirectoryNode" />
-              <item name="templates" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="deloyment" type="b2602c69:ProjectViewProjectNode" />
-              <item name="deloyment" type="462c0819:PsiDirectoryNode" />
-              <item name="frontitems" type="462c0819:PsiDirectoryNode" />
-              <item name="templates" type="462c0819:PsiDirectoryNode" />
-              <item name="frontitems" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="deloyment" type="b2602c69:ProjectViewProjectNode" />
-              <item name="deloyment" type="462c0819:PsiDirectoryNode" />
-              <item name="templates" type="462c0819:PsiDirectoryNode" />
+              <item name="deployment" type="b2602c69:ProjectViewProjectNode" />
+              <item name="deployment" type="462c0819:PsiDirectoryNode" />
+              <item name="autojar" type="462c0819:PsiDirectoryNode" />
+              <item name="static" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -313,6 +386,7 @@
     <property name="node.js.selected.package.tslint" value="" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+<<<<<<< HEAD
     <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Ignored.Files" />
   </component>
   <component name="PyConsoleOptionsProvider">
@@ -322,6 +396,9 @@
         <option name="myModuleName" value="deloyment" />
       </console-settings>
     </option>
+=======
+    <property name="settings.editor.selected.configurable" value="zielu.svntoolbox.prj.config" />
+>>>>>>> 77ad65989ee84ff2e9e4808fa48d0d786cf82f89
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -342,6 +419,25 @@
     </option>
   </component>
   <component name="RunManager" selected="Django server.deloyment">
+    <configuration name="remote_run" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="deloyment" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/autojar" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/autojar/remote_run.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+    </configuration>
     <configuration name="remotepubstatic" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="deloyment" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -369,7 +465,7 @@
         <env name="PYTHONUNBUFFERED" value="1" />
         <env name="DJANGO_SETTINGS_MODULE" value="deloyment.settings" />
       </envs>
-      <option name="SDK_HOME" value="D:\deloyment\venv\Scripts\python.exe" />
+      <option name="SDK_HOME" value="E:\Miniconda\envs\deployment\python.exe" />
       <option name="WORKING_DIRECTORY" value="" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
@@ -387,9 +483,11 @@
     <list>
       <item itemvalue="Django server.deloyment" />
       <item itemvalue="Python.remotepubstatic" />
+      <item itemvalue="Python.remote_run" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.remote_run" />
         <item itemvalue="Python.remotepubstatic" />
       </list>
     </recent_temporary>
@@ -417,12 +515,12 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1066" extended-state="6" />
-    <editor active="true" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <layout>
       <window_info anchor="bottom" id="TODO" order="7" weight="0.32938644" />
       <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.5010661" side_tool="true" weight="0.32938644" />
       <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
+<<<<<<< HEAD
       <window_info anchor="bottom" id="Run" order="3" sideWeight="0.4989339" weight="0.3125" />
       <window_info anchor="bottom" id="Version Control" order="10" />
       <window_info anchor="bottom" id="Python Console" order="2" sideWeight="0.4989339" visible="true" weight="0.42564654" />
@@ -432,10 +530,19 @@
       <window_info anchor="bottom" id="Docker" order="12" show_stripe_button="false" />
       <window_info anchor="right" id="Database" order="3" visible="true" weight="0.23614073" />
       <window_info anchor="bottom" id="Find" order="1" />
+=======
+      <window_info anchor="bottom" id="Version Control" order="10" />
+      <window_info anchor="bottom" id="Python Console" order="2" sideWeight="0.4989339" weight="0.32938644" />
+      <window_info anchor="bottom" id="Run" order="3" sideWeight="0.4989339" weight="0.43028322" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="11" sideWeight="0.49946696" visible="true" weight="0.32897604" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.28837952" />
+      <window_info anchor="bottom" id="Docker" order="12" show_stripe_button="false" />
+      <window_info anchor="right" id="Database" order="3" weight="0.19616205" />
+>>>>>>> 77ad65989ee84ff2e9e4808fa48d0d786cf82f89
       <window_info anchor="right" id="SciView" order="3" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info anchor="bottom" id="Debug" order="4" weight="0.4" />
       <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Debug" order="4" weight="0.4" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="6" weight="0.4" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
@@ -444,28 +551,28 @@
       <window_info anchor="bottom" id="Cvs" order="5" weight="0.25" />
     </layout>
     <layout-to-restore>
-      <window_info anchor="bottom" id="Version Control" order="10" show_stripe_button="false" />
       <window_info anchor="bottom" id="Database Console" order="13" sideWeight="0.49946696" weight="0.32938644" />
       <window_info anchor="bottom" id="Docker" order="12" show_stripe_button="false" />
-      <window_info active="true" anchor="bottom" id="Run" order="3" sideWeight="0.4989339" visible="true" weight="0.39827773" />
+      <window_info anchor="bottom" id="Inspection" order="6" weight="0.4" />
+      <window_info anchor="bottom" id="Cvs" order="5" weight="0.25" />
+      <window_info id="Favorites" order="2" side_tool="true" />
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.19029851" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
-      <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
-      <window_info anchor="bottom" id="TODO" order="7" weight="0.32938644" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
-      <window_info anchor="bottom" id="Python Console" order="2" sideWeight="0.4989339" weight="0.32938644" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="bottom" id="TODO" order="7" weight="0.32938644" />
+      <window_info active="true" anchor="bottom" id="Run" order="3" sideWeight="0.4989339" visible="true" weight="0.39827773" />
       <window_info anchor="bottom" id="Find" order="1" />
       <window_info anchor="right" id="Database" order="3" visible="true" weight="0.1401919" />
       <window_info anchor="bottom" id="Terminal" order="11" sideWeight="0.49946696" weight="0.32938644" />
       <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.5010661" side_tool="true" weight="0.32938644" />
-      <window_info anchor="bottom" id="Inspection" order="6" weight="0.4" />
-      <window_info anchor="bottom" id="Cvs" order="5" weight="0.25" />
+      <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Version Control" order="10" show_stripe_button="false" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="SciView" order="4" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Debug" order="4" weight="0.4" />
-      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Python Console" order="2" sideWeight="0.4989339" weight="0.32938644" />
     </layout-to-restore>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -479,17 +586,11 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/autojar/remote_run.py</url>
-          <line>1</line>
-          <option name="timeStamp" value="2" />
-        </line-breakpoint>
-      </breakpoints>
       <option name="time" value="3" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
+<<<<<<< HEAD
     <entry file="file://$PROJECT_DIR$/frontitems/models.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="450">
@@ -517,6 +618,11 @@
         </state>
       </provider>
     </entry>
+=======
+    <entry file="file://$PROJECT_DIR$/frontitems/models.py" />
+    <entry file="file://$PROJECT_DIR$/deloyment/settings.py" />
+    <entry file="file://$PROJECT_DIR$/deloyment/urls.py" />
+>>>>>>> 77ad65989ee84ff2e9e4808fa48d0d786cf82f89
     <entry file="file://$PROJECT_DIR$/frontitems/url.py" />
     <entry file="file://$PROJECT_DIR$/static/404page/404page2.html" />
     <entry file="file://$APPLICATION_HOME_DIR$/helpers/typeshed/stdlib/3/builtins.pyi">
@@ -529,6 +635,7 @@
         </state>
       </provider>
     </entry>
+<<<<<<< HEAD
     <entry file="file://$USER_HOME$/.PyCharm2018.1/system/python_stubs/1901966986/builtins.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="191">
@@ -563,26 +670,21 @@
         </state>
       </provider>
     </entry>
+=======
+    <entry file="file://$USER_HOME$/.PyCharm2018.1/system/python_stubs/1901966986/builtins.py" />
+    <entry file="file://$PROJECT_DIR$/deloyment/wsgi.py" />
+    <entry file="file://$PROJECT_DIR$/templates/404page.html" />
+    <entry file="file://$PROJECT_DIR$/frontitems/apps.py" />
+    <entry file="file://$PROJECT_DIR$/templates/indexpage.html" />
+    <entry file="file://$PROJECT_DIR$/deloyment/views.py" />
+    <entry file="file://$PROJECT_DIR$/static/css/googleapis.css" />
+>>>>>>> 77ad65989ee84ff2e9e4808fa48d0d786cf82f89
     <entry file="das://b01e2bd9-5654-4cf5-b642-85593689c7e6/schema/main/table/auth_user" />
     <entry file="das://b01e2bd9-5654-4cf5-b642-85593689c7e6/schema/main/table/frontitems_recordofstatic" />
-    <entry file="file://$PROJECT_DIR$/templates/login.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-950">
-          <caret line="4" column="16" selection-start-line="4" selection-start-column="16" selection-end-line="4" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/login.html" />
     <entry file="das://b01e2bd9-5654-4cf5-b642-85593689c7e6/schema/main/table/frontitems_projectinfo" />
-    <entry file="file://$APPLICATION_CONFIG_DIR$/consoles/db/a4bce6cf-db22-41d5-a6b1-9971d14602a4/console.sql">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/static/js/libs/select2/select2.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="191">
-          <caret line="442" column="27" selection-start-line="442" selection-start-column="27" selection-end-line="442" selection-end-column="27" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$APPLICATION_CONFIG_DIR$/consoles/db/a4bce6cf-db22-41d5-a6b1-9971d14602a4/console.sql" />
+    <entry file="file://$PROJECT_DIR$/static/js/libs/select2/select2.js" />
     <entry file="das://d3a4bbbb-229f-4c7c-9547-a9b7e5609029/schema/main/table/frontitems_projectinfo">
       <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
         <state>
@@ -597,13 +699,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/frontitems/fixture/initial_data.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="675">
-          <caret line="27" column="227" selection-start-line="27" selection-start-column="227" selection-end-line="27" selection-end-column="227" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/frontitems/fixture/initial_data.json" />
     <entry file="das://d3a4bbbb-229f-4c7c-9547-a9b7e5609029/schema/main/table/frontitems_recordofstatic">
       <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
         <state>
@@ -611,6 +707,7 @@
         </state>
       </provider>
     </entry>
+<<<<<<< HEAD
     <entry file="file://$PROJECT_DIR$/frontitems/pubstatic.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="125">
@@ -622,15 +719,39 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/autojar/apppath.conf">
+=======
+    <entry file="file://$PROJECT_DIR$/frontitems/pubstatic.py" />
+    <entry file="file://$PROJECT_DIR$/frontitems/remotepubstatic.py" />
+    <entry file="file://$PROJECT_DIR$/autojar/apppath.conf" />
+    <entry file="file://$PROJECT_DIR$/autojar/admin.py" />
+    <entry file="file://$PROJECT_DIR$/autojar/__init__.py" />
+    <entry file="file://$PROJECT_DIR$/autojar/forms.py" />
+    <entry file="file://$PROJECT_DIR$/autojar/apps.py" />
+    <entry file="file://$PROJECT_DIR$/autojar/tests.py" />
+    <entry file="file://$PROJECT_DIR$/frontitems/admin.py" />
+    <entry file="file://$PROJECT_DIR$/deloyment/urls.py" />
+    <entry file="file://$PROJECT_DIR$/frontitems/urls.py" />
+    <entry file="file://$PROJECT_DIR$/frontitems/templates/frontitems/upload.html" />
+    <entry file="file://$PROJECT_DIR$/autojar/urls.py" />
+    <entry file="file://$PROJECT_DIR$/frontitems/models.py" />
+    <entry file="file://$PROJECT_DIR$/templates/layout.html" />
+    <entry file="file://$PROJECT_DIR$/autojar/templates/autojar/success.html" />
+    <entry file="file://$PROJECT_DIR$/autojar/templates/autojar/Result.html" />
+    <entry file="file://$PROJECT_DIR$/autojar/templates/autojar/upload.html" />
+    <entry file="file://$PROJECT_DIR$/frontitems/views.py" />
+    <entry file="file://$PROJECT_DIR$/cmdb/models.py" />
+    <entry file="file://$PROJECT_DIR$/requirements.txt">
+>>>>>>> 77ad65989ee84ff2e9e4808fa48d0d786cf82f89
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/autojar/admin.py">
+    <entry file="file://$PROJECT_DIR$/autojar/models.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="3" lean-forward="true" selection-start-line="3" selection-end-line="3" />
+        <state relative-caret-position="228">
+          <caret line="12" selection-start-line="12" selection-end-line="12" />
         </state>
       </provider>
     </entry>
+<<<<<<< HEAD
     <entry file="file://$PROJECT_DIR$/autojar/__init__.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -681,11 +802,18 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="8">
           <caret line="17" column="58" lean-forward="true" selection-start-line="17" selection-start-column="58" selection-end-line="17" selection-end-column="58" />
+=======
+    <entry file="file://$PROJECT_DIR$/deloyment/settings.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="114">
+          <caret line="6" column="55" selection-start-line="6" selection-start-column="55" selection-end-line="6" selection-end-column="55" />
+>>>>>>> 77ad65989ee84ff2e9e4808fa48d0d786cf82f89
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/autojar/host.conf">
       <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
         <state>
           <caret column="4" selection-start-column="4" selection-end-column="4" />
         </state>
@@ -772,8 +900,19 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="268">
           <caret line="99" column="63" selection-start-line="99" selection-start-column="63" selection-end-line="99" selection-end-column="63" />
+=======
+        <state relative-caret-position="152">
+          <caret line="8" selection-start-line="8" selection-end-line="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/autojar/remote_run.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="342">
+          <caret line="18" column="21" selection-start-line="18" selection-start-column="21" selection-end-line="18" selection-end-column="21" />
+>>>>>>> 77ad65989ee84ff2e9e4808fa48d0d786cf82f89
           <folding>
-            <element signature="e#0#9#0" expanded="true" />
+            <element signature="e#22#44#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -783,28 +922,45 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/deloyment/views.py">
       <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
         <state relative-caret-position="275">
           <caret line="11" column="42" selection-start-line="11" selection-start-column="42" selection-end-line="11" selection-end-column="42" />
+=======
+        <state relative-caret-position="1444">
+          <caret line="76" column="21" selection-start-line="76" selection-start-column="21" selection-end-line="76" selection-end-column="21" />
+>>>>>>> 77ad65989ee84ff2e9e4808fa48d0d786cf82f89
           <folding>
             <element signature="e#0#34#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+<<<<<<< HEAD
     <entry file="das://d3a4bbbb-229f-4c7c-9547-a9b7e5609029/schema/main/table/cmdb_serverinfo">
       <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
         <state>
           <filtering enabled="true" />
+=======
+    <entry file="file://$PROJECT_DIR$/manage.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="228">
+          <caret line="13" column="16" selection-start-line="13" selection-start-column="16" selection-end-line="13" selection-end-column="16" />
+>>>>>>> 77ad65989ee84ff2e9e4808fa48d0d786cf82f89
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/cmdb/models.py">
+    <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
         <state relative-caret-position="107">
           <caret line="62" selection-start-line="62" selection-end-line="62" />
           <folding>
             <element signature="e#0#28#0" expanded="true" />
           </folding>
+=======
+        <state relative-caret-position="143">
+          <caret line="162" column="22" lean-forward="true" selection-start-line="162" selection-start-column="22" selection-end-line="162" selection-end-column="22" />
+>>>>>>> 77ad65989ee84ff2e9e4808fa48d0d786cf82f89
         </state>
       </provider>
     </entry>
