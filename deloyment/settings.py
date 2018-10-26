@@ -86,6 +86,7 @@ WSGI_APPLICATION = 'deloyment.wsgi.application'
 #     }
 # }
 
+# USE MYSQL DATABASE
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
