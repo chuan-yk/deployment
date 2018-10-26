@@ -1,7 +1,7 @@
 from django.db import models
 import paramiko
 
-key = "C:\\Users\\ice\\.ssh\\id_rsa"
+key = "sshkey\\id_rsa"
 # pkey=paramiko.RSAKey.from_private_key_file(key,password='******')
 pkey = paramiko.RSAKey.from_private_key_file(key)
 
