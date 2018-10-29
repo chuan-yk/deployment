@@ -1,11 +1,10 @@
-import os,configparser,datetime
+import configparser,datetime
 from django.shortcuts import render, redirect
 from .remote_run import *
-##from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from tempfile import TemporaryFile,NamedTemporaryFile
-# test
+from tempfile import NamedTemporaryFile
+
 
 
 hostConf = 'D:\\Projects\\deployment\\autojar\\host.conf'
@@ -41,9 +40,9 @@ def upload_file(request):
                     f.close()
             ResultdicExe = RunCommd(ptid,appid,File.name,f.name,action)
             Resultdic = deldicNullkey(ResultdicExe)
-            print(ResultdicExe)
+            print('aaaa',ResultdicExe)
 
-            if ResultdicExe['Resultstderr']:
+            if 'Resultstderr' in ResultdicExe.keys():
                 messages.error(request,'发布失败','alert-danger')
                 return render(request, 'autojar/upload.html', Resultdic)
             messages.success(request, '发布成功！', 'alert-success')
@@ -83,7 +82,7 @@ def RunCommd(ptname,appname,Fname,fname,action=0):
         {apppath}bin/startup.sh
         '''.format(apppath=prepareConfig(ptname, appname,appConf)))
         #print(result)
-        print(Resultdic)
+    print(Resultdic)
     return  Resultdic
 
 

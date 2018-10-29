@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'frontitems',
     'autojar',
     'cmdb',
+    'django_crontab',
     # 'django.conf.OrdersConfig'
 ]
 
@@ -150,3 +151,10 @@ LOGIN_URL = 'login'
 SESSION_COOKIE_AGE = 60 * 300 # 30分钟
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True # 关闭浏览器，则COOKIE失效
+
+
+# 定时任务
+CRONJOBS = [
+
+    ('01 00 * * *', 'autojar.crontab.deloldfile')
+]
