@@ -78,15 +78,16 @@ WSGI_APPLICATION = 'deloyment.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
-# sqlite config, dendi local env dev
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#     }
-# }
+# sqlite config, dendi local env dev.
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.sqlite3',
+#        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#    }
+#}
 
-# Mysql config
+
+# Mysql config.
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
