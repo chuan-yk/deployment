@@ -78,7 +78,7 @@ WSGI_APPLICATION = 'deloyment.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
-
+# sqlite config
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -86,6 +86,7 @@ DATABASES = {
     }
 }
 
+# Mysql config
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.mysql',
