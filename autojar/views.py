@@ -1,10 +1,11 @@
 import os,configparser,datetime
 from django.shortcuts import render, redirect
 from .remote_run import *
-from django.http import HttpResponse
+##from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from tempfile import TemporaryFile,NamedTemporaryFile
+# test
 
 
 hostConf = 'D:\\Projects\\deployment\\autojar\\host.conf'
