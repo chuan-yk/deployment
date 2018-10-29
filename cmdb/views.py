@@ -1,10 +1,11 @@
 from django.shortcuts import render
 from django.views import generic
+from .models import ServerInfo
 # Create your views here.
 
-class ServerManager(generic.ListView):
-    template_name = ''
-
+class ServerManager(generic.DetailView):
+    model = ServerInfo
+    
     pass
 
 
