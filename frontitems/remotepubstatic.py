@@ -4,8 +4,7 @@ import os
 import datetime
 import tempfile
 import shutil
-from cmdb.models import ServerInfo
-from .models import  ProjectInfo
+
 
 class RemoteReplaceWorker(object):
     def __init__(self, serverinfo_instance, dstdir, fromfile, projectname, backupdir, shouldbackdir=set(), backup_ver='', ignore_new=True):
@@ -157,26 +156,96 @@ class RemoteReplaceWorker(object):
                 "pub_ignore_new": self.ignore_new, "add_file": self.newfile, "add_dir": self.newdir,
                 "update_file_list": self.unzipfilelist, }
 
+#class for debug
+class Rserver(object):
+    import paramiko
+    key = "sshkey\\id_rsa"
+    pkey = paramiko.RSAKey.from_private_key_file(key)
+    def __init__(self, ip, port, username):
+        self.ip = ip
+        self.port = port
+        self.username = username
+    def connect(self):
+        try:
+            if not self.transport.is_alive():
+                self.transport = paramiko.Transport((self.ip, self.port))
+                self.transport.connect(username=self.username, pkey=self.pkey)
+        except:
+            self.transport = paramiko.Transport((self.ip, self.port))
+            self.transport.connect(username=self.username, pkey=self.pkey)
+
+    def get_sshclient(self):
+        # print('debug,  ==', self.ip, self.port,self.username)
+        try:
+            # Avoid duplicate links
+            if self.sshclient.get_transport().is_active():
+                return self.sshclient
+        except AttributeError :
+            self.connect()
+            self.sshclient = paramiko.SSHClient()
+            self.sshclient._transport = self.transport
+            return self.sshclient
+        except Exception as e:
+            print(e)
+            return None
+
+    def sshclient_close(self):
+        try:
+            self.sshclient.close()
+        except:
+            pass
+
+    def get_xftpclient(self):
+        self.xftpclient_close()
+        try:
+            self.connect()
+            self.sftpclient = paramiko.SFTPClient.from_transport(self.transport)
+            return self.sftpclient
+        except Exception as e:
+            print(e)
+            return None
+
+    def xftpclient_close(self):
+        try:
+            self.sftpclient.close()
+        except:
+            pass
+
+    def if_exist_dir(self,path):
+        """check path is tag=(file or dir) , return True or false"""
+        self.get_sshclient()
+        command_argv = '-d'
+        stdin, stdout, stderr = self.sshclient.exec_command('test {0} {1} && echo True'.format(command_argv, path))
+        #print('===debug ', stdout.read(), stdout.read().decode())
+        if stdout.read().decode() == 'True\n':
+            return True
+        else:
+            return False
+
+    def if_exist_file(self,path):
+        """check path is tag=(file or dir) , return True or false"""
+        self.get_sshclient()
+        command_argv = '-f'
+        stdin, stdout, stderr = self.sshclient.exec_command('test {0} {1} && echo True'.format(command_argv, path))
+        #print('===debug2 ', stdout.read(), stdout.read().decode())
+        if stdout.read().decode() == 'True\n':
+            return True
+        else:
+            return False
 
 if __name__ == "__main__":
     import paramiko
     import os
-    import sys
-    import django
-    import django_manage_shell
 
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "D:\\deployment\\deployment\\deployment.settings.py")
-    sys.path.extend(['D:\\deployment', 'D:\\Program Files\\PyCharm 2018.1.4\\helpers\\pycharm',
-                     'D:\\Program Files\\PyCharm 2018.1.4\\helpers\\pydev'])
-    django.setup()
-    django_manage_shell.run()
-    pkey = paramiko.RSAKey.from_private_key_file("C:\\Users\\ice\\.ssh\\id_rsa")
-    serverinfo_150 = ServerInfo.objects.get(pk=1)
+    # os.environ.setdefault("DJANGO_SETTINGS_MODULE", "D:\\deployment\\deployment\\deployment.settings.py")
+    # sys.path.extend(['D:\\deployment', 'D:\\Program Files\\PyCharm 2018.1.4\\helpers\\pycharm',
+    #                  'D:\\Program Files\\PyCharm 2018.1.4\\helpers\\pydev'])
+
+    serverinfo_150 = Rserver('192.168.159.150', 22, 'dendi')
     print(serverinfo_150)
-    p = ProjectInfo.objects.get(package_name="sobet.zip")
-    dst = p.static_dir
-    fromfile1 = "tmp/sobet.zip"
-    projectname1 = p.items
-    backupdir = p.file_save_base_dir
+    dst = '/var/www/html'
+    fromfile1 = "/tmp/sobet.zip"
+    projectname1 = 'sobet'
+    backupdir = '/data/release/mc'
     rmt_tasker = RemoteReplaceWorker(serverinfo_150, dst, fromfile1, projectname1, backupdir)
     rmt_tasker.pip_run()
