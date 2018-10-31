@@ -3,7 +3,7 @@ import paramiko
 
 key = "sshkey\\id_rsa"
 # pkey=paramiko.RSAKey.from_private_key_file(key,password='******')
-pkey = paramiko.RSAKey.from_private_key_file(key)
+#pkey = paramiko.RSAKey.from_private_key_file(key)
 
 
 # Create your models here.
@@ -28,20 +28,20 @@ class ServerInfo(models.Model):
         # print('debug,  ==', self.ip, self.port,self.username)
         try:
             # Avoid duplicate links
-            if self.sshclint.get_transport().is_active():
-                return self.sshclint
+            if self.sshclient.get_transport().is_active():
+                return self.sshclient
         except AttributeError :
             self.connect()
-            self.sshclint = paramiko.SSHClient()
-            self.sshclint._transport = self.transport
-            return self.sshclint
+            self.sshclient = paramiko.SSHClient()
+            self.sshclient._transport = self.transport
+            return self.sshclient
         except Exception as e:
             print(e)
             return None
 
-    def sshclint_close(self):
+    def sshclient_close(self):
         try:
-            self.sshclint.close()
+            self.sshclient.close()
         except:
             pass
 
@@ -65,7 +65,7 @@ class ServerInfo(models.Model):
         """check path is tag=(file or dir) , return True or false"""
         self.get_sshclient()
         command_argv = '-d'
-        stdin, stdout, stderr = self.sshclint.exec_command('test {0} {1} && echo True'.format(command_argv, path))
+        stdin, stdout, stderr = self.sshclient.exec_command('test {0} {1} && echo True'.format(command_argv, path))
         #print('===debug ', stdout.read(), stdout.read().decode())
         if stdout.read().decode() == 'True\n':
             return True
@@ -76,7 +76,7 @@ class ServerInfo(models.Model):
         """check path is tag=(file or dir) , return True or false"""
         self.get_sshclient()
         command_argv = '-f'
-        stdin, stdout, stderr = self.sshclint.exec_command('test {0} {1} && echo True'.format(command_argv, path))
+        stdin, stdout, stderr = self.sshclient.exec_command('test {0} {1} && echo True'.format(command_argv, path))
         #print('===debug2 ', stdout.read(), stdout.read().decode())
         if stdout.read().decode() == 'True\n':
             return True

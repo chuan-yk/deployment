@@ -170,3 +170,4 @@ venv.bak/
 /autojar/static/upload/
 /.idea/
 *.pyc
+tmp/
