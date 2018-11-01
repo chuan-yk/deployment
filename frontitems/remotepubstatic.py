@@ -66,19 +66,27 @@ class RemoteReplaceWorker(object):
                 if seconddir.split('/').__len__() < 3 and seconddir != 'static':
                     self.shouldbackdir.add(seconddir)
             for file in self.unzipfilelist:
-                if not self.redis_cli.hget("{0}:{1}:{2}".format(self._pjtname, self._items, file), "Exist"):
-                    self.newfile.append(file)
-                elif not self._remote_server.if_exist_file(os.path.join(self._dstdir, file)):
-                    self.newfile.append(file)
+                if self.redis_cli.hget("{0}:{1}:{2}".format(self._pjtname, self._items, file), "Exist"):
+                    continue
+                elif self._remote_server.if_exist_file(os.path.join(self._dstdir, file)):
                     self.redis_cli.hmset("{0}:{1}:{2}".format(self._pjtname, self._items, file),
                                          {"Exist": True, "Type": 'f'})
+                    continue
+                else:
+                    self.redis_cli.hmset("{0}:{1}:{2}".format(self._pjtname, self._items, file),
+                                         {"Type": 'f'})
+                    self.newfile.append(file)
             for the_dir in self.unzipdirlist:
-                if not self.redis_cli.hget("{0}:{1}:{2}".format(self._pjtname, self._items, the_dir), "Exist"):
-                    self.newdir.append(dir)
-                elif not self._remote_server.if_exist_dir(os.path.join(self._dstdir, the_dir)):
-                    self.newdir.append(dir)
+                if self.redis_cli.hget("{0}:{1}:{2}".format(self._pjtname, self._items, the_dir), "Exist"):
+                    continue
+                elif self._remote_server.if_exist_dir(os.path.join(self._dstdir, the_dir)):
                     self.redis_cli.hmset("{0}:{1}:{2}".format(self._pjtname, self._items, the_dir),
                                          {"Exist": True, "Type": 'd'})
+                    continue
+                else:
+                    self.redis_cli.hmset("{0}:{1}:{2}".format(self._pjtname, self._items, the_dir),
+                                         {"Type": 'd'})
+                    self.newdir.append(the_dir)
         except Exception as e1:
             self.have_error = True
             print('Error e1:', e1)
@@ -102,7 +110,10 @@ class RemoteReplaceWorker(object):
                 self.success_status = 'backup_fail'
                 self.have_error = True
         else:
-            self.success_status = 'backup_success'
+            if self.have_error:
+                self.success_status = 'backup_fail'
+            else:
+                self.success_status = 'backup_success'
 
 
     def do_cover(self):

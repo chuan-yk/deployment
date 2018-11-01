@@ -66,7 +66,7 @@ class ServerInfo(models.Model):
         """check path is tag=(file or dir) , return True or false"""
         self.get_sshclient()
         command_argv = '-d'
-        stdin, stdout, stderr = self.sshclient.exec_command('test {0} {1} && echo True'.format(command_argv, path))
+        stdin, stdout, stderr = self.sshclient.exec_command('test {0} "{1}" && echo True'.format(command_argv, path))
         #print('===debug ', stdout.read(), stdout.read().decode())
         if stdout.read().decode() == 'True\n':
             return True
@@ -77,7 +77,7 @@ class ServerInfo(models.Model):
         """check path is tag=(file or dir) , return True or false"""
         self.get_sshclient()
         command_argv = '-f'
-        stdin, stdout, stderr = self.sshclient.exec_command('test {0} {1} && echo True'.format(command_argv, path))
+        stdin, stdout, stderr = self.sshclient.exec_command('test {0} "{1}" && echo True'.format(command_argv, path))
         #print('===debug2 ', stdout.read(), stdout.read().decode())
         if stdout.read().decode() == 'True\n':
             return True

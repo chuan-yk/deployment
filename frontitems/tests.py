@@ -90,7 +90,7 @@ if __name__ == "__main__":
     # sys.path.extend(['D:\\deployment', 'D:\\Program Files\\PyCharm 2018.1.4\\helpers\\pycharm',
     #                  'D:\\Program Files\\PyCharm 2018.1.4\\helpers\\pydev'])
 
-    serverinfo_150 = Rserver('192.168.159.150', 22, 'dendi')
+    serverinfo_150 = Rserver('192.168.159.150', 22, 'root')
     print(serverinfo_150)
     dst = '/var/www/html'
     fromfile1 = "/tmp/sobet.zip"
