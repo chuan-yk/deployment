@@ -100,6 +100,20 @@ DATABASES = {
     }
 }
 
+#django-redis
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://10.46.5.246:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "PASSWORD": "djangodevops",
+            "COMPRESSOR": "django_redis.compressors.lzma.LzmaCompressor",   # lzma 压缩
+            "CONNECTION_POOL_KWARGS": {"max_connections": 20},              # 连接池的最大连接数量
+            "PARSER_CLASS": "redis.connection.HiredisParser",               # hiredis, C 实现 Redis 客户端
+        }
+    }
+}
 
 
 # Password validation
@@ -152,6 +166,9 @@ LOGIN_URL = 'login'
 SESSION_COOKIE_AGE = 60 * 300 # 30分钟
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True # 关闭浏览器，则COOKIE失效
+# redis session backend
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
 
 
 # 定时任务
