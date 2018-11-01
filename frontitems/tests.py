@@ -1,6 +1,9 @@
 from django.test import TestCase
 import paramiko
 
+from .remotepubstatic import RemoteReplaceWorker
+
+
 # class for debug
 class Rserver(object):
     key = "sshkey\\id_rsa"
@@ -91,7 +94,8 @@ if __name__ == "__main__":
     print(serverinfo_150)
     dst = '/var/www/html'
     fromfile1 = "/tmp/sobet.zip"
+    platfrom = 'mc'
     projectname1 = 'sobet'
     backupdir = '/data/release/mc'
-    rmt_tasker = RemoteReplaceWorker(serverinfo_150, dst, fromfile1, projectname1, backupdir)
+    rmt_tasker = RemoteReplaceWorker(serverinfo_150, dst, fromfile1, platfrom, projectname1, backupdir)
     rmt_tasker.pip_run()

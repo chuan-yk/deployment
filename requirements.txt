@@ -1,0 +1,4 @@
+django-redis
+django_crontab
+paramiko
+django-widget-tweaks
