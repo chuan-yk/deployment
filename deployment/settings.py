@@ -110,7 +110,7 @@ CACHES = {
             "PASSWORD": "djangodevops",
             "COMPRESSOR": "django_redis.compressors.lzma.LzmaCompressor",   # lzma 压缩
             "CONNECTION_POOL_KWARGS": {"max_connections": 20},              # 连接池的最大连接数量
-            "PARSER_CLASS": "redis.connection.HiredisParser",               # hiredis, C 实现 Redis 客户端
+            #"PARSER_CLASS": "redis.connection.HiredisParser",               # hiredis, C 实现 Redis 客户端
         }
     }
 }

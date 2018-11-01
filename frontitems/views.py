@@ -8,10 +8,11 @@ from django.template import loader
 
 from datetime import datetime, date, timedelta
 from .models import ProjectInfo, RecordOfStatic
-from .pubstatic import ReplaceWorker, ReplaceWorker1
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 
+#from .pubstatic import ReplaceWorker, ReplaceWorker1
+from .remotepubstatic import RemoteReplaceWorker
 
 
 
@@ -41,17 +42,22 @@ def upload(request):
             pst_filename = myFile.name
             task_projectinfo = ProjectInfo.objects.get(project=pst_platform, items=pst_item)
             if task_projectinfo.package_name != pst_filename:
-                raise FileNotFoundError('Upload file = {}  does not match {}'.format(pst_filename, task_projectinfo.package_name))
-            #inputfiledir = os.path.join(task_projectinfo.file_save_base_dir, datetime.now().strftime('%Y%m%d_%H%M%S'))
-            inputfiledir = 'D:\\static'
-            #os.makedirs(inputfiledir)
+                raise FileNotFoundError('Upload file = {}  does not match {}'.format(pst_filename,
+                                                                                    task_projectinfo.package_name))
+            inputfiledir = os.path.join(task_projectinfo.file_save_base_dir,
+                                        datetime.now().strftime('%Y%m%d_%H%M%S'))  # linux run
+            # inputfiledir = 'D:\\static' # window debug
+            # os.makedirs(inputfiledir)
             fromfile = open(os.path.join(inputfiledir, myFile.name), 'wb+')
             for chunk in myFile.chunks():  # 分块写入文件
                 fromfile.write(chunk)
             fromfile.close()
-            print('===-======debug  1')
-            print('==== 1.2 ', task_projectinfo.static_dir, os.path.join(inputfiledir, myFile.name), task_projectinfo.items, task_projectinfo.backup_file_dir)
-            tasker = ReplaceWorker1(task_projectinfo.static_dir, os.path.join(inputfiledir, myFile.name), task_projectinfo.items, task_projectinfo.backup_file_dir)
+            tasker = RemoteReplaceWorker(serverinfo_instance='==',
+                                dstdir=task_projectinfo.static_dir,
+                                fromfile=os.path.join(inputfiledir, myFile.name),
+                                platfrom=task_projectinfo.project,
+                                items=task_projectinfo.items,
+                                backupdir=task_projectinfo.backup_file_dir, )
             #tasker.ignore_newfile_run()
             #if tasker.coversuccess:
             print('===-======debug  2')
