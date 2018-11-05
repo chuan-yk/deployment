@@ -18,6 +18,8 @@ from django.contrib import admin
 from django.contrib.auth import views as auth
 from django.contrib.auth.decorators import login_required
 from . import views
+from django.urls import include, path
+from django.http import HttpResponseRedirect
 
 
 urlpatterns = [
@@ -29,4 +31,6 @@ urlpatterns = [
     url(r'^autojar/', include('autojar.urls')),
     url(r'^$', views.indexpage, name='indexhome'),
     url(r'coming_soon$', views.comingsoon, name='not_finish_page'),
+    #path('', lambda x: HttpResponseRedirect('/upload/new/')),
+    path('upload/', include('fileupload.urls')),
 ]

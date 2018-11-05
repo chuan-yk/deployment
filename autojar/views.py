@@ -9,8 +9,8 @@ from tempfile import NamedTemporaryFile
 
 hostConf = 'D:\\Projects\\deployment\\autojar\\host.conf'
 appConf = 'D:\\Projects\\deployment\\autojar\\apppath.conf'
-def prepareConfig(section, appname, filenames=hostConf):
 
+def prepareConfig(section, appname, filenames=hostConf):
     configdata = configparser.ConfigParser()
     configdata.read(filenames)
     if appname == 'sobet':
@@ -40,7 +40,6 @@ def upload_file(request):
                     f.close()
             ResultdicExe = RunCommd(ptid,appid,File.name,f.name,action)
             Resultdic = deldicNullkey(ResultdicExe)
-            print('aaaa',ResultdicExe)
 
             if 'Resultstderr' in ResultdicExe.keys():
                 messages.error(request,'发布失败','alert-danger')
