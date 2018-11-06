@@ -5,23 +5,17 @@ from django.views.generic import CreateView, DeleteView, ListView
 from .models import Fileupload
 from .response import JSONResponse, response_mimetype
 from .serialize import serialize
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 
-#@login_required
-class FileuploadCreateView(CreateView):
+
+class FileuploadCreateView(LoginRequiredMixin,CreateView):
     model = Fileupload
     #fields = ['file','app','bug_id','description']
     #fields = ['all']
     fields = '__all__'
     #template_name_suffix = '_form'
     #template_name_ = 'fileupload/fileupload_form.html'
-    # def get_form(self, form):
-    #     pass
-    # def get(self, request, *args, **kwargs):
-    #     self.file = request.file
-    #     print(self.file)
-    #     return super(PictureCreateView, self).get(request, *args, **kwargs)
 
     def form_valid(self, form):
 
