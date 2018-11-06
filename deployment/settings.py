@@ -51,6 +51,8 @@ INSTALLED_APPS = [
     'autojar',
     'cmdb',
     'django_crontab',
+    'fileupload',
+    # 'django.conf.OrdersConfig'
 ]
 
 MIDDLEWARE = [
@@ -88,25 +90,25 @@ WSGI_APPLICATION = 'deployment.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 # sqlite config, dendi local env dev.
-#DATABASES = {
-#    'default': {
-#        'ENGINE': 'django.db.backends.sqlite3',
-#        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#    }
-#}
+DATABASES = {
+   'default': {
+       'ENGINE': 'django.db.backends.sqlite3',
+       'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+   }
+}
 
 
 # Mysql config.
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'django',
-        'USER': 'django',
-        'PASSWORD': 'django',
-        'HOST': '10.46.5.246',
-        'PORT': '3306',
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'django',
+#         'USER': 'django',
+#         'PASSWORD': 'django',
+#         'HOST': '10.46.5.246',
+#         'PORT': '3306',
+#     }
+# }
 
 #django-redis
 CACHES = {
@@ -184,3 +186,6 @@ CRONJOBS = [
 
     ('01 00 * * *', 'autojar.crontab.deloldfile')
 ]
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR,'media')

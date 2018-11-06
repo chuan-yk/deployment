@@ -43,6 +43,8 @@
 		<script type="text/javascript" src="../../assets/js/libs/utils/respond.min.js?1403934956"></script>
 		<![endif]-->
 </head>
+
+
 <body class="menubar-pin menubar-hoverable header-fixed "> <!--max sidemenu: menubar-pin -->
 
 <!-- BEGIN HEADER-->
@@ -178,7 +180,13 @@
                     </ul><!--end /submenu -->
                 </li><!--end /menu-li -->
                 <!-- END PROFILE -->
+                <li class="gui-folder">
+                    <div class="gui-icon"><i class="fa fa-user"></i></div>
+                    <a href="{% url 'upload-new' %}"><span class="title">文件上传</span></a>
 
+                    <!--start submenu -->
+
+                </li><!--end /menu-li -->
             </ul><!--end .main-menu -->
             <!-- END MAIN MENU -->
 
@@ -215,6 +223,8 @@
 <script src="{% static 'js/core/Demo.js' %}"></script>
 <script src="{% static 'js/core/DemoTableDynamic.js' %}"></script>
 <!-- END JAVASCRIPT -->
+{% block body_js %}
 
+{% endblock %}
 </body>
 </html>
