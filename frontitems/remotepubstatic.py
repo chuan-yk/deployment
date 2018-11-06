@@ -4,8 +4,9 @@ import os
 import datetime
 import tempfile
 import shutil
-import paramiko
 from django_redis import get_redis_connection
+from cachetools import cached, TTLCache  # 1 - let's import the "cached" decorator and the "TTLCache" object from cachetools
+
 
 
 class RemoteReplaceWorker(object):
@@ -184,3 +185,8 @@ class RemoteReplaceWorker(object):
                 "add_dir": self.newdir, "update_file_list": self.unzipfilelist, }
 
 
+cache = TTLCache(maxsize=100, ttl=365*24*60*60)
+@cached(cache)
+def lock_status(platfrom, items):
+    import threading
+    return threading.Lock()

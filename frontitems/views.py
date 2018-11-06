@@ -1,11 +1,10 @@
 import os
-import subprocess
 from django.shortcuts import render,redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 #from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
-
+import threading
 from datetime import datetime, date, timedelta
 from .models import ProjectInfo, RecordOfStatic
 from django.core.exceptions import ObjectDoesNotExist
@@ -15,6 +14,16 @@ from django.utils import timezone
 from .remotepubstatic import RemoteReplaceWorker
 
 
+def run_tasker(task_projectinfo, inputfiledir):
+    tasker = RemoteReplaceWorker(serverinfo_instance='==',
+                                 dstdir=task_projectinfo.static_dir,
+                                 fromfile=os.path.join(inputfiledir, myFile.name),
+                                 platfrom=task_projectinfo.project,
+                                 items=task_projectinfo.items,
+                                 backupdir=task_projectinfo.backup_file_dir, )
+    import time
+    time.sleep(10)
+    # tasker.ignore_newfile_run()
 
 @login_required
 def upload(request):
@@ -52,38 +61,35 @@ def upload(request):
             for chunk in myFile.chunks():  # 分块写入文件
                 fromfile.write(chunk)
             fromfile.close()
-            tasker = RemoteReplaceWorker(serverinfo_instance='==',
-                                dstdir=task_projectinfo.static_dir,
-                                fromfile=os.path.join(inputfiledir, myFile.name),
-                                platfrom=task_projectinfo.project,
-                                items=task_projectinfo.items,
-                                backupdir=task_projectinfo.backup_file_dir, )
-            #tasker.ignore_newfile_run()
+
+            task = threading.Thread(target=run_tasker, args=(task_projectinfo, inputfiledir))
+            task.start()
+            messages.success(request, '发布成功！', 'alert-success')
             #if tasker.coversuccess:
-            print('===-======debug  2')
-            coversuccess = True
-            if coversuccess:    #tasker.coversuccess:
-                messages.success(request, '发布成功！', 'alert-success')
-                print('===-======debug  3')
-                RecordOfStatic.objects.filter(items=task_projectinfo).update(isthis_current=False)
-                record_task = task_projectinfo.recordofstatic_set.create(pub_time=timezone.now(),
-                                                                         deployment_user=request.user.username,
-                                                                         isthis_current=True, return_user='',
-                                                                         upload_file=os.path.join(inputfiledir, myFile.name),
-                                                                         backuplist=', '.join(tasker.backupdir),
-                                                                         newdir=', '.join(tasker.newdirlist),
-                                                                         newfile=', '.join(tasker.newfilelist),
-                                                                         ignore_new=True, )
-                print('===-======debug  4')
-            else:
-                messages.error(request, "发布失败，失败原因详见下文", 'alert-danger')
-                context['task_error'] = 'tasker.errormessage'
-            newfile_len = 1
-            newdir_len = 2
-            if newfile_len > 0 or newdir_len > 0:
-                messages.warning(request, "默认新增文件不跟新，请联系运维或项目主管审核后更新", 'alert-danger' )
-                context['newfiles'] = ['static/new/1.txt', '/static/new/mew.image.png'] #'tasker.newfilelist  '
-                context['newdirs'] = ['static/newimage', 'static/download/']#'tasker.newdirlist'
+            #print('===-======debug  2')
+            #coversuccess = True
+            # if coversuccess:    #tasker.coversuccess:
+            #     messages.success(request, '发布成功！', 'alert-success')
+            #     print('===-======debug  3')
+            #     RecordOfStatic.objects.filter(items=task_projectinfo).update(isthis_current=False)
+            #     record_task = task_projectinfo.recordofstatic_set.create(pub_time=timezone.now(),
+            #                                                              deployment_user=request.user.username,
+            #                                                              isthis_current=True, return_user='',
+            #                                                              upload_file=os.path.join(inputfiledir, myFile.name),
+            #                                                              backuplist=', '.join(tasker.backupdir),
+            #                                                              newdir=', '.join(tasker.newdirlist),
+            #                                                              newfile=', '.join(tasker.newfilelist),
+            #                                                              ignore_new=True, )
+            #     print('===-======debug  4')
+            # else:
+            #     messages.error(request, "发布失败，失败原因详见下文", 'alert-danger')
+            #     context['task_error'] = 'tasker.errormessage'
+            # newfile_len = 1
+            # newdir_len = 2
+            # if newfile_len > 0 or newdir_len > 0:
+            #     messages.warning(request, "默认新增文件不跟新，请联系运维或项目主管审核后更新", 'alert-danger' )
+            #     context['newfiles'] = ['static/new/1.txt', '/static/new/mew.image.png'] #'tasker.newfilelist  '
+            #     context['newdirs'] = ['static/newimage', 'static/download/']#'tasker.newdirlist'
         except AttributeError as e:   #myFile.name
             messages.error(request, '请选择更新文件', 'alert-danger')
         except FileNotFoundError as e:
@@ -95,7 +101,7 @@ def upload(request):
             print(e)
             messages.error(request, '未知错误： '+str(e), 'alert-danger')
         finally:
-            #return render(request, 'frontitems/upload.html', context)
+            return render(request, 'frontitems/upload.html', context)
             #return redirect(reverse(upload))
             pass
 
@@ -106,3 +112,4 @@ def upload(request):
         #return HttpResponse(template.render(context, request))
         context = {'platformlist': platformlist, 'items': items, }
         return render(request,'frontitems/upload.html',context)
+
