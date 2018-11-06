@@ -27,6 +27,15 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# BROKER_URL = 'django://127.0.0.1:9000'
+
+# CELERY_BROKER_URL = 'redis://:djangodevops@10.46.5.246:6379/1'
+#: Only add pickle to this list if your broker is secured
+#: from unwanted access (see userguide/security.html)
+# CELERY_ACCEPT_CONTENT = ['json']
+# CELERY_RESULT_BACKEND = 'redis://:djangodevops@10.46.5.246:6379/1'
+# CELERY_TASK_SERIALIZER = 'json'
+
 
 # Application definition
 
