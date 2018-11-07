@@ -1,6 +1,6 @@
+django
 django-redis
 django_crontab
 paramiko
 django-widget-tweaks
 pymysql
-cachetools == 3.0.0

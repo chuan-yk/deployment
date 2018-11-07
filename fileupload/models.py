@@ -14,22 +14,19 @@ class Fileupload(models.Model):
     file = models.FileField(upload_to='')
     platform = models.CharField(max_length=100)
     app = models.CharField(max_length=100)
-    bug_id = models.IntegerField(blank=True,null=True)
+    bug_id = models.IntegerField(blank=True, null=True)
     description= models.CharField(max_length=500, blank=True)
     user = models.CharField(max_length=100, blank=True, null=True, unique=True)
-    status = models.IntegerField(default=0,blank=True)
-    create_date = models.DateTimeField( auto_now_add=True)
+    status = models.IntegerField(default=0, blank=True)
+    create_date = models.DateTimeField(auto_now_add=True)
     slug = models.SlugField(max_length=50, blank=True)
 
-
     def __str__(self):
-
         return self.file.name
-
 
     @models.permalink
     def get_absolute_url(self):
-        #return ('upload-new',kwargs={'pk': self.pk} )
+        # return ('upload-new',kwargs={'pk': self.pk} )
         return reverse('upload-new', kwargs={'pk': self.pk})
 
     def save(self, *args, **kwargs):
