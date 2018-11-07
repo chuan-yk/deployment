@@ -171,4 +171,4 @@ venv.bak/
 /.idea/
 *.pyc
 tmp/
-# */migrations
+*/migrations/*_initial.py
