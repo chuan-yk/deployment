@@ -1,0 +1,77 @@
+{% extends 'layout.html' %}
+
+{% block title %} All Orders {% endblock %}
+
+{% block body %}
+                <section>
+                    <div class="section-body">
+                        <!-- BEGIN DATATABLE 2 -->
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="card">
+                                    <div class="card-head style-primary">
+                                        <header>前端文件发布列表</header>
+                                        <div class="tools">
+                                            <a class="btn btn-icon-toggle btn-collapse"><i class="fa fa-angle-down"></i></a>
+                                            <a class="btn btn-icon-toggle btn-close"><i class="md md-close"></i></a>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table id="datatable2" class="table order-column hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>编号</th>
+                                                        <th>文件名</th>
+                                                        <th>平台</th>
+                                                        <th>项目</th>
+                                                        <th>任务编号</th>
+                                                        <th>开发者描述</th>
+                                                        <th>提交人员</th>
+                                                        <th>状态</th>
+                                                        <th width="150px">操作选项</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for thisline in static_uploadfile_list %}
+                                                        <tr class="gradeX">
+                                                            <td>{{ thisline.id }}</td>
+                                                            <td>{{ thisline.slug }}</td>
+                                                            <td>{{ thisline.platform }}</td>
+                                                            <td>{{ thisline.app }}</td>
+                                                            <td>{{ thisline.bug_id }}</td>
+                                                            <td>{{ thisline.description }}</td>
+                                                            <td>{{ thisline.user }}</td>
+                                                            <td><span class="badge" style="background: #0aa89e">
+                                                                {% ifequal thisline.status 0 %}
+                                                                 待发布
+                                                                {% endifequal  %}
+                                                                {% ifequal thisline.status -1 %}
+                                                                    发布失败
+                                                                {% endifequal  %}
+                                                                {% ifequal thisline.status 1 %}
+                                                                    发布中
+                                                                {% endifequal  %}
+                                                                {% ifequal thisline.status 2 %}
+                                                                    发布完成
+                                                                {% endifequal  %}
+
+                                                                </span></td>
+                                                            <td>
+                                                                <a href="#" class="btn ink-reaction btn-floating-action btn-warning"><i class="md md-edit"></i> </a>
+
+                                                            </td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div><!--end .table-responsive -->
+                                    </div>   
+                                </div>       
+                            </div><!--end .col -->
+                        </div><!--end .row -->
+                        <!-- END DATATABLE 2 -->
+
+                    </div><!--end .section-body -->
+                </section>
+{% endblock %}

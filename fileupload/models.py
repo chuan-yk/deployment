@@ -16,7 +16,7 @@ class Fileupload(models.Model):
     app = models.CharField(max_length=100)
     bug_id = models.IntegerField(blank=True, null=True)
     description= models.CharField(max_length=500, blank=True)
-    user = models.CharField(max_length=100, blank=True, null=True, unique=True)
+    user = models.CharField(max_length=100, blank=True, null=True)
     status = models.IntegerField(default=0, blank=True)
     create_date = models.DateTimeField(auto_now_add=True)
     slug = models.SlugField(max_length=50, blank=True)
@@ -35,7 +35,7 @@ class Fileupload(models.Model):
         self.platform = self.platform
         self.bug_id = self.bug_id
         self.description = self.description
-        self.user =self.user
+        self.user = self.user
 
         super(Fileupload, self).save(*args, **kwargs)
 

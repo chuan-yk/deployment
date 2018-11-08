@@ -1,5 +1,5 @@
 import os
-from django.shortcuts import render,redirect
+from django.shortcuts import render,get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 #from django.http import HttpResponse, HttpResponseRedirect
@@ -8,12 +8,33 @@ import threading
 from datetime import datetime, date, timedelta
 from .models import ProjectInfo, RecordOfStatic
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils import timezone
 
-#from .pubstatic import ReplaceWorker, ReplaceWorker1
+from fileupload.models import Fileupload
 from .remotepubstatic import RemoteReplaceWorker
 
+@login_required
+def list(request):
+    #static_uploadfile_list = Fileupload.objects.filter(pk=1)
+    static_uploadfile_list = Fileupload.objects.all()
+    return render(request, 'frontitems/list.html', {'static_uploadfile_list': static_uploadfile_list})
 
+
+@login_required
+def list_detail(request, pk):
+    pub_detail = RecordOfStatic.objects.get(pk=pk)
+    return render(request, 'frontitems/detail.html', {'pub_detail':pub_detail})
+
+
+@login_required
+def pub(request, pk):
+    pass
+
+
+@login_required
+def pubresult(request, pk):
+    pass
+
+@login_required
 def run_tasker(task_projectinfo, inputfiledir):
     tasker = RemoteReplaceWorker(serverinfo_instance='==',
                                  dstdir=task_projectinfo.static_dir,
@@ -39,8 +60,8 @@ def upload(request):
         items.append(i[0])
     platformlist = sorted(platformlist.items(), key=lambda obj: obj[1], reverse=True)
     items.sort()
-    #platformlist = {'摩臣':"mc", '摩臣2':"mc2", '摩登':"md"}
-    #items = ['sobet', 'lottery', 'lottery_m', 'sport']
+    # platformlist = {'摩臣':"mc", '摩臣2':"mc2", '摩登':"md"}
+    # items = ['sobet', 'lottery', 'lottery_m', 'sport']
     context = { 'platformlist': platformlist,  'items': items, }
 
     if request.method == "POST":  # 请求方法为POST时，进行处理

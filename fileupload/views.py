@@ -11,13 +11,17 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 class FileuploadCreateView(LoginRequiredMixin,CreateView):
     model = Fileupload
-    #fields = ['file','app','bug_id','description']
-    #fields = ['all']
+    # fields = ['file','app','bug_id','description']
+    # fields = ['all']
     fields = '__all__'
-    #template_name_suffix = '_form'
-    #template_name_ = 'fileupload/fileupload_form.html'
+    # template_name_suffix = '_form'
+    # template_name_ = 'fileupload/fileupload_form.html'
 
     def form_valid(self, form):
+        try:
+            form.instance.user = self.request.user
+        except:
+            pass
 
         self.object = form.save()
         files = [serialize(self.object)]
