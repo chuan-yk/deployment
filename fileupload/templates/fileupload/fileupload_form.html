@@ -21,10 +21,18 @@
                 <option value="md">摩登</option>
                 <option value="cyq">彩友圈</option>
             </select>
+            <label for="">发布类型</label>
+            <select style="width: 140px;height: 32px " name="type" >
+                 <option value="-1">选择类型</option>
+                <option value="0">前端静态</option>
+                <option value="1">全量war包</option>
+                <option value="2">增量包</option>
+                <option value="3">Jar包</option>
+            </select>
             <label for="" >项目名称</label>
             <input type="text" name="app" multiple>
 
-            <label for="" >BUGID</label>
+            <label for="" >任务ID</label>
             <input type="text" name="bug_id" multiple>
 
             <label for="">功能描述</label>
