@@ -8,20 +8,27 @@ from .serialize import serialize
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 
+# def get_object(self, queryset=None):
+#     obj = super().get_object(queryset=queryset)
+#     if obj.author != self.request.user:
+#         raise Http404()
+#     return obj
 
 class FileuploadCreateView(LoginRequiredMixin,CreateView):
     model = Fileupload
-    #fields = ['file','app','bug_id','description']
-    #fields = ['all']
-    fields = '__all__'
+    fields = ['file','platform','app','type','bug_id','description']
     #template_name_suffix = '_form'
     #template_name_ = 'fileupload/fileupload_form.html'
 
-    def form_valid(self, form):
 
+    def form_valid(self,form):
+        try:
+            form.instance.user = self.request.user.username
+        except:
+            print('form.instance.user add failure')
         self.object = form.save()
         files = [serialize(self.object)]
-        print(files)
+
         data = {'files': files}
         response = JSONResponse(data, mimetype=response_mimetype(self.request))
         response['Content-Disposition'] = 'inline; filename=files.json'
