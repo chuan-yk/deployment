@@ -9,34 +9,36 @@ class Fileupload(models.Model):
     problems installing pillow, use a more generic FileField instead.
 
     """
-
-
     file = models.FileField(upload_to='')
     platform = models.CharField(max_length=100)
+    name = models.CharField(max_length=200,help_text='上传文件名')
+    type = models.IntegerField(help_text='0 静态 1 全量war包 2 增量包 3 Jar包')
     app = models.CharField(max_length=100)
-    bug_id = models.IntegerField(blank=True, null=True)
+    bug_id = models.IntegerField()
     description= models.CharField(max_length=500, blank=True)
     user = models.CharField(max_length=100, blank=True, null=True)
-    status = models.IntegerField(default=0, blank=True)
+    status = models.IntegerField(default=0, blank=True, help_text='-1 发布失败 0 未发布 1 正在发布 2 发布完成')
     create_date = models.DateTimeField(auto_now_add=True)
     slug = models.SlugField(max_length=50, blank=True)
+
 
     def __str__(self):
         return self.file.name
 
+
     @models.permalink
     def get_absolute_url(self):
-        # return ('upload-new',kwargs={'pk': self.pk} )
+        #return ('upload-new',kwargs={'pk': self.pk} )
         return reverse('upload-new', kwargs={'pk': self.pk})
 
-    def save(self, *args, **kwargs):
+    def save(self,*args, **kwargs):
         self.slug = self.file.name
         self.app = self.app
         self.platform = self.platform
+        self.name = self.file.name
         self.bug_id = self.bug_id
         self.description = self.description
         self.user = self.user
-
         super(Fileupload, self).save(*args, **kwargs)
 
 
