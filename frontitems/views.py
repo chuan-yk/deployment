@@ -15,7 +15,7 @@ from .remotepubstatic import RemoteReplaceWorker
 @login_required
 def list(request):
     #static_uploadfile_list = Fileupload.objects.filter(pk=1)
-    static_uploadfile_list = Fileupload.objects.all()
+    static_uploadfile_list = Fileupload.objects.filter(type=0)
     return render(request, 'frontitems/list.html', {'static_uploadfile_list': static_uploadfile_list})
 
 

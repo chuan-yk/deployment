@@ -9,17 +9,18 @@ class Fileupload(models.Model):
     problems installing pillow, use a more generic FileField instead.
 
     """
-    file = models.FileField(upload_to='')
-    platform = models.CharField(max_length=100)
-    name = models.CharField(max_length=200,help_text='上传文件名')
-    type = models.IntegerField(help_text='0 静态 1 全量war包 2 增量包 3 Jar包')
-    app = models.CharField(max_length=100)
-    bug_id = models.IntegerField()
+    file = models.FileField(upload_to='', null=True)
+    platform = models.CharField(default='-', max_length=100)
+    name = models.CharField(max_length=200, default='-', help_text='上传文件名')
+    type = models.IntegerField(default='0', help_text='0 静态 1 全量war包 2 增量包 3 Jar包')
+    app = models.CharField(max_length=100, default='-')
+    bug_id = models.IntegerField(default='0',)
     description= models.CharField(max_length=500, blank=True)
     user = models.CharField(max_length=100, blank=True, null=True)
     status = models.IntegerField(default=0, blank=True, help_text='-1 发布失败 0 未发布 1 正在发布 2 发布完成')
-    create_date = models.DateTimeField(auto_now_add=True)
+    create_date = models.DateTimeField(auto_now=True)
     slug = models.SlugField(max_length=50, blank=True)
+    pubuser = models.CharField(max_length=100, default=None, null=True)
 
 
     def __str__(self):
