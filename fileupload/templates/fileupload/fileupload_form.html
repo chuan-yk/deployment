@@ -30,8 +30,11 @@
                 <option value="3">Jar包</option>
             </select>
             <label for="" >项目名称</label>
-            <input type="text" name="app" multiple>
-
+            <select style="width: 140px;height: 32px " name="app" >
+                {% for i in app_list %}
+                    <option value={{ i }}>{{ i }}</option>
+                {% endfor %}
+            </select>
             <label for="" >任务ID</label>
             <input type="text" name="bug_id" multiple>
 

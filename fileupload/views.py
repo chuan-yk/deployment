@@ -13,21 +13,34 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 #     if obj.author != self.request.user:
 #         raise Http404()
 #     return obj
+def Getplatform(name):
+    if name == 'mc':
+        ptname = '摩臣'
+    elif name == 'md':
+        ptname = '摩登'
+    elif name == 'cyq':
+        ptname = '彩友圈'
+    else:
+        return 'Unknow'
+    return ptname
 
 class FileuploadCreateView(LoginRequiredMixin,CreateView):
     model = Fileupload
-    model = Fileupload
-    fields = ['file', 'platform', 'app', 'type', 'bug_id', 'description']
 
+    fields = ['file', 'platform', 'app', 'type', 'bug_id', 'description']
     # template_name_suffix = '_form'
     # template_name_ = 'fileupload/fileupload_form.html'
-
+    def get_context_data(self, **kwargs):
+        context = super(FileuploadCreateView,self).get_context_data(**kwargs)
+        context['app_list'] = ['sobet','lottery']
+        return context
 
     def form_valid(self,form):
         try:
             form.instance.user = self.request.user.username
+            form.instance.pt_name = Getplatform(self.request.POST['platform'])
         except:
-            print('form.instance.user add failure')
+            print('add form.instance  failure')
         self.object = form.save()
         files = [serialize(self.object)]
 
