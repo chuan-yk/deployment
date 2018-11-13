@@ -2,7 +2,7 @@
 import json
 from django.http import HttpResponse
 from django.views.generic import CreateView, DeleteView, ListView
-from .models import Fileupload
+from .models import Fileupload,Application
 from .response import JSONResponse, response_mimetype
 from .serialize import serialize
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -26,13 +26,13 @@ def Getplatform(name):
 
 class FileuploadCreateView(LoginRequiredMixin,CreateView):
     model = Fileupload
-
+    #model = Application
     fields = ['file', 'platform', 'app', 'type', 'bug_id', 'description']
     # template_name_suffix = '_form'
     # template_name_ = 'fileupload/fileupload_form.html'
     def get_context_data(self, **kwargs):
         context = super(FileuploadCreateView,self).get_context_data(**kwargs)
-        context['app_list'] = ['sobet','lottery']
+        context['app_list'] = Application.objects.values_list('app_name',flat=True)
         return context
 
     def form_valid(self,form):

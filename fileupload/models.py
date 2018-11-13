@@ -2,19 +2,13 @@
 from django.db import models
 from django.urls import reverse
 from datetime import datetime
-#
-# class Project(models.Model):
-#     platform_cod = models.CharField(max_length=100,null=True)
-#     platform_name = models.CharField(max_length=100,null=True)
-#     def __str__(self):
-#         return self.platform_name
-#
-#
-#
-# class Application(models.Model):
-#     pt_id = models.IntegerField()
-#     app_name = models.CharField(max_length=100, default='-')
-#
+
+
+class Application(models.Model):
+    app_name = models.CharField(max_length=100, null=True)
+    platform = models.CharField(max_length=100, null=True)
+
+
 def upload_to(instance, fielname):
     upload_path = "{platform}/{app}/{type}/{date}/{filename}".format(platform=instance.platform,app=instance.app,
                        type=instance.type,date=datetime.now().strftime('%Y%m%d_%H%M%S'),filename=fielname)
