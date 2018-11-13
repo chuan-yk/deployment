@@ -85,3 +85,16 @@ class ServerInfo(models.Model):
             return False
 
 
+class ProjectInfo(models.Model):
+    def __str__(self):
+        return '{} : {}'.format(self.project,   self.items)
+
+    items = models.CharField(default='sobet', max_length=100, help_text='项目名称，如sobet，lottery，admin')
+    platform = models.CharField(max_length=100, default='', help_text='平台名称，如MC\MD\CYQ')
+    platform_cn = models.CharField(max_length=100, default='', help_text='中文名')
+    package_name = models.CharField(max_length=100, default='', help_text='合法包名，允许字段为空')
+    type = models.IntegerField(default='0', help_text='0 静态 1 全量war包 2 增量包 3 Jar包')
+    dst_file_path = models.CharField(max_length=200, default='', help_text='文件发布路径')
+    backup_file_dir = models.CharField(max_length=200, default='')
+    validate_user = models.CharField(max_length=500, default='', help_text='有权限发布的用户/用户组， 暂未使用')
+    ipaddress = models.ForeignKey(ServerInfo, on_delete=models.CASCADE, default='1', help_text='服务器IP地址')

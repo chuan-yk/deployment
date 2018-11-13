@@ -43,7 +43,7 @@ def list_detail(request, pk):
 
 @login_required
 def pub(request, pk):
-    print(pk)
+    pub_file = get_object_or_404(Fileupload, pk=pk)
     return HttpResponse('it is ok , test')
 
 

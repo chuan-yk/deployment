@@ -16,7 +16,7 @@ class ProjectInfo(models.Model):
     file_save_base_dir = models.CharField(max_length=200,default='')
     backup_file_dir = models.CharField(max_length=200,default='')
     validate_user = models.CharField(max_length=500,default='')
-    server_ipaddress = models.ForeignKey(ServerInfo, on_delete=models.CASCADE, default='1')
+    # server_ipaddress = models.ForeignKey(ServerInfo, on_delete=models.CASCADE, default='1')
 
 
 class RecordOfStatic(models.Model):
