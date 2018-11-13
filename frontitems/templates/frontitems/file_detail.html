@@ -1,0 +1,160 @@
+{% extends 'layout.html' %}
+
+{% load staticfiles %}
+
+{% block title %}发布文件详情{% endblock %}
+
+{% block body %}
+
+    {#    {% for info in uploadfile_detail %}#}
+    {% if uploadfile_detail %}
+        <section xmlns="http://www.w3.org/1999/html">
+            <div class="section-header">
+                <ol class="breadcrumb">
+                    <li class="active">待发布文件详情</li>
+                </ol>
+            </div>
+            <div class="section-body">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="card card-printable style-default-light">
+                            <div class="card-body style-default-bright" id="print">
+                                <!-- BEGIN FILE DETAIL HEADER -->
+                                <div class="row">
+                                    <div class="col-xs-8">
+                                        <h1 class="text-light" style="margin-top: 0px; color: #f70b0b">运维自动化 <strong
+                                                class="text-accent-dark" style="color: #1ab394">前端静态文件发布</strong></h1>
+                                    </div>
+                                    <div class="col-xs-4 text-right">
+                                        <h1 class="text-light text-default-light">详情页</h1>
+                                    </div>
+                                </div><!--end .row -->
+                                <!-- END FILE DETAIL HEADER -->
+                                <br/>
+
+                                <br/>
+
+                                <!-- BEGIN INVOICE PRODUCTS -->
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <table class="table">
+                                            {#                                            <thead>#}
+                                            <tr>
+                                                <th style="width:150px" class="text-center">上传时间:</th>
+                                                <th class="text-left">{{ uploadfile_detail.create_date }}</th>
+                                                <th style="width:140px" class="text-right">文件编号:</th>
+                                                <th style="width:180px"
+                                                    class="text-center">{{ uploadfile_detail.id }}</th>
+                                            </tr>
+                                            {#                                            </thead>#}
+                                            <tbody>
+                                            <tr>
+                                                <th style="width:150px" class="text-center">文件名:</th>
+                                                <th class="text-left">{{ uploadfile_detail.slug }}</th>
+                                                <th style="width:140px" class="text-right">发布任务ID:</th>
+                                                <th style="width:180px"
+                                                    class="text-center"> xxxxx
+                                                </th>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-center">所属项目:</td>
+                                                <td>
+                                                    {{ uploadfile_detail.app }}
+                                                </td>
+                                                <td class="text-right">所属平台:</td>
+                                                <td class="text-center">
+                                                    {{ uploadfile_detail.platform }}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-center">任务编号:</td>
+                                                <td>
+                                                    {{ uploadfile_detail.bug_id }}
+                                                </td>
+                                                <td class="text-right">开发人员:</td>
+                                                <td class="text-center">
+                                                    {{ uploadfile_detail.user }}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-center">功能描述:</td>
+                                                <td>  {{ uploadfile_detail.description }}   </td>
+                                                <td class="text-right"></td>
+                                                <td class="text-center">  </td>
+                                            </tr>
+                                                {% if not filemd5.show %}
+                                                    <tr>
+                                                        <td class="text-center">文件MD5:</td>
+                                                        <td>  MD5checksum </td>
+                                                        <td class="text-right">发布文件详情:</td>
+
+                                                        <td class="text-center">
+                                                            <a href="{% url 'frontitems:file_detail' uploadfile_detail.id %}?filemd5=1"
+                                                               class="btn btn-primary">
+                                                                展开发布文件详情列表</a>
+                                                        </td>
+                                                        {% else %}
+                                                        <td class="text-center">文件MD5:</td>
+                                                        <td>  MD5checksum   </td>
+                                                        <td class="text-right">文件详情:</td>
+                                                        <td class="text-center">
+                                                            <a href="{% url 'frontitems:file_detail' uploadfile_detail.id %}?filemd5=0"
+                                                               class="btn btn-primary">
+                                                                收起文件详情列表</a>
+                                                        </td>
+                                                        {% for sub_file, sub_md5 in filemd5.MD5.items %}
+                                                            <tr>
+                                                                <td class="text-center">{{ sub_file }}</td>
+                                                                <td class="text-left">{{ sub_md5 }}</td>
+                                                            </tr>
+                                                        {% endfor %}
+                                                {% endif %}
+
+                                            </tr>
+
+                                            <tr>
+                                                {% if pub_lock.lock %}
+                                                    <td class="text-center">当前发布内容:</td>
+                                                    <td> {{ pub_lock.pubtask }} </td>
+                                                    <td class="text-right">状态:</td>
+                                                    <td class="text-center">不可发布</td>
+                                                {% else %}
+                                                    <td class="text-center">当前发布内容:</td>
+                                                    <td> 无</td>
+                                                    <td class="text-right">状态:</td>
+                                                    <td class="text-center">可发布</td>
+                                                {% endif %}
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td>
+                                                    {% if pub_lock.lock %}
+                                                        <a href="{% url 'frontitems:do_pub' uploadfile_detail.id %}"
+                                                           class="btn  btn-info btn-rounded disabled">发布<i
+                                                                class="md glyphicon glyphicon-play"></i></a>
+                                                    {% else %}
+                                                        <a href="{% url 'frontitems:do_pub' uploadfile_detail.id %}"
+                                                           class="btn  btn-info btn-rounded">发布<i
+                                                                class="md glyphicon glyphicon-play"></i></a>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+
+                                            </tbody>
+                                        </table>
+                                    </div><!--end .col -->
+                                </div><!--end .row -->
+                                <!-- END INVOICE PRODUCTS -->
+
+                            </div><!--end .card-body -->
+                        </div><!--end .card -->
+                    </div><!--end .col -->
+                </div><!--end .row -->
+            </div><!--end .section-body -->
+        </section>
+        {#    {% endfor %}#}
+    {% endif %}
+
+{% endblock %}
