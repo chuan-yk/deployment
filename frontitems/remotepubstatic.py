@@ -180,7 +180,7 @@ class RemoteReplaceWorker(object):
             self.do_backup()
         if not self.have_error:
             self.do_cover()
-        return {"task_status": self.have_error,"status": self.success_status, "backup_ver": self._backup_ver,
+        return {"Error": self.have_error,"status": self.success_status, "backup_ver": self._backup_ver,
                 "backed_up_dir": self.shouldbackdir, "pub_ignore_new": self.ignore_new, "add_file": self.newfile,
                 "add_dir": self.newdir, "update_file_list": self.unzipfilelist, }
 

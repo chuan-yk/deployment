@@ -87,7 +87,7 @@ class ServerInfo(models.Model):
 
 class ProjectInfo(models.Model):
     def __str__(self):
-        return '{} : {}'.format(self.project,   self.items)
+        return '{} : {}'.format(self.platform,   self.items)
 
     items = models.CharField(default='sobet', max_length=100, help_text='项目名称，如sobet，lottery，admin')
     platform = models.CharField(max_length=100, default='', help_text='平台名称，如MC\MD\CYQ')

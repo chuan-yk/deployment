@@ -6,11 +6,13 @@ from django.contrib.auth.decorators import login_required
 from django.template import loader
 import threading
 from datetime import datetime, date, timedelta
-from .models import ProjectInfo, RecordOfStatic
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
+
 from fileupload.models import Fileupload
 from .remotepubstatic import RemoteReplaceWorker
+from cmdb.models import ServerInfo, ProjectInfo
 
 
 @login_required
@@ -34,7 +36,7 @@ def list_detail(request, pk):
 
     uploadfile_detail = Fileupload.objects.get(pk=pk)
     # pub_lock   = ''  # function return
-    pub_lock = {'lock': False , 'pubtask': 'mc_sobet_jar_20181108_0001'}
+    pub_lock = {'lock': False, 'pubtask': 'mc_sobet_jar_20181108_0001'}
     filemd5 = {'show': show, 'MD5': MD5}
     context = {'uploadfile_detail': uploadfile_detail, 'pub_lock': pub_lock, 'filemd5': filemd5}
     print(context['filemd5'])
@@ -44,6 +46,17 @@ def list_detail(request, pk):
 @login_required
 def pub(request, pk):
     pub_file = get_object_or_404(Fileupload, pk=pk)
+    pjt_info = get_object_or_404(ProjectInfo, items=pub_file.app, platform=pub_file.platform,
+                                   type=pub_file.type)
+    serverinfo_instance = pjt_info.ipaddress
+    dstdir = pjt_info.dst_file_path
+    fromfile = pub_file.file.path
+    platfrom = pjt_info.platform
+    items = pjt_info.items
+    backupdir = pjt_info.backup_file_dir
+    pub_task = RemoteReplaceWorker(serverinfo_instance, dstdir, fromfile, platfrom, items, backupdir, )
+    print( pub_task._dstdir, pub_task._backup_ver )
+
     return HttpResponse('it is ok , test')
 
 
