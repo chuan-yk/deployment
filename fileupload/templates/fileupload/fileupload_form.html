@@ -1,110 +1,137 @@
 {% extends "layout.html" %}
+{% load widget_tweaks %}
 {% load upload_tags %}
 {% load static from staticfiles %}
 
+
+
+
+
+{% block title %} 上传文件 {% endblock %}
 {% block body %}
-<div class="container" style="margin-left: 50px">
 
-    <ul class="nav nav-tabs">
-        <li class="active"><a href="/upload/new/">上传文件</a></li>
-    </ul>
-    <br>
+<section>
+    <div class="section-body">
+        <div class="row">
 
-    <br>
-    <!-- The file upload form used as target for the file upload widget -->
-    <form id="fileupload" enctype="multipart/form-data">{% csrf_token %}
-        <div class="row fileupload-buttonbar">
-            <label for="">平台</label>
-            <select style="width: 140px;height: 32px " name="platform" >
-                <option value="">选择平台</option>
-                <option value="mc">摩臣</option>
-                <option value="md">摩登</option>
-                <option value="cyq">彩友圈</option>
-            </select>
-            <label for="">发布类型</label>
-            <select style="width: 140px;height: 32px " name="type" >
-                 <option value="-1">选择类型</option>
-                <option value="0">前端静态</option>
-                <option value="1">全量war包</option>
-                <option value="2">增量包</option>
-                <option value="3">Jar包</option>
-            </select>
-            <label for="" >项目名称</label>
-            <select style="width: 140px;height: 32px " name="app" >
-                {% for i in app_list %}
-                    <option value={{ i }}>{{ i }}</option>
-                {% endfor %}
-            </select>
-            <label for="" >任务ID</label>
-            <input type="text" name="bug_id" multiple>
+            <!-- BEGIN  - FORM -->
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-head style-primary">
+                        <header>文件上传</header>
+                        <div class="tools">
+                            <a class="btn btn-icon-toggle btn-collapse"><i class="fa fa-angle-down"></i></a>
+                            <a class="btn btn-icon-toggle btn-close"><i class="md md-close"></i></a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- The file upload form used as target for the file upload widget -->
+                        <form id="fileupload" enctype="multipart/form-data">{% csrf_token %}
+                            <div class="row fileupload-buttonbar">
+                                <label for="">平台</label>
+                                <select style="width: 140px;height: 32px " name="platform">
+                                    <option value="">选择平台</option>
+                                    {% for i in pt_list %}
+                                        <option value={{ i.platform }}>{{ i.platform_cn }}</option>
+                                    {% endfor %}
+                                </select>
+                                <label for="">发布类型</label>
+                                <select style="width: 140px;height: 32px " name="type">
+                                    <option value="-1">选择类型</option>
+                                    <option value="0">前端静态</option>
+                                    <option value="1">全量war包</option>
+                                    <option value="2">增量包</option>
+                                    <option value="3">Jar包</option>
+                                </select>
+                                <label for="">项目名称</label>
+                                <select style="width: 140px;height: 32px " name="app">
+                                    {% for i in app_list %}
+                                        <option value={{ i }}>{{ i }}</option>
+                                    {% endfor %}
+                                </select>
+                                <label for="">任务ID</label>
+                                <input type="text" name="bug_id" multiple>
 
-            <label for="">功能描述</label>
-            <input type="text" name="description" multiple>
-        </div>
-        <!-- Redirect browsers with JavaScript disabled to the origin page -->
-        <!--<noscript><input type="hidden" name="redirect" value="http://blueimp.github.io/jQuery-File-Upload/"></noscript>-->
-        <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
-        <div style="margin-top: 15px" class="row fileupload-buttonbar">
-            <div class="col-lg-7">
-                <!-- The fileinput-button span is used to style the file input field as button -->
-                <span style="position: relative" class="btn btn-success fileinput-button">
-                    <i class="glyphicon glyphicon-plus"></i>
-                    <span>Add files...</span>
-                    <input style="width: 127px;height: 35px; opacity: 0; position: absolute;left: 0;top: 0;" type="file" name="file" multiple>
-                </span>
-                <button type="submit" class="btn btn-primary start">
-                    <i class="glyphicon glyphicon-upload"></i>
-                    <span>Start upload</span>
-                </button>
-                <button type="reset" class="btn btn-warning cancel">
-                    <i class="glyphicon glyphicon-ban-circle"></i>
-                    <span>Cancel upload</span>
-                </button>
-                <button type="button" class="btn btn-danger delete">
-                    <i class="glyphicon glyphicon-trash"></i>
-                    <span>Delete</span>
-                </button>
-                <input type="checkbox" class="toggle">
-                <!-- The loading indicator is shown during file processing -->
-                <span class="fileupload-loading"></span>
-            </div>
-            <!-- The global progress information -->
-            <div class="col-lg-5 fileupload-progress fade">
-                <!-- The global progress bar -->
-                <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
-                    <div class="progress-bar progress-bar-success" style="width:0%;"></div>
+                                <label for="">功能描述</label>
+                                <input type="text" name="description" multiple>
+                            </div>
+                            <!-- Redirect browsers with JavaScript disabled to the origin page -->
+                            <!--<noscript><input type="hidden" name="redirect" value="http://blueimp.github.io/jQuery-File-Upload/"></noscript>-->
+                            <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
+                            <div style="margin-top: 15px" class="row fileupload-buttonbar">
+                                <div class="col-lg-7">
+                                    <!-- The fileinput-button span is used to style the file input field as button -->
+                                    <span style="position: relative" class="btn btn-success fileinput-button">
+                        <i class="glyphicon glyphicon-plus"></i>
+                        <span>Add files...</span>
+                        <input style="width: 127px;height: 35px; opacity: 0; position: absolute;left: 0;top: 0;"
+                               type="file"
+                               name="file" multiple>
+                    </span>
+                                    <button type="submit" class="btn btn-primary start">
+                                        <i class="glyphicon glyphicon-upload"></i>
+                                        <span>Start upload</span>
+                                    </button>
+                                    <button type="reset" class="btn btn-warning cancel">
+                                        <i class="glyphicon glyphicon-ban-circle"></i>
+                                        <span>Cancel upload</span>
+                                    </button>
+                                    <button type="button" class="btn btn-danger delete">
+                                        <i class="glyphicon glyphicon-trash"></i>
+                                        <span>Delete</span>
+                                    </button>
+                                    <input type="checkbox" class="toggle">
+                                    <!-- The loading indicator is shown during file processing -->
+                                    <span class="fileupload-loading"></span>
+                                </div>
+                                <!-- The global progress information -->
+                                <div class="col-lg-5 fileupload-progress fade">
+                                    <!-- The global progress bar -->
+                                    <div class="progress progress-striped active" role="progressbar" aria-valuemin="0"
+                                         aria-valuemax="100">
+                                        <div class="progress-bar progress-bar-success" style="width:0%;"></div>
+                                    </div>
+                                    <!-- The extended global progress information -->
+                                    <div class="progress-extended">&nbsp;</div>
+                                </div>
+                            </div>
+                            <!-- The table listing the files available for upload/download -->
+                            <table role="presentation" class="table table-striped">
+                                <tbody class="files"></tbody>
+                            </table>
+                        </form>
+                        <br>
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Demo Notes</h3>
+                            </div>
+                            <div class="panel-body">
+                                <ul>
+                                    <li>You can <strong>drag &amp; drop</strong> files from your desktop on this webpage
+                                        (see <a
+                                                href="https://github.com/blueimp/jQuery-File-Upload/wiki/Browser-support">Browser
+                                            support</a>).
+                                    </li>
+                                    <li>Please refer to the <a href="https://github.com/blueimp/jQuery-File-Upload">project
+                                        website</a>
+                                        and
+                                        <a href="https://github.com/blueimp/jQuery-File-Upload/wiki">documentation</a>
+                                        for more
+                                        information.
+                                    </li>
+                                    <li>Built with Twitter's <a
+                                            href="http://twitter.github.com/bootstrap/">Bootstrap</a> CSS framework
+                                        and Icons from <a href="http://glyphicons.com/">Glyphicons</a>.
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <!-- The extended global progress information -->
-                <div class="progress-extended">&nbsp;</div>
             </div>
-        </div>
-        <!-- The table listing the files available for upload/download -->
-        <table role="presentation" class="table table-striped"><tbody class="files"></tbody></table>
-    </form>
-    <br>
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <h3 class="panel-title">Demo Notes</h3>
-        </div>
-        <div class="panel-body">
-            <ul>
-                <li>You can <strong>drag &amp; drop</strong> files from your desktop on this webpage (see <a href="https://github.com/blueimp/jQuery-File-Upload/wiki/Browser-support">Browser support</a>).</li>
-                <li>Please refer to the <a href="https://github.com/blueimp/jQuery-File-Upload">project website</a> and <a href="https://github.com/blueimp/jQuery-File-Upload/wiki">documentation</a> for more information.</li>
-                <li>Built with Twitter's <a href="http://twitter.github.com/bootstrap/">Bootstrap</a> CSS framework and Icons from <a href="http://glyphicons.com/">Glyphicons</a>.</li>
-            </ul>
         </div>
     </div>
-</div>
-<!-- The blueimp Gallery widget -->
-{% comment %}<div id="blueimp-gallery" class="blueimp-gallery blueimp-gallery-controls" data-filter=":even">
-    <div class="slides"></div>
-    <h3 class="title"></h3>
-    <a class="prev"></a>
-    <a class="next"></a>
-    <a class="close"></a>
-    <a class="play-pause"></a>
-    <ol class="indicator"></ol>
-</div>{% endcomment %}
+</section>>
 
 {% endblock %}
 
