@@ -19,7 +19,20 @@ $(function () {
     $('#fileupload').fileupload({
         // Uncomment the following to send cross-domain cookies:
         //xhrFields: {withCredentials: true},
-        url: ''
+        url: '',
+        failed: function (e, data) {
+            if (data.jqXHR && data.jqXHR.responseJSON) {
+                let resp = data.jqXHR.responseJSON;
+                if (resp.error) {
+                    toastr.options = {
+                        "positionClass": "toast-bottom-center"
+                    };
+
+                    toastr.error(resp.message);
+                }
+            }
+            return false;
+        }
     });
 
     // Enable iframe cross-domain access via redirect option:

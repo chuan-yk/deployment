@@ -34,6 +34,7 @@
     <link type="text/css" rel="stylesheet" href="{% static 'css/libs/DataTables/extensions/dataTables.colVis.css' %}"/>
     <link type="text/css" rel="stylesheet"
           href="{% static 'css/libs/DataTables/extensions/dataTables.tableTools.css' %}"/>
+    <link type="text/css" rel="stylesheet" href="{% static 'css/libs/toastr/toastr.css' %}"/>
     <link type="text/css" rel="stylesheet" href="{% static 'css/print.css' %}"/>
     <!-- END STYLESHEETS -->
 
@@ -177,6 +178,7 @@
                         <li><a href="{% url 'autojar:jar_upload' %}"><span class="title">Jar包发布</span></a></li>
                         <li><a href="{% url 'not_finish_page' %}"><span class="title">项目发布</span></a></li>
                         <li><a href="{% url 'not_finish_page' %}"><span class="title">版本回滚</span></a></li>
+                        <li><a href="{% url 'upload-new' %}"><span class="title">文件上传</span></a></li>
                     </ul><!--end /submenu -->
                 </li><!--end /menu-li -->
                 <!-- END PROFILE -->
@@ -213,6 +215,7 @@
 <script src="{% static 'js/libs/DataTables/jquery.dataTables.min.js' %}"></script>
 <script src="{% static 'js/libs/DataTables/extensions/ColVis/js/dataTables.colVis.min.js' %}"></script>
 <script src="{% static 'js/libs/DataTables/extensions/TableTools/js/dataTables.tableTools.min.js' %}"></script>
+<script src="{% static 'js/libs/toastr/toastr.js' %}"></script>
 
 <script src="{% static 'js/core/App.js' %}"></script>
 <script src="{% static 'js/core/AppNavigation.js' %}"></script>
@@ -223,8 +226,8 @@
 <script src="{% static 'js/core/Demo.js' %}"></script>
 <script src="{% static 'js/core/DemoTableDynamic.js' %}"></script>
 <!-- END JAVASCRIPT -->
-{% block body_js %}
+    {% block body_js %}
 
-{% endblock %}
+    {% endblock %}
 </body>
 </html>

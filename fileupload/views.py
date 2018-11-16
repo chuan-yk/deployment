@@ -2,17 +2,17 @@
 import json
 from django.http import HttpResponse
 from django.views.generic import CreateView, DeleteView, ListView
-from .models import Fileupload,Application
+from .models import Fileupload,Application,ProjectInfo
 from .response import JSONResponse, response_mimetype
 from .serialize import serialize
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ObjectDoesNotExist
+from django.contrib import messages
 
 
-# def get_object(self, queryset=None):
-#     obj = super().get_object(queryset=queryset)
-#     if obj.author != self.request.user:
-#         raise Http404()
-#     return obj
+
+
+
 def Getplatform(name):
     if name == 'mc':
         ptname = '摩臣'
@@ -26,24 +26,27 @@ def Getplatform(name):
 
 class FileuploadCreateView(LoginRequiredMixin,CreateView):
     model = Fileupload
-    #model = Application
     fields = ['file', 'platform', 'app', 'type', 'bug_id', 'description']
     # template_name_suffix = '_form'
     # template_name_ = 'fileupload/fileupload_form.html'
     def get_context_data(self, **kwargs):
-        context = super(FileuploadCreateView,self).get_context_data(**kwargs)
+        context = super(FileuploadCreateView, self).get_context_data(**kwargs)
         context['app_list'] = Application.objects.values_list('app_name',flat=True)
+        context['pt_list'] = ProjectInfo.objects.values('platform','platform_cn').distinct()
         return context
 
     def form_valid(self,form):
         try:
             form.instance.user = self.request.user.username
             form.instance.pt_name = Getplatform(self.request.POST['platform'])
-        except:
-            print('add form.instance  failure')
+            form.instance.project = ProjectInfo.objects.get(platform=self.request.POST['platform'],
+                                                           items=self.request.POST['app'])
+        except ObjectDoesNotExist as e:
+            #messages.error(self.request, "没有对应项目", 'alert-danger')
+            data = json.dumps({'error': True, 'message': "没有对应项目"})
+            return HttpResponse(content=data, status=400, content_type='application/json')
         self.object = form.save()
         files = [serialize(self.object)]
-
         data = {'files': files}
         response = JSONResponse(data, mimetype=response_mimetype(self.request))
         response['Content-Disposition'] = 'inline; filename=files.json'
@@ -52,6 +55,8 @@ class FileuploadCreateView(LoginRequiredMixin,CreateView):
     def form_invalid(self, form):
         data = json.dumps(form.errors)
         return HttpResponse(content=data, status=400, content_type='application/json')
+
+
 
 
 class FileuploadDeleteView(DeleteView):

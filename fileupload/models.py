@@ -2,7 +2,7 @@
 from django.db import models
 from django.urls import reverse
 from datetime import datetime
-
+from cmdb.models import ProjectInfo
 
 class Application(models.Model):
     app_name = models.CharField(max_length=100, null=True)
@@ -18,6 +18,7 @@ def upload_to(instance, fielname):
 class Fileupload(models.Model):
 
     file = models.FileField(upload_to=upload_to, null=True)
+    project = models.ForeignKey(ProjectInfo, on_delete=models.CASCADE, default='1')
     platform = models.CharField(default='-', max_length=100)
     pt_name = models.CharField(default='-', max_length=100)
     name = models.CharField(max_length=200, default='-', help_text='上传文件名')
@@ -36,9 +37,9 @@ class Fileupload(models.Model):
         return self.file.name
 
 
-    @models.permalink
+    #@models.permalink
     def get_absolute_url(self):
-        #return ('upload-new',kwargs={'pk': self.pk} )
+        #return ('upload-new',kwargs={'pk': self.pk})
         return reverse('upload-new', kwargs={'pk': self.pk})
 
     def save(self,*args, **kwargs):
@@ -51,7 +52,6 @@ class Fileupload(models.Model):
         self.description = self.description
         self.user = self.user
         super(Fileupload, self).save(*args, **kwargs)
-
         return self.pk
 
 
