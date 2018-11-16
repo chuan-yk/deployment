@@ -6,13 +6,14 @@ from django.contrib.auth.decorators import login_required
 from django.template import loader
 import threading
 from datetime import datetime, date, timedelta
-
+from django_redis import get_redis_connection
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
-
+from django_redis import get_redis_connection
 from fileupload.models import Fileupload
-from .remotepubstatic import RemoteReplaceWorker
+from frontitems.models import RecordOfStatic
 from cmdb.models import ServerInfo, ProjectInfo
+from .remotepubstatic import RemoteReplaceWorker, file_as_byte_md5sum
 
 
 @login_required
@@ -27,36 +28,81 @@ def list(request):
 @login_required
 def list_detail(request, pk):
     """指定pk 文件详情, Get参数filemd5 为1: 显示更新文件MD5 信息，"""
+    pub_file = get_object_or_404(Fileupload, pk=pk)
+    pjt_info = get_object_or_404(ProjectInfo, items=pub_file.app, platform=pub_file.platform,
+                                 type=pub_file.type)
+    record_id = '{0}_{1}_{2}_{3}'.format(pjt_info.platform, pjt_info.items, '0', pk)
+    redis_for_detail_cli = get_redis_connection("default")
+    if RecordOfStatic.objects.filter(record_id=record_id).count() == 0:  # 初始化插入 Record 记录
+        uploadfile_md5 = file_as_byte_md5sum(pub_file.file.read())  # 上传文件Md5
+        RecordOfStatic(pub_filemd5sum=uploadfile_md5,
+                       items=ProjectInfo.objects.get(items=pjt_info.items, platform=pjt_info.platform, type=0),
+                       record_id=record_id,
+                       pub_status=0  # 初始状态
+                       ).save()
+    else:
+        uploadfile_md5 = RecordOfStatic.objects.get(record_id=record_id).pub_filemd5sum  # 已存在记录直接从数据库查
     if request.GET.get('filemd5') == '1':
         show = True
-        MD5 = {'f1': '1111111', 'f2': '22222222', 'f3': '3333333333'}
+        pub_task = RemoteReplaceWorker(pjt_info.ipaddress,
+                                       dstdir=pjt_info.dst_file_path,
+                                       fromfile=pub_file.file.path,
+                                       platfrom=pjt_info.platform,
+                                       items=pjt_info.items,
+                                       backupdir=pjt_info.backup_file_dir,
+                                       filepk=pk,
+                                       tmpdir='media',
+                                       )
+        MD5 = pub_task.checkfiledetail()
     else:
         show = False
         MD5 = {'None': None}
 
-    uploadfile_detail = Fileupload.objects.get(pk=pk)
-    # pub_lock   = ''  # function return
-    pub_lock = {'lock': False, 'pubtask': 'mc_sobet_jar_20181108_0001'}
+    uploadfile_detail = pub_file  # 兼顾模板写法，不同名同内容变量
+    # pub_lock 发布锁状态获取
+    redis_for_detail_cli = get_redis_connection("default")
+    pub_lock_key = '{0}_{1}_{2}_{3}'.format(pjt_info.platform, pjt_info.items, '0', 'lock')
+    if redis_for_detail_cli.exists(pub_lock_key):
+        pub_lock = {'lock': True, 'pubtask': redis_for_detail_cli.hget(pub_lock_key, 'lock_task').decode()}
+    else:
+        pub_lock = {'lock': False, 'pubtask': None}
     filemd5 = {'show': show, 'MD5': MD5}
-    context = {'uploadfile_detail': uploadfile_detail, 'pub_lock': pub_lock, 'filemd5': filemd5}
-    print(context['filemd5'])
+    context = {'uploadfile_detail': uploadfile_detail,
+               'pub_lock': pub_lock,
+               'filemd5': filemd5,
+               "uploadfile_md5": uploadfile_md5, }
+
     return render(request, 'frontitems/file_detail.html', context)
 
 
 @login_required
 def pub(request, pk):
+    redis_for_pub_cli = get_redis_connection("default")
     pub_file = get_object_or_404(Fileupload, pk=pk)
     pjt_info = get_object_or_404(ProjectInfo, items=pub_file.app, platform=pub_file.platform,
-                                   type=pub_file.type)
-    serverinfo_instance = pjt_info.ipaddress
-    dstdir = pjt_info.dst_file_path
-    fromfile = pub_file.file.path
-    platfrom = pjt_info.platform
-    items = pjt_info.items
-    backupdir = pjt_info.backup_file_dir
-    pub_task = RemoteReplaceWorker(serverinfo_instance, dstdir, fromfile, platfrom, items, backupdir, )
-    print( pub_task._dstdir, pub_task._backup_ver )
+                                 type=pub_file.type)
+    pub_lock_key = '{0}_{1}_{2}_{3}'.format(pjt_info.platform, pjt_info.items, '0', 'lock')
+    if redis_for_pub_cli.exists(pub_lock_key):
+        lock_task = redis_for_pub_cli.hget(pub_lock_key, 'lock_task').decode()
+        messages.error(request,
+                       '当前{0}-{1}发布通道被占用，请稍后重试'.format(pjt_info.platform, pjt_info.items, ),
+                       'alert-danger')
+        messages.error(request,
+                       '发布任务{0}尚未完成'.format(lock_task), 'alert-danger')
+        static_uploadfile_list = Fileupload.objects.filter(type=0)
+        return render(request, 'frontitems/list.html', {'static_uploadfile_list': static_uploadfile_list})
 
+    pub_task = RemoteReplaceWorker(pjt_info.ipaddress,
+                                   dstdir=pjt_info.dst_file_path,
+                                   fromfile=pub_file.file.path,
+                                   platfrom=pjt_info.platform,
+                                   items=pjt_info.items,
+                                   backupdir=pjt_info.backup_file_dir,
+                                   filepk=pk,
+                                   tmpdir='media',
+                                   )
+    threading_task = threading.Thread(target=pub_task.test_run, )
+    threading_task.start()
     return HttpResponse('it is ok , test')
 
 

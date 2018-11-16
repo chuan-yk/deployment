@@ -77,7 +77,7 @@
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <td class="text-center">功能描述:</td>
+                                                <td class="text-center">开发者功能描述:</td>
                                                 <td>  {{ uploadfile_detail.description }}   </td>
                                                 <td class="text-right"></td>
                                                 <td class="text-center">  </td>
@@ -85,7 +85,7 @@
                                                 {% if not filemd5.show %}
                                                     <tr>
                                                         <td class="text-center">文件MD5:</td>
-                                                        <td>  MD5checksum </td>
+                                                        <td>  {{  uploadfile_md5 }} </td>
                                                         <td class="text-right">发布文件详情:</td>
 
                                                         <td class="text-center">
@@ -95,7 +95,7 @@
                                                         </td>
                                                         {% else %}
                                                         <td class="text-center">文件MD5:</td>
-                                                        <td>  MD5checksum   </td>
+                                                        <td>  {{  uploadfile_md5 }}   </td>
                                                         <td class="text-right">文件详情:</td>
                                                         <td class="text-center">
                                                             <a href="{% url 'frontitems:file_detail' uploadfile_detail.id %}?filemd5=0"
@@ -104,6 +104,7 @@
                                                         </td>
                                                         {% for sub_file, sub_md5 in filemd5.MD5.items %}
                                                             <tr>
+                                                                <td></td>
                                                                 <td class="text-center">{{ sub_file }}</td>
                                                                 <td class="text-left">{{ sub_md5 }}</td>
                                                             </tr>
