@@ -1,0 +1,122 @@
+[
+  {
+    "model": "cmdb.projectinfo",
+    "pk": 1,
+    "fields": {
+      "items": "sobet",
+      "platform": "mc",
+      "platform_cn": "\u6469\u81e3",
+      "package_name": "sobet.zip",
+      "type": 0,
+      "dst_file_path": "/var/www/html",
+      "backup_file_dir": "/backup/mc",
+      "validate_user": "-",
+      "ipaddress": 1
+    }
+  },
+  {
+    "model": "cmdb.projectinfo",
+    "pk": 2,
+    "fields": {
+      "items": "lottery",
+      "platform": "mc",
+      "platform_cn": "\u6469\u81e3",
+      "package_name": "lottery.zip",
+      "type": 0,
+      "dst_file_path": "/var/www/html",
+      "backup_file_dir": "/backup/mc",
+      "validate_user": "-",
+      "ipaddress": 1
+    }
+  },
+  {
+    "model": "cmdb.projectinfo",
+    "pk": 3,
+    "fields": {
+      "items": "lottery_m",
+      "platform": "mc",
+      "platform_cn": "\u6469\u81e3",
+      "package_name": "lottery_m.zip",
+      "type": 0,
+      "dst_file_path": "/var/www/html/mobile",
+      "backup_file_dir": "/backup/mc",
+      "validate_user": "-",
+      "ipaddress": 1
+    }
+  },
+  {
+    "model": "cmdb.projectinfo",
+    "pk": 4,
+    "fields": {
+      "items": "sport",
+      "platform": "mc",
+      "platform_cn": "\u6469\u81e3",
+      "package_name": "sport.zip",
+      "type": 0,
+      "dst_file_path": "/var/www/html",
+      "backup_file_dir": "/backup/mc",
+      "validate_user": "-",
+      "ipaddress": 1
+    }
+  },
+  {
+    "model": "cmdb.projectinfo",
+    "pk": 5,
+    "fields": {
+      "items": "sobet",
+      "platform": "md",
+      "platform_cn": "\u6469\u767b",
+      "package_name": "md_sobet.zip",
+      "type": 0,
+      "dst_file_path": "/var/www/html/xpt",
+      "backup_file_dir": "/backup/md",
+      "validate_user": "-",
+      "ipaddress": 1
+    }
+  },
+  {
+    "model": "cmdb.projectinfo",
+    "pk": 6,
+    "fields": {
+      "items": "lottery",
+      "platform": "md",
+      "platform_cn": "\u6469\u767b",
+      "package_name": "md_lottery.zip",
+      "type": 0,
+      "dst_file_path": "/var/www/html/xpt",
+      "backup_file_dir": "/backup/md",
+      "validate_user": "-",
+      "ipaddress": 1
+    }
+  },
+  {
+    "model": "cmdb.projectinfo",
+    "pk": 7,
+    "fields": {
+      "items": "lottery_m",
+      "platform": "md",
+      "platform_cn": "\u6469\u767b",
+      "package_name": "md_lottery_m.zip",
+      "type": 0,
+      "dst_file_path": "/var/www/html/xpt/mobile",
+      "backup_file_dir": "/backup/md",
+      "validate_user": "-",
+      "ipaddress": 1
+    }
+  },
+  {
+    "model": "cmdb.projectinfo",
+    "pk": 8,
+    "fields": {
+      "items": "sport",
+      "platform": "md",
+      "platform_cn": "\u6469\u767b",
+      "package_name": "md_sport.zip",
+      "type": 0,
+      "dst_file_path": "/var/www/html/xpt",
+      "backup_file_dir": "/backup/md",
+      "validate_user": "-",
+      "ipaddress": 1
+    }
+  }
+]

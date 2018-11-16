@@ -172,6 +172,6 @@ venv.bak/
 *.pyc
 tmp/
 */migrations/*_initial.py
-cmdb/migrations/0001_initial.py
-frontitems/migrations/0001_initial.py
+cmdb/migrations/*.py
+frontitems/migrations/*.py
 media/

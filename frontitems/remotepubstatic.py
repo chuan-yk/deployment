@@ -27,7 +27,7 @@ def file_md5sum(filepath):
 def file_as_byte_md5sum(file_byte):
     return hashlib.md5(file_byte).hexdigest()
 from fileupload.models import Fileupload
-fileupload_instace = Fileupload.objects.get(pk=9)
+# fileupload_instace = Fileupload.objects.get(pk=9)
 
 class RemoteReplaceWorker(object):
     def __init__(self, serverinfo_instance, fileupload_instace, projectinfo_instance, dstdir, fromfile, platfrom, items, backupdir, filepk, shouldbackdir=set(),
@@ -44,7 +44,7 @@ class RemoteReplaceWorker(object):
         backup_ver: 备份所在文件夹
         """
         fileupload_instace = Fileupload.objects.get(pk=9)
-        projectinfo_instance = Fileupload.
+        # projectinfo_instance = Fileupload.
         self._remote_server = serverinfo_instance
         self._dstdir = dstdir
         self._fromfile = fromfile
