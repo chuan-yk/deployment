@@ -31,7 +31,7 @@ class FileuploadCreateView(LoginRequiredMixin,CreateView):
     # template_name_ = 'fileupload/fileupload_form.html'
     def get_context_data(self, **kwargs):
         context = super(FileuploadCreateView, self).get_context_data(**kwargs)
-        context['app_list'] = Application.objects.values_list('app_name',flat=True)
+        context['app_list'] = Application.objects.values_list('app_name',flat=True).distinct()
         context['pt_list'] = ProjectInfo.objects.values('platform','platform_cn').distinct()
         return context
 

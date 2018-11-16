@@ -29,10 +29,10 @@ def list(request):
 def list_detail(request, pk):
     """指定pk 文件详情, Get参数filemd5 为1: 显示更新文件MD5 信息，"""
     pub_file = get_object_or_404(Fileupload, pk=pk)
-    pjt_info = get_object_or_404(ProjectInfo, items=pub_file.app, platform=pub_file.platform,
+    pjt_info = get_object_or_404(ProjectInfo, items=pub_file.app, platform=pub_file.platform,  # 唯一任务值
                                  type=pub_file.type)
     record_id = '{0}_{1}_{2}_{3}'.format(pjt_info.platform, pjt_info.items, '0', pk)
-    redis_for_detail_cli = get_redis_connection("default")
+
     if RecordOfStatic.objects.filter(record_id=record_id).count() == 0:  # 初始化插入 Record 记录
         uploadfile_md5 = file_as_byte_md5sum(pub_file.file.read())  # 上传文件Md5
         RecordOfStatic(pub_filemd5sum=uploadfile_md5,
@@ -45,15 +45,13 @@ def list_detail(request, pk):
     if request.GET.get('filemd5') == '1':
         show = True
         pub_task = RemoteReplaceWorker(pjt_info.ipaddress,
-                                       dstdir=pjt_info.dst_file_path,
-                                       fromfile=pub_file.file.path,
-                                       platfrom=pjt_info.platform,
-                                       items=pjt_info.items,
-                                       backupdir=pjt_info.backup_file_dir,
-                                       filepk=pk,
+                                       pub_file,
+                                       pjt_info,
+                                       RecordOfStatic.objects.get(record_id=record_id),
                                        tmpdir='media',
                                        )
         MD5 = pub_task.checkfiledetail()
+
     else:
         show = False
         MD5 = {'None': None}
@@ -62,10 +60,17 @@ def list_detail(request, pk):
     # pub_lock 发布锁状态获取
     redis_for_detail_cli = get_redis_connection("default")
     pub_lock_key = '{0}_{1}_{2}_{3}'.format(pjt_info.platform, pjt_info.items, '0', 'lock')
-    if redis_for_detail_cli.exists(pub_lock_key):
-        pub_lock = {'lock': True, 'pubtask': redis_for_detail_cli.hget(pub_lock_key, 'lock_task').decode()}
+    if redis_for_detail_cli.exists(pub_lock_key):   # 发布占用锁定状态,
+        pub_lock = {'lock': True, 'pubtask': redis_for_detail_cli.hget(pub_lock_key, 'lock_task').decode(),
+                    'pub_current_status': redis_for_detail_cli.hget(pub_lock_key, 'pub_current_status').decode(),
+                    'starttime': redis_for_detail_cli.hget(pub_lock_key, 'starttime').decode(),
+                    'pub_user': redis_for_detail_cli.hget(pub_lock_key, 'pub_user').decode(),
+                    }
+
+    elif pub_file.status != 0:      # 锁定状态
+        pub_lock = {'lock': True, 'pubtask': None, 'pub_current_status':None, 'starttime':None, 'pub_user': None, }
     else:
-        pub_lock = {'lock': False, 'pubtask': None}
+        pub_lock = {'lock': False, 'pubtask': None, 'pub_current_status':None, 'starttime':None, 'pub_user': None, }
     filemd5 = {'show': show, 'MD5': MD5}
     context = {'uploadfile_detail': uploadfile_detail,
                'pub_lock': pub_lock,
@@ -81,8 +86,19 @@ def pub(request, pk):
     pub_file = get_object_or_404(Fileupload, pk=pk)
     pjt_info = get_object_or_404(ProjectInfo, items=pub_file.app, platform=pub_file.platform,
                                  type=pub_file.type)
-    pub_lock_key = '{0}_{1}_{2}_{3}'.format(pjt_info.platform, pjt_info.items, '0', 'lock')
-    if redis_for_pub_cli.exists(pub_lock_key):
+    pub_lock_key = '{0}_{1}_{2}_{3}'.format(pjt_info.platform, pjt_info.items, '0', 'lock')  # 发布任务锁
+    record_id = '{0}_{1}_{2}_{3}'.format(pjt_info.platform, pjt_info.items, '0', pk)  # 唯一任务值
+    pub_user = request.user.username
+    if RecordOfStatic.objects.filter(record_id=record_id).count() == 0:  # 初始化插入 Record 记录
+        uploadfile_md5 = file_as_byte_md5sum(pub_file.file.read())  # 上传文件Md5
+        RecordOfStatic(pub_filemd5sum=uploadfile_md5,
+                       items=ProjectInfo.objects.get(items=pjt_info.items, platform=pjt_info.platform, type=0),
+                       pub_user=pub_user,
+                       record_id=record_id,
+                       pub_status=0  # 初始状态
+                       ).save()
+
+    if redis_for_pub_cli.exists(pub_lock_key):  # 发布锁定状态
         lock_task = redis_for_pub_cli.hget(pub_lock_key, 'lock_task').decode()
         messages.error(request,
                        '当前{0}-{1}发布通道被占用，请稍后重试'.format(pjt_info.platform, pjt_info.items, ),
@@ -90,20 +106,32 @@ def pub(request, pk):
         messages.error(request,
                        '发布任务{0}尚未完成'.format(lock_task), 'alert-danger')
         static_uploadfile_list = Fileupload.objects.filter(type=0)
-        return render(request, 'frontitems/list.html', {'static_uploadfile_list': static_uploadfile_list})
+
+        return render(request, 'frontitems/list.html', {'static_uploadfile_list': static_uploadfile_list})  # 返回默认发布页面
+
+    pub_record = RecordOfStatic.objects.get(record_id=record_id, )
+    pub_record.pub_user = request.user.username  # 更新Records 表 pub_user 字段
+    pub_record.save()
+    pub_file.pubuser = request.user.username  # 更新fileupload 表 pubuser 字段
+    pub_file.save()
 
     pub_task = RemoteReplaceWorker(pjt_info.ipaddress,
-                                   dstdir=pjt_info.dst_file_path,
-                                   fromfile=pub_file.file.path,
-                                   platfrom=pjt_info.platform,
-                                   items=pjt_info.items,
-                                   backupdir=pjt_info.backup_file_dir,
-                                   filepk=pk,
-                                   tmpdir='media',
+                                   pub_file,
+                                   pjt_info,
+                                   pub_record,
+                                   tmpdir='media',  # 解压临时文件，跟进环境调整
                                    )
-    threading_task = threading.Thread(target=pub_task.test_run, )
+    # threading_task = threading.Thread(target=pub_task.pip_run, )  # 正式使用
+    threading_task = threading.Thread(target=pub_task.test_run, )  # windows 开发过程调试
     threading_task.start()
-    return HttpResponse('it is ok , test')
+    print('xxxxxxxxxxxx pub pk',pk , pub_file.pk)
+    redis_detail = {'lock_task': redis_for_pub_cli.hget(pub_lock_key, 'lock_task').decode(),
+                    'pub_current_status': redis_for_pub_cli.hget(pub_lock_key, 'pub_current_status').decode(),
+                    'starttime': redis_for_pub_cli.hget(pub_lock_key, 'starttime').decode(),
+                    'pub_user': redis_for_pub_cli.hget(pub_lock_key, 'pub_user').decode(),
+                    }
+    context = {'pub_file': pub_file, 'pub_record': pub_record, 'redis_detail': redis_detail}
+    return render(request, 'frontitems/pub_detail.html', context)
 
 
 @login_required
@@ -111,17 +139,17 @@ def pubresult(request, pk):
     pass
 
 
-@login_required
-def run_tasker(task_projectinfo, inputfiledir):
-    tasker = RemoteReplaceWorker(serverinfo_instance='==',
-                                 dstdir=task_projectinfo.static_dir,
-                                 fromfile=os.path.join(inputfiledir, myFile.name),
-                                 platfrom=task_projectinfo.project,
-                                 items=task_projectinfo.items,
-                                 backupdir=task_projectinfo.backup_file_dir, )
-    import time
-    time.sleep(10)
-    # tasker.ignore_newfile_run()
+# @login_required
+# def run_tasker(task_projectinfo, inputfiledir):
+#     tasker = RemoteReplaceWorker(serverinfo_instance='==',
+#                                  dstdir=task_projectinfo.static_dir,
+#                                  fromfile=os.path.join(inputfiledir, myFile.name),
+#                                  platfrom=task_projectinfo.project,
+#                                  items=task_projectinfo.items,
+#                                  backupdir=task_projectinfo.backup_file_dir, )
+#     import time
+#     time.sleep(10)
+#     # tasker.ignore_newfile_run()
 
 
 @login_required
@@ -161,8 +189,8 @@ def upload(request):  # 原一键发布入口，弃用
                 fromfile.write(chunk)
             fromfile.close()
 
-            task = threading.Thread(target=run_tasker, args=(task_projectinfo, inputfiledir))
-            task.start()
+            # task = threading.Thread(target=run_tasker, args=(task_projectinfo, inputfiledir))
+            # task.start()
             messages.success(request, '发布成功！', 'alert-success')
             # if tasker.coversuccess:
             # print('===-======debug  2')

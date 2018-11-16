@@ -43,11 +43,17 @@ class Fileupload(models.Model):
         return reverse('upload-new', kwargs={'pk': self.pk})
 
     def save(self,*args, **kwargs):
-        self.slug = self.file.name
+        if self.file.name.count('/'):
+            self.slug = self.file.name.split('/')[-1]
+        else:
+            self.slug = self.file.name
         self.app = self.app
         self.platform = self.platform
         self.pt_name = self.pt_name
-        self.name = self.file.name
+        if self.file.name.count('/'):
+            self.name = self.file.name.split('/')[-1]
+        else:
+            self.name = self.file.name
         self.bug_id = self.bug_id
         self.description = self.description
         self.user = self.user

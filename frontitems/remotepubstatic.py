@@ -26,11 +26,14 @@ def file_md5sum(filepath):
 
 def file_as_byte_md5sum(file_byte):
     return hashlib.md5(file_byte).hexdigest()
+
+
 from fileupload.models import Fileupload
-# fileupload_instace = Fileupload.objects.get(pk=9)
+
 
 class RemoteReplaceWorker(object):
-    def __init__(self, serverinfo_instance, fileupload_instace, projectinfo_instance, dstdir, fromfile, platfrom, items, backupdir, filepk, shouldbackdir=set(),
+    def __init__(self, serverinfo_instance, fileupload_instace, projectinfo_instance, records_instance,
+                 shouldbackdir=set(),
                  backup_ver='', ignore_new=True, tmpdir='/tmp'):
         """serverinfo_instance:服务器 ssh 实例
         fileupload_instace: 文件上传行内容
@@ -43,22 +46,26 @@ class RemoteReplaceWorker(object):
         shouldbackdir: 备份文件夹，如 static/common , static/sobet, sobet
         backup_ver: 备份所在文件夹
         """
-        fileupload_instace = Fileupload.objects.get(pk=9)
-        # projectinfo_instance = Fileupload.
+        # fileupload_instace = Fileupload.objects.get(pk=4)
+        # debug # projectinfo_instance = fileupload_instace.project
+        # records_instance = RecordOfStatic.objects.get(pk=2)
         self._remote_server = serverinfo_instance
-        self._dstdir = dstdir
-        self._fromfile = fromfile
-        self._pjtname = platfrom
-        self._items = items
-        self._backupdir = backupdir  # /date/release
-        self._pk = filepk
+        self._fileupload_instace = fileupload_instace
+        self._projectinfo_instance = projectinfo_instance
+        self._records_instance = records_instance
+        self._dstdir = projectinfo_instance.dst_file_path  # 发布目标地址
+        self._fromfile = fileupload_instace.file.path  # 上传文件
+        self._pjtname = projectinfo_instance.platform  # 平台名
+        self._items = projectinfo_instance.items  # 项目名
+        self._backupdir = projectinfo_instance.backup_file_dir  # 约定平台备份路径，/date/mc
+        self._pk = fileupload_instace.pk  # 文件上传编号
         self._operatingtime = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
         if len(backup_ver) == 0:
             self._backup_ver = os.path.join(self._backupdir, '{}_Ver_{}'.format(self._items, self._operatingtime))
         else:
-            self._backup_ver = backup_ver
-        self.ignore_new = ignore_new
-        self.redis_cli = get_redis_connection("default")
+            self._backup_ver = backup_ver  # 约定平台下项目备份路径 /data/mc/[sobet_Ver_日期]
+        self.ignore_new = ignore_new  # 忽略新增
+        self.redis_cli = get_redis_connection("default")  # redis 客户端
         self.unzipfilelist = []  # 文件夹列表
         self.unzipdirlist = []  # 文件列表
         self.shouldbackdir = shouldbackdir  # 发布文件子目录，对改目录进行备份
@@ -72,19 +79,20 @@ class RemoteReplaceWorker(object):
         else:
             os.makedirs(os.path.join(os.getcwd(), 'tmp'), exist_ok=True)
             tempfile.tempdir = os.path.join(os.getcwd(), 'tmp')
-        self._tmpdir = tempfile.mkdtemp(prefix=items + '_', suffix='_django')
+        self._tmpdir = tempfile.mkdtemp(prefix=self._items + '_', suffix='_django')
         self.md5dict = {}
-        self.pub_type = 0   # 发布类型 0：静态文件
+        self.pub_type = 0  # 发布类型 0：静态文件
+        self.record_id = '{0}_{1}_{2}_{3}'.format(self._pjtname, self._items, self.pub_type, self._pk)
+        self._lockkey = '{}_{}_{}_lock'.format(self._pjtname, self._items, self.pub_type)
         self.ssh = None
         self.sftp = None
 
     def checkfiledetail(self):
         """检查文件详情，存redis """
         pub_status = 3  # 约定 3：已完成检查文件详情
-        record_id = '{0}_{1}_{2}_{3}'.format(self._pjtname, self._items, self.pub_type, self._pk)
-        if self.redis_cli.exists(record_id):
-            # print("Debug: redis 键值 {} 已存在".format(record_id))
-            tmp_getall = self.redis_cli.hgetall(record_id, )
+        if self.redis_cli.exists(self.record_id):
+            # print("Debug: redis 键值 {} 已存在".format(self.record_id))
+            tmp_getall = self.redis_cli.hgetall(self.record_id, )
             for rkey, rvalue in tmp_getall.items():
                 self.md5dict[rkey.decode()] = rvalue.decode()
             self.cleantmp()
@@ -105,24 +113,25 @@ class RemoteReplaceWorker(object):
                     # print('----', current_file, current_file_name, os.path.join(root, file).split(self._tmpdir)[-1],
                     #  current_file_md5)
                     self.md5dict[current_file_name] = current_file_md5
-                    # print('=== debug, redis hmset', record_id, {'{}'.format(current_file_name): current_file_md5})
-                    self.redis_cli.hmset(record_id, {'{}'.format(current_file_name): current_file_md5})
+                    # print('=== debug, redis hmset', self.record_id, {'{}'.format(current_file_name): current_file_md5})
+                    self.redis_cli.hmset(self.record_id, {'{}'.format(current_file_name): current_file_md5})
             else:
-                self.redis_cli.expire(record_id, 60*60*24*14)
+                self.redis_cli.expire(self.record_id, 60 * 60 * 24 * 14)
         except IOError as e:
             print(e, "dir _dist Does not Exist")
             return {"错误信息": "静态增量文件不包含 '_dist' 目录"}
         except Exception as e1:
             print(e1)
             return {"错误信息2": str(e1)}
-        if RecordOfStatic.objects.filter(record_id=record_id).count() == 0:
+        if RecordOfStatic.objects.filter(record_id=self.record_id).count() == 0:
             pub_filemd5sum = file_md5sum(self._fromfile)
             RecordOfStatic(pub_filemd5sum=pub_filemd5sum,
                            items=ProjectInfo.objects.get(items=self._items, platform=self._pjtname, type=self.pub_type),
-                           record_id=record_id,
+                           record_id=self.record_id,
                            pub_status=pub_status).save()
-        elif RecordOfStatic.objects.get(record_id=record_id).pub_status == 0 :  # RecordOfStatic Exist， pub_status = 0
-            record_line_info  = RecordOfStatic.objects.get(record_id=record_id)
+        elif RecordOfStatic.objects.get(
+                record_id=self.record_id).pub_status == 0:  # RecordOfStatic Exist， pub_status = 0
+            record_line_info = RecordOfStatic.objects.get(record_id=self.record_id)
             record_line_info.pub_status = pub_status
             record_line_info.save()
         self.cleantmp()
@@ -251,39 +260,73 @@ class RemoteReplaceWorker(object):
         shutil.rmtree(self._tmpdir)
 
     def pip_run(self):
-        _lockkey = '{}_{}_0_lock'.format(self._pjtname, self._items, )
-        record_id = '{0}_{1}_{2}_{3}'.format(self._pjtname, self._items, 0, self._pk)
-        self.redis_cli.hmset(_lockkey, {'lock_task': record_id, 'starttime': self._operatingtime, })
+        self.redis_cli.hmset(self._lockkey, {'lock_task': self.record_id, 'starttime': self._operatingtime,
+                                             'pub_user': self._records_instance.pub_user,
+                                             'pub_current_status': 'Start pub...',
+                                             })
+        self._records_instance.pub_status = 1  # 修改发布状态
+        self._records_instance.save()
+        self._fileupload_instace.status = 1  # 修改发布状态
+        self._fileupload_instace.save()
         if not self.have_error:
             self.make_ready()
+            self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.success_status})  # 发布过程更新状态
         if not self.have_error:
             self.do_backup()
+            self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.success_status})
         if not self.have_error:
             self.do_cover()
-        self.redis_cli.delete(_lockkey)
+            self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.success_status})
+        self.redis_cli.delete(self._lockkey)
         self.cleantmp()
-        pub_status = 2  # 发布成功状态
-        if RecordOfStatic.objects.filter(record_id=record_id).count() == 0:
-            pub_filemd5sum = file_md5sum(self._fromfile)
-            RecordOfStatic(pub_filemd5sum=pub_filemd5sum,
-                           items=ProjectInfo.objects.get(items=self._items, platform=self._pjtname, type=self.pub_type),
-                           record_id=record_id,
-                           pub_status=pub_status).save()
-        elif RecordOfStatic.objects.get(record_id=record_id).pub_status == 0:  # RecordOfStatic Exist， pub_status = 0
-            record_line_info = RecordOfStatic.objects.get(record_id=record_id)
-            record_line_info.pub_status = pub_status
-            record_line_info.save()
-        return {"Error": self.have_error, "status": self.success_status, "backup_ver": self._backup_ver,
-                "backed_up_dir": self.shouldbackdir, "pub_ignore_new": self.ignore_new, "add_file": self.newfile,
-                "add_dir": self.newdir, "update_file_list": self.unzipfilelist, }
+        self._records_instance.backuplist = ', '.join(self.shouldbackdir)
+        self._records_instance.newdir = ', '.join(self.newdir)
+        self._records_instance.newfile = ', '.join(self.newfile)
+        self._records_instance.ignore_new = self.ignore_new
+        if self.have_error:
+            self._records_instance.pub_status = -1  # 修改发布状态
+            self._records_instance.save()
+            self._fileupload_instace.status = -1  # 修改发布状态
+            self._fileupload_instace.save()
+        else:
+            self._records_instance.pub_status = 2  # 修改发布状态
+            self._records_instance.save()
+            self._fileupload_instace.status = 2  # 修改发布状态
+            self._fileupload_instace.save()
+
+        # return {"Error": self.have_error, "status": self.success_status, "backup_ver": self._backup_ver,
+        #         "backed_up_dir": self.shouldbackdir, "pub_ignore_new": self.ignore_new, "add_file": self.newfile,
+        #         "add_dir": self.newdir, "update_file_list": self.unzipfilelist, }
 
     def test_run(self):
-        _lockkey = '{}_{}_0_lock'.format(self._pjtname, self._items, )
-        self.redis_cli.hmset(_lockkey, {'lock_task': 'test_run_task_id'})
+        self.redis_cli.hmset(self._lockkey, {'lock_task': self.record_id, 'starttime': self._operatingtime,
+                                             'pub_user': self._records_instance.pub_user,
+                                             'pub_current_status': 'Start pub...',
+                                             })
+        self._records_instance.pub_status = 1  # 修改发布状态
+        self._records_instance.save()
+        self._fileupload_instace.status = 1  # 修改发布状态
+        self._fileupload_instace.save()
         print('start_run')
         import time
-        time.sleep(25)
-        self.redis_cli.delete(_lockkey)
+        time.sleep(3)
+        self.redis_cli.hmset(self._lockkey, {'pub_current_status': 'hahah1'})
+        print('debug test_run', 'hahah1')
+        time.sleep(3)
+        self.redis_cli.hmset(self._lockkey, {'pub_current_status': 'hahah222222222'})
+        print('debug test_run', 'hahah2')
+        time.sleep(3)
+        self.redis_cli.hmset(self._lockkey, {'pub_current_status': 'hahah3333333333333333333'})
+        print('debug test_run', 'hahah3333333333333333333')
+        self._records_instance.backuplist = ', '.join(self.shouldbackdir)
+        self._records_instance.newdir = ', '.join(self.newdir)
+        self._records_instance.newfile = ', '.join(self.newfile)
+        self._records_instance.pub_status = 2  # 修改发布状态
+        self._records_instance.save()
+        self._fileupload_instace.status = 2  # 修改发布状态
+        print('================, change fileupload_instace.status = 2 ', self._fileupload_instace.pk    )
+        self._fileupload_instace.save()
+        self.redis_cli.delete(self._lockkey)
         self.cleantmp()
         print('end_test run ')
 
