@@ -1,14 +1,13 @@
 import os
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-# from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 import threading
+import time
 from datetime import datetime, date, timedelta
-from django_redis import get_redis_connection
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import HttpResponse
 from django_redis import get_redis_connection
 from fileupload.models import Fileupload
 from frontitems.models import RecordOfStatic
@@ -27,7 +26,7 @@ def list(request):
 
 @login_required
 def list_detail(request, pk):
-    """指定pk 文件详情, Get参数filemd5 为1: 显示更新文件MD5 信息，"""
+    """指定pk 文件详情, Get参数 ?filemd5=1: 显示更新文件MD5 信息，"""
     pub_file = get_object_or_404(Fileupload, pk=pk)
     pjt_info = get_object_or_404(ProjectInfo, items=pub_file.app, platform=pub_file.platform,  # 唯一任务值
                                  type=pub_file.type)
@@ -60,17 +59,17 @@ def list_detail(request, pk):
     # pub_lock 发布锁状态获取
     redis_for_detail_cli = get_redis_connection("default")
     pub_lock_key = '{0}_{1}_{2}_{3}'.format(pjt_info.platform, pjt_info.items, '0', 'lock')
-    if redis_for_detail_cli.exists(pub_lock_key):   # 发布占用锁定状态,
+    if redis_for_detail_cli.exists(pub_lock_key):  # 发布占用锁定状态,
         pub_lock = {'lock': True, 'pubtask': redis_for_detail_cli.hget(pub_lock_key, 'lock_task').decode(),
                     'pub_current_status': redis_for_detail_cli.hget(pub_lock_key, 'pub_current_status').decode(),
                     'starttime': redis_for_detail_cli.hget(pub_lock_key, 'starttime').decode(),
                     'pub_user': redis_for_detail_cli.hget(pub_lock_key, 'pub_user').decode(),
                     }
 
-    elif pub_file.status != 0:      # 锁定状态
-        pub_lock = {'lock': True, 'pubtask': None, 'pub_current_status':None, 'starttime':None, 'pub_user': None, }
+    elif pub_file.status != 0:  # 锁定状态
+        pub_lock = {'lock': True, 'pubtask': None, 'pub_current_status': None, 'starttime': None, 'pub_user': None, }
     else:
-        pub_lock = {'lock': False, 'pubtask': None, 'pub_current_status':None, 'starttime':None, 'pub_user': None, }
+        pub_lock = {'lock': False, 'pubtask': None, 'pub_current_status': None, 'starttime': None, 'pub_user': None, }
     filemd5 = {'show': show, 'MD5': MD5}
     context = {'uploadfile_detail': uploadfile_detail,
                'pub_lock': pub_lock,
@@ -98,7 +97,7 @@ def pub(request, pk):
                        pub_status=0  # 初始状态
                        ).save()
 
-    if redis_for_pub_cli.exists(pub_lock_key):  # 发布锁定状态
+    if redis_for_pub_cli.exists(pub_lock_key):  # 发布锁定状态，返回占用提示
         lock_task = redis_for_pub_cli.hget(pub_lock_key, 'lock_task').decode()
         messages.error(request,
                        '当前{0}-{1}发布通道被占用，请稍后重试'.format(pjt_info.platform, pjt_info.items, ),
@@ -121,22 +120,51 @@ def pub(request, pk):
                                    pub_record,
                                    tmpdir='media',  # 解压临时文件，跟进环境调整
                                    )
-    # threading_task = threading.Thread(target=pub_task.pip_run, )  # 正式使用
-    threading_task = threading.Thread(target=pub_task.test_run, )  # windows 开发过程调试
+    threading_task = threading.Thread(target=pub_task.pip_run, )  # 正式使用
+    # threading_task = threading.Thread(target=pub_task.test_run, )  # windows 开发过程调试
     threading_task.start()
-    print('xxxxxxxxxxxx pub pk',pk , pub_file.pk)
-    redis_detail = {'lock_task': redis_for_pub_cli.hget(pub_lock_key, 'lock_task').decode(),
-                    'pub_current_status': redis_for_pub_cli.hget(pub_lock_key, 'pub_current_status').decode(),
-                    'starttime': redis_for_pub_cli.hget(pub_lock_key, 'starttime').decode(),
-                    'pub_user': redis_for_pub_cli.hget(pub_lock_key, 'pub_user').decode(),
-                    }
-    context = {'pub_file': pub_file, 'pub_record': pub_record, 'redis_detail': redis_detail}
-    return render(request, 'frontitems/pub_detail.html', context)
+    # time.sleep(0.01)  # sleep while wait for insert key to redis
+    return redirect(reverse('frontitems:pub_detail', args=[pk, ]))
 
 
 @login_required
 def pubresult(request, pk):
-    pass
+    redis_for_pub_cli = get_redis_connection("default")
+    pub_file = get_object_or_404(Fileupload, pk=pk)
+    pjt_info = get_object_or_404(ProjectInfo, items=pub_file.app, platform=pub_file.platform,
+                                 type=pub_file.type)
+    pub_lock_key = '{0}_{1}_{2}_{3}'.format(pjt_info.platform, pjt_info.items, '0', 'lock')  # 发布任务锁
+    record_id = '{0}_{1}_{2}_{3}'.format(pjt_info.platform, pjt_info.items, '0', pk)  # 唯一任务值
+    try:
+        redis_detail = {'lock_task': redis_for_pub_cli.hget(pub_lock_key, 'lock_task').decode(),
+                        'pub_current_status': redis_for_pub_cli.hget(pub_lock_key, 'pub_current_status').decode(),
+                        'starttime': redis_for_pub_cli.hget(pub_lock_key, 'starttime').decode(),
+                        'pub_user': redis_for_pub_cli.hget(pub_lock_key, 'pub_user').decode(),
+                        'error_detail': None
+                        }
+        pub_record = RecordOfStatic.objects.get(record_id=record_id, )
+    except AttributeError:
+        print('Info Function pubresult, Try get redis task lock value get None ')
+        redis_detail = {'lock_task': None,
+                        'pub_current_status': None,
+                        'starttime': None,
+                        'pub_user': None,
+                        }
+        pub_record = RecordOfStatic.objects.get(record_id=record_id, )  # 捕获redis lock 状态后再读取 Records 表内容
+        if pub_record.pub_status == -1:
+            redis_detail = {'error_detail': redis_for_pub_cli.hget(pub_lock_key, 'error_detail').decode(), }
+
+        elif pub_record.pub_status == 1:
+            redis_detail = {'error_detail': '未成功捕获异常，请联系dendi<dendi@networkws.com> 排查', }
+    if pub_record.pub_status == 0:
+        messages.error(request,
+                       '该任务未进行发布操作！', 'alert-danger')
+        static_uploadfile_list = Fileupload.objects.filter(type=0)
+        return render(request, 'frontitems/list.html', {'static_uploadfile_list': static_uploadfile_list})  # 返回默认发布页面
+
+    context = {'pub_file': pub_file, 'pub_record': pub_record, 'redis_detail': redis_detail}
+    return render(request, 'frontitems/pub_detail.html', context)
+
 
 
 # @login_required

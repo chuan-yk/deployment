@@ -123,9 +123,6 @@
                                                         {% ifequal uploadfile_detail.status -1 %}
                                                             <td class="text-center">发布失败</td>
                                                         {% endifequal %}
-                                                        {% ifequal uploadfile_detail.status 1 %}
-                                                            <td class="text-center">发布中</td>
-                                                        {% endifequal %}
                                                         {% ifequal uploadfile_detail.status 2 %}
                                                             <td class="text-center">发布成功</td>
                                                             </tr>
@@ -142,7 +139,7 @@
                                                         <td class="text-center">当前发布内容:</td>
                                                         <td><a href="{% url 'frontitems:pub_detail' uploadfile_detail.id %}"
                                                                class="btn  btn-info btn-rounded ">
-                                                            任务 {{ pub_lock.pubtask }}</td>
+                                                            任务-{{ pub_lock.pubtask }}</td>
                                                         <td class="text-right">状态:</td>
                                                         {% ifequal uploadfile_detail.status 1 %}
                                                             <td class="text-center">发布中</td>

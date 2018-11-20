@@ -288,6 +288,8 @@ class RemoteReplaceWorker(object):
             self._records_instance.save()
             self._fileupload_instace.status = -1  # 修改发布状态
             self._fileupload_instace.save()
+            self.redis_cli.hmset(self.record_id, {'error_detail': self.success_status})
+            self.redis_cli.expire(self.record_id, 60 * 60 * 24 * 14)
         else:
             self._records_instance.pub_status = 2  # 修改发布状态
             self._records_instance.save()
@@ -327,6 +329,8 @@ class RemoteReplaceWorker(object):
         print('================, change fileupload_instace.status = 2 ', self._fileupload_instace.pk    )
         self._fileupload_instace.save()
         self.redis_cli.delete(self._lockkey)
+        # self.redis_cli.hmset(self.record_id, {'error_detail': self.success_status})   # redis: record_id: error_detail
+        # self.redis_cli.expire(self.record_id, 60 * 60 * 24 * 14)
         self.cleantmp()
         print('end_test run ')
 
