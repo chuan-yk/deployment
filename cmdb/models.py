@@ -2,7 +2,7 @@ from django.db import models
 import paramiko
 
 key = "sshkey\\id_rsa"
-#key = "~/.ssh/id_rsa"
+#key = "/root/.ssh/id_rsa"
 # pkey=paramiko.RSAKey.from_private_key_file(key,password='******')
 pkey = paramiko.RSAKey.from_private_key_file(key)
 
