@@ -199,6 +199,7 @@ def pubreturn(request, pk):
         return redirect(reverse('frontitems:pub_detail', args=[pk, ]))  # 返回详情页面 错误信息
     RecordOfStatic.objects.filter(pk=pub_record.pk).update(return_user=request.user.username)  # 更新 return_user
     pub_record.pub_status = 4                                      # 更改状态为发布中
+    Fileupload.objects.filter(pk=pub_file.pk).update(status=1)
     pub_record.save()
     pub_record.refresh_from_db()
     threading_task = threading.Thread(target=pub_task.rollback, )  # 另起线程调用， 异步执行
