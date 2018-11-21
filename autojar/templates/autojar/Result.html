@@ -1,18 +1,59 @@
-{% if Resultstdout %}
-    <div class="line ">
-        发布详情
-    </div>
-    {% for variable in Resultstdout %}
-        <p> {{ variable }} </p>
-    {% endfor %}
-{% endif %}
+{% extends 'layout.html' %}
+{% load widget_tweaks %}
+{% block title %} Jar包发布详情 {% endblock %}
 
-{% if Resultstderr %}
-    <div class="line">
-        错误信息
-    </div>
+{% block body %}
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
 
-    {% for variable in Resultstderr %}
-        <p> {{ variable }} </p>
-    {% endfor %}
-{% endif %}
+        p {
+            width: 100%;
+            padding: 5px 10px;
+            font-size: 15px;
+            color: #000000;
+        }
+
+        p:nth-child(2n) {
+            background: #eeeeee;
+        }
+
+        .line {
+            width: 100%;
+            height: 50px;
+            line-height: 50px;
+            color: red;
+            border-bottom: 1px solid #888888;
+            text-align: left;
+            font-size: 24px;
+            padding-left: 10px;
+            margin-bottom: 5px;
+        }
+    </style>
+    <section>
+        <div class="section-body">
+            <div class="row">
+                {% if Resultstdout %}
+                    <div class="line ">
+                        发布详情
+                    </div>
+                    {% for variable in Resultstdout %}
+                        <p> {{ variable }} </p>
+                    {% endfor %}
+                {% endif %}
+
+                {% if Resultstderr %}
+                    <div class="line">
+                        错误信息
+                    </div>
+
+                    {% for variable in Resultstderr %}
+                        <p> {{ variable }} </p>
+                    {% endfor %}
+                {% endif %}
+            </div><!--end .row -->
+        </div><!--end .section-body -->
+    </section>
+{% endblock %}
