@@ -42,7 +42,6 @@ def RunEnter(request):
          add_key = ("{pt}:{app}:{type}_{id}"
                  .format(pt=fileobj.platform, app=fileobj.app, type=fileobj.type, id=id))
 
-         redis_lock = redisObj.get(add_key)
 
          if redisObj.exists(add_key):
             messages.error(request, '任务已经进入发布状态，请勿重新操作！', 'alert-danger')
@@ -53,20 +52,21 @@ def RunEnter(request):
          messages.error(request, '无效的请求方法！', 'alert-danger')
          return redirect('/autojar/deploy_list/')
      if obj.type == 1:
-         print(obj.type)
+
          objdepy = DeploySet(obj.platform, obj.app, obj.name, obj.type)
 
      elif obj.type == 2:
-        print(obj.type)
+
         objdepy = DeploySet(obj.platform, obj.app, obj.name, obj.type)
 
 
      elif obj.type == 3:
-        print(obj.type)
         objdepy = DeploySet(obj.platform, obj.app, obj.name, obj.type)
         result = objdepy.jar()
-        print(result)
-
+        if len(result['Resultstderr']) != 0:
+            Fileupload.objects.filter(id=id).update(status=-1)
+            messages.error(request, '发布失败！', 'alert-danger')
+            return render(request, 'autojar/Result.html', result)
      Fileupload.objects.filter(id=id).update(status=2)
      return render(request,'autojar/Result.html',result)
 
