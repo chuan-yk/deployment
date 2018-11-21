@@ -158,26 +158,26 @@
                                             <tr>
                                                 <td class="text-center">开发者功能描述:</td>
                                                 <td>  {{ pub_file.description }}   </td>
-                                                {% ifequal pub_record.status 2 %}
+                                                {% ifequal pub_record.pub_status 2 %}
                                                     <td class="text-right">回滚选项</td>
                                                     <td class="text-center"><a
                                                             href="{% url 'frontitems:pub_return' pub_file.id %}"
                                                             class="btn  btn-danger  ">
                                                         回滚</a></td>
                                                 {% endifequal %}
-                                                {% ifequal pub_record.status 4 %}
+                                                {% ifequal pub_record.pub_status 4 %}
                                                     <td class="text-right">回滚状态</td>
                                                     <td class="text-center"><a
                                                             href="#"
                                                             class="btn  btn-danger  ">
                                                         回滚中</a></td>
                                                 {% endifequal %}
-                                                {% ifequal pub_record.status 5 %}
+                                                {% ifequal pub_record.pub_status 5 %}
                                                     <td class="text-right">回滚状态</td>
                                                     <td class="text-center"><a
                                                             href="#"
                                                             class="btn  btn-danger  ">
-                                                        回滚回滚完成</a></td>
+                                                        回滚完成</a></td>
                                                 {% endifequal %}
                                             </tr>
                                             <tr>
