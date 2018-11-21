@@ -131,7 +131,7 @@ class RemoteReplaceWorker(object):
                            pub_status=pub_status).save()
         elif RecordOfStatic.objects.get(
                 record_id=self.record_id).pub_status == 0:  # RecordOfStatic Exist， pub_status = 0
-            RecordOfStatic.objects.get(pk=self._records_instance.pk).update(pub_status=pub_status)      # 发布状态更改为3
+            RecordOfStatic.objects.filter(pk=self._records_instance.pk).update(pub_status=pub_status)      # 发布状态更改为3
         self.cleantmp()
         return self.md5dict
 
@@ -269,13 +269,14 @@ class RemoteReplaceWorker(object):
                 if stderr_txt3 != '':
                     raise IOError(stderr_txt3)
                 self.ssh.exec_command("mv {}/* {}".format(os.path.join(self._dstdir, tdir), roll_back_dir_add))
-                self.ssh.exec_command("mv {} {}".format(os.path.join(self._backup_ver, tdir),
+                self.ssh.exec_command("mv {}/* {}".format(os.path.join(self._backup_ver, tdir),
                                                       os.path.join(self._dstdir, tdir)))
             if not onpub:   # 直接调用回滚操作
                 self.redis_cli.delete(self._lockkey)  # 回滚完成，释放发布lock
-                RecordOfStatic.objects.filter(pk=self._records_instance.pk).update(backuplist='', pub_status=4, )
+                RecordOfStatic.objects.filter(pk=self._records_instance.pk).update(backuplist='', pub_status=5, )
                 Fileupload.objects.filter(type=self._fileupload_instace.type,
                                           pk__gte=self._fileupload_instace.pk).update(status=0)     # 更改回滚影响文件的发布状态
+
         except IOError as e3:
             print("Unknown Exception as:", e3)
             print('Debug there, rollback dir {}'.format(roll_back_dir))

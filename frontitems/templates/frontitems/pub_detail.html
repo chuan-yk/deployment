@@ -17,8 +17,17 @@
                     {% ifequal pub_record.pub_status  2 %}
                         <li class="active">当前任务发布完成</li>
                     {% endifequal %}
-                    {% ifequal pub_record.pub_status  -2 %}
+                    {% ifequal pub_record.pub_status  -1 %}
                         <li class="active">该更新包发布失败，详情如下</li>
+                    {% endifequal %}
+                    {% ifequal pub_record.pub_status  -2 %}
+                        <li class="active">该更新包回滚失败，详情如下</li>
+                    {% endifequal %}
+                    {% ifequal pub_record.pub_status  4 %}
+                        <li class="active">更新内容回滚中</li>
+                    {% endifequal %}
+                    {% ifequal pub_record.pub_status  5 %}
+                        <li class="active">回滚完成</li>
                     {% endifequal %}
                 </ol>
             </div>
@@ -40,8 +49,16 @@
                                         {% ifequal pub_record.pub_status  2 %}
                                             <h1 class="text-light text-default-light">发布完成</h1>
                                         {% endifequal %}
-                                        {% ifequal pub_record.pub_status  -2 %}
+                                        {% ifequal pub_record.pub_status  -1 %}
                                             <h1 class="text-light text-default-light">发布失败</h1>
+                                        {% endifequal %}
+                                    {% ifequal pub_record.pub_status  -2 %}
+                                            <h1 class="text-light text-default-light">回滚失败</h1>
+                                        {% endifequal %}{% ifequal pub_record.pub_status  4 %}
+                                            <h1 class="text-light text-default-light">回滚进行中</h1>
+                                        {% endifequal %}
+                                    {% ifequal pub_record.pub_status  5 %}
+                                            <h1 class="text-light text-default-light">回滚完成</h1>
                                         {% endifequal %}
                                     </div>
                                 </div><!--end .row -->
@@ -85,6 +102,22 @@
                                                     <th>{{ redis_detail.error_detail }}</th>
                                                 </tr>
                                             {% endifequal %}
+                                        {% ifequal  pub_record.pub_status -2 %}
+                                                <tr>
+                                                    <th class="text-center">当前进度</th>
+                                                    <th>回滚失败</th>
+                                                    <th class="text-center">失败原因</th>
+                                                    <th>{{ redis_detail.error_detail }}</th>
+                                                </tr>
+                                            {% endifequal %}
+                                        {% ifequal  pub_record.pub_status 5 %}
+                                                <tr>
+                                                    <th class="text-center">当前进度</th>
+                                                    <th>回滚完成</th>
+                                                    <th class="text-center">回滚用户</th>
+                                                    <th>{{ pub_record.return_user }}</th>
+                                                </tr>
+                                            {% endifequal %}
                                             <tr>
                                                 <th style="width:150px" class="text-center">发布时间:</th>
                                                 <th class="text-left">{{ pub_file.create_date }}</th>
@@ -125,12 +158,26 @@
                                             <tr>
                                                 <td class="text-center">开发者功能描述:</td>
                                                 <td>  {{ pub_file.description }}   </td>
-                                                {% ifequal pub_file.status 2 %}
+                                                {% ifequal pub_record.status 2 %}
                                                     <td class="text-right">回滚选项</td>
                                                     <td class="text-center"><a
                                                             href="{% url 'frontitems:pub_return' pub_file.id %}"
                                                             class="btn  btn-danger  ">
                                                         回滚</a></td>
+                                                {% endifequal %}
+                                                {% ifequal pub_record.status 4 %}
+                                                    <td class="text-right">回滚状态</td>
+                                                    <td class="text-center"><a
+                                                            href="#"
+                                                            class="btn  btn-danger  ">
+                                                        回滚中</a></td>
+                                                {% endifequal %}
+                                                {% ifequal pub_record.status 5 %}
+                                                    <td class="text-right">回滚状态</td>
+                                                    <td class="text-center"><a
+                                                            href="#"
+                                                            class="btn  btn-danger  ">
+                                                        回滚回滚完成</a></td>
                                                 {% endifequal %}
                                             </tr>
                                             <tr>
