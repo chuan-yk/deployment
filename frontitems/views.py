@@ -20,7 +20,7 @@ def list(request):
     """静态文件全部内容列表
        Fileupload: 0 为静态文件
     """
-    static_uploadfile_list = Fileupload.objects.filter(type=0)
+    static_uploadfile_list = Fileupload.objects.filter(type=0).order_by('-id', '-create_date')
     return render(request, 'frontitems/list.html', {'static_uploadfile_list': static_uploadfile_list})
 
 
@@ -109,10 +109,8 @@ def pub(request, pk):
         return render(request, 'frontitems/list.html', {'static_uploadfile_list': static_uploadfile_list})  # 返回默认发布页面
 
     pub_record = RecordOfStatic.objects.get(record_id=record_id, )
-    pub_record.pub_user = request.user.username  # 更新Records 表 pub_user 字段
-    pub_record.save()
-    pub_file.pubuser = request.user.username  # 更新fileupload 表 pubuser 字段
-    pub_file.save()
+    RecordOfStatic.objects.filter(pk=pub_record.pk).update(pub_user=request.user.username)  # 更新Records 表 pub_user 字段
+    Fileupload.objects.filter(pk=pub_file.pk).update(pubuser=request.user.username)  # 更新fileupload 表 pubuser 字段
 
     pub_task = RemoteReplaceWorker(pjt_info.ipaddress,
                                    pub_file,
@@ -152,7 +150,7 @@ def pubresult(request, pk):
                         }
         pub_record = RecordOfStatic.objects.get(record_id=record_id, )  # 捕获redis lock 状态后再读取 Records 表内容
         if pub_record.pub_status == -1:
-            redis_detail = {'error_detail': redis_for_pub_cli.hget(pub_lock_key, 'error_detail').decode(), }
+            redis_detail = {'error_detail': redis_for_pub_cli.hget(record_id, 'error_detail').decode(), }
 
         elif pub_record.pub_status == 1:
             redis_detail = {'error_detail': '未成功捕获异常，请联系dendi<dendi@networkws.com> 排查', }
@@ -161,109 +159,41 @@ def pubresult(request, pk):
                        '该任务未进行发布操作！', 'alert-danger')
         static_uploadfile_list = Fileupload.objects.filter(type=0)
         return render(request, 'frontitems/list.html', {'static_uploadfile_list': static_uploadfile_list})  # 返回默认发布页面
-
-    context = {'pub_file': pub_file, 'pub_record': pub_record, 'redis_detail': redis_detail}
+    newfilelist = pub_record.newfile.split(',')
+    newdirlist = pub_record.newdir.split(',')
+    context = {'pub_file': pub_file, 'pub_record': pub_record, 'redis_detail': redis_detail, 'newfilelist': newfilelist,
+               'newdirlist': newdirlist}
     return render(request, 'frontitems/pub_detail.html', context)
 
 
+def pubreturn(request, pk):
+    pub_file = get_object_or_404(Fileupload, pk=pk)
+    pjt_info = get_object_or_404(ProjectInfo, items=pub_file.app, platform=pub_file.platform,
+                                 type=pub_file.type)
 
-# @login_required
-# def run_tasker(task_projectinfo, inputfiledir):
-#     tasker = RemoteReplaceWorker(serverinfo_instance='==',
-#                                  dstdir=task_projectinfo.static_dir,
-#                                  fromfile=os.path.join(inputfiledir, myFile.name),
-#                                  platfrom=task_projectinfo.project,
-#                                  items=task_projectinfo.items,
-#                                  backupdir=task_projectinfo.backup_file_dir, )
-#     import time
-#     time.sleep(10)
-#     # tasker.ignore_newfile_run()
-
-
-@login_required
-def upload(request):  # 原一键发布入口，弃用
-    project_cn_set = set()
-    platformlist = {}
-    items = []
-    for project_cn in ProjectInfo.objects.values_list('project_cn'):
-        project_cn_set.add(project_cn[0])
-    for pjt_cn in project_cn_set:
-        platformlist['{}'.format(pjt_cn)] = ProjectInfo.objects.filter(project_cn=pjt_cn)[0].project
-        continue
-    for i in set(ProjectInfo.objects.values_list('items')):
-        items.append(i[0])
-    platformlist = sorted(platformlist.items(), key=lambda obj: obj[1], reverse=True)
-    items.sort()
-    # platformlist = {'摩臣':"mc", '摩臣2':"mc2", '摩登':"md"}
-    # items = ['sobet', 'lottery', 'lottery_m', 'sport']
-    context = {'platformlist': platformlist, 'items': items, }
-
-    if request.method == "POST":  # 请求方法为POST时，进行处理
-        try:
-            pst_platform = request.POST.get('id')
-            pst_item = request.POST.get('id2')
-            myFile = request.FILES.get("myfile", None)  # 获取上传的文件，如果没有文件，则默认为None
-            pst_filename = myFile.name
-            task_projectinfo = ProjectInfo.objects.get(project=pst_platform, items=pst_item)
-            if task_projectinfo.package_name != pst_filename:
-                raise FileNotFoundError('Upload file = {}  does not match {}'.format(pst_filename,
-                                                                                     task_projectinfo.package_name))
-            inputfiledir = os.path.join(task_projectinfo.file_save_base_dir,
-                                        datetime.now().strftime('%Y%m%d_%H%M%S'))  # linux run
-            # inputfiledir = 'D:\\static' # window debug
-            # os.makedirs(inputfiledir)
-            fromfile = open(os.path.join(inputfiledir, myFile.name), 'wb+')
-            for chunk in myFile.chunks():  # 分块写入文件
-                fromfile.write(chunk)
-            fromfile.close()
-
-            # task = threading.Thread(target=run_tasker, args=(task_projectinfo, inputfiledir))
-            # task.start()
-            messages.success(request, '发布成功！', 'alert-success')
-            # if tasker.coversuccess:
-            # print('===-======debug  2')
-            # coversuccess = True
-            # if coversuccess:    #tasker.coversuccess:
-            #     messages.success(request, '发布成功！', 'alert-success')
-            #     print('===-======debug  3')
-            #     RecordOfStatic.objects.filter(items=task_projectinfo).update(isthis_current=False)
-            #     record_task = task_projectinfo.recordofstatic_set.create(pub_time=timezone.now(),
-            #                                                              deployment_user=request.user.username,
-            #                                                              isthis_current=True, return_user='',
-            #                                                              upload_file=os.path.join(inputfiledir, myFile.name),
-            #                                                              backuplist=', '.join(tasker.backupdir),
-            #                                                              newdir=', '.join(tasker.newdirlist),
-            #                                                              newfile=', '.join(tasker.newfilelist),
-            #                                                              ignore_new=True, )
-            #     print('===-======debug  4')
-            # else:
-            #     messages.error(request, "发布失败，失败原因详见下文", 'alert-danger')
-            #     context['task_error'] = 'tasker.errormessage'
-            # newfile_len = 1
-            # newdir_len = 2
-            # if newfile_len > 0 or newdir_len > 0:
-            #     messages.warning(request, "默认新增文件不跟新，请联系运维或项目主管审核后更新", 'alert-danger' )
-            #     context['newfiles'] = ['static/new/1.txt', '/static/new/mew.image.png'] #'tasker.newfilelist  '
-            #     context['newdirs'] = ['static/newimage', 'static/download/']#'tasker.newdirlist'
-        except AttributeError as e:  # myFile.name
-            messages.error(request, '请选择更新文件', 'alert-danger')
-        except FileNotFoundError as e:
-            messages.error(request, '上传文件不正确\n{}'.format(str(e)), 'alert-danger')
-        except ObjectDoesNotExist as e:
-            messages.error(request, '请选择正确的平台-项目对应关系\n{}'.format(str(e)), 'alert-danger')
-            print(e)
-        except Exception as e:
-            print(e)
-            messages.error(request, '未知错误： ' + str(e), 'alert-danger')
-        finally:
-            return render(request, 'frontitems/upload.html', context)
-            # return redirect(reverse(upload))
-            pass
-
-    elif request.method == 'GET':
-        # if request.user.is_authenticated():
-        #     #print(request.user.username, '====')
-        #     pass
-        # return HttpResponse(template.render(context, request))
-        context = {'platformlist': platformlist, 'items': items, }
-        return render(request, 'frontitems/upload.html', context)
+    record_id = '{0}_{1}_{2}_{3}'.format(pjt_info.platform, pjt_info.items, '0', pk)  # 唯一任务值
+    pub_record = get_object_or_404(RecordOfStatic, record_id=record_id, )
+    if pub_record.pub_status != 2 or len(pub_record.backuplist) == 0 or len(pub_record.backupsavedir) == 0:
+        messages.error(request,
+                       '当前版本发布内容非发布完成状态，请选择正确的回滚版本',
+                       'alert-danger')
+        return redirect(reverse('frontitems:file_detail', args=[pk, ]))
+    RecordOfStatic.objects.filter(pk=pub_record.pk).update(return_user=request.user.username)   # 更新 return_user
+    shouldbackdir = set([i.strip() for i in pub_record.backuplist.split(',')])
+    backup_ver = pub_record.backupsavedir
+    pub_task = RemoteReplaceWorker(pjt_info.ipaddress,
+                                   pub_file,
+                                   pjt_info,
+                                   pub_record,
+                                   shouldbackdir=shouldbackdir,
+                                   backup_ver=backup_ver,
+                                   tmpdir='media',  # 解压临时文件，跟进环境调整
+                                   )
+    if not pub_task.checkbackdir():
+        messages.error(request,
+                       '当前版本备份文件不完整，无法回滚',
+                       'alert-danger')
+        return redirect(reverse('frontitems:pub_detail', args=[pk, ]))  # 返回详情页面 错误信息
+    threading_task = threading.Thread(target=pub_task.rollback, )  # 正式使用
+    threading_task.start()
+    return redirect(reverse('frontitems:pub_detail', args=[pk, ]))

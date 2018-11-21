@@ -27,7 +27,7 @@ class Fileupload(models.Model):
     bug_id = models.IntegerField(default='0')
     description= models.CharField(max_length=500, blank=True)
     user = models.CharField(max_length=100, blank=True, null=True)
-    status = models.IntegerField(default=0, blank=True, help_text='-1 发布失败 0 未发布 1 正在发布 2 发布完成')
+    status = models.IntegerField(default=0, blank=True, help_text='-1 发布失败 0 未发布 1 正在发布 2 发布完成 ')
     create_date = models.DateTimeField(auto_now=True)
     slug = models.SlugField(max_length=50, blank=True)
     pubuser = models.CharField(max_length=100, default=None, null=True)

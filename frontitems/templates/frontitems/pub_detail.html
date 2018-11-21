@@ -55,6 +55,36 @@
                                     <div class="col-md-12">
                                         <table class="table">
                                             {#                                            <thead>#}
+                                            {% ifequal pub_record.pub_status 1 %}
+                                                <tr>
+                                                    <th class="text-center">当前进度:</th>
+                                                    <th>{{ redis_detail.pub_current_status }}</th>
+                                                    <th class="text-right">发布者:</th>
+                                                    <th>{{ redis_detail.pub_user }}</th>
+                                                </tr>
+                                                <tr>
+                                                    <th class="text-center">发布开始时间:</th>
+                                                    <th>{{ redis_detail.starttime }}</th>
+                                                    <th class="text-center"></th>
+                                                    <th></th>
+                                                </tr>
+                                            {% endifequal %}
+                                            {% ifequal  pub_record.pub_status 2 %}
+                                                <tr>
+                                                    <th class="text-center">当前进度</th>
+                                                    <th>发布完成</th>
+                                                    <th class="text-right">完成时间</th>
+                                                    <th>{{ pub_record.pub_time }}</th>
+                                                </tr>
+                                            {% endifequal %}
+                                            {% ifequal  pub_record.pub_status -1 %}
+                                                <tr>
+                                                    <th class="text-center">当前进度</th>
+                                                    <th>发布失败</th>
+                                                    <th class="text-center">失败原因</th>
+                                                    <th>{{ redis_detail.error_detail }}</th>
+                                                </tr>
+                                            {% endifequal %}
                                             <tr>
                                                 <th style="width:150px" class="text-center">发布时间:</th>
                                                 <th class="text-left">{{ pub_file.create_date }}</th>
@@ -95,8 +125,13 @@
                                             <tr>
                                                 <td class="text-center">开发者功能描述:</td>
                                                 <td>  {{ pub_file.description }}   </td>
-                                                <td class="text-right"></td>
-                                                <td class="text-center"></td>
+                                                {% ifequal pub_file.status 2 %}
+                                                    <td class="text-right">回滚选项</td>
+                                                    <td class="text-center"><a
+                                                            href="{% url 'frontitems:pub_return' pub_file.id %}"
+                                                            class="btn  btn-danger  ">
+                                                        回滚</a></td>
+                                                {% endifequal %}
                                             </tr>
                                             <tr>
                                                 <td class="text-center">文件MD5:</td>
@@ -108,36 +143,27 @@
                                                         查看发布文件详情列表</a>
                                                 </td>
                                             </tr>
-                                            {% ifequal pub_record.pub_status 1 %}
+                                            <tr>
+                                                <td>更新目录</td>
+                                                <td>{{ pub_record.backuplist }}</td>
+                                                <td>备份路径</td>
+                                                <td>{{ pub_record.backupsavedir }}</td>
+                                            </tr>
+                                            {% if newfilelist %}
                                                 <tr>
-                                                    <td>当前进度</td>
-                                                    <td>{{ redis_detail.pub_current_status }}</td>
-                                                    <td>发布者</td>
-                                                    <td>{{ redis_detail.pub_user }}</td>
+                                                    <td>新增文件夹</td>
+                                                    <td>{% for nd in newdirlist %}
+                                                        {{ nd }} <br>
+                                                    {% endfor %}
+                                                    </td>
+                                                    <td>新增文件</td>
+                                                    <td>{% for nf in newfilelist %}
+                                                        {{ nf }} <br>
+                                                    {% endfor %}
+                                                    </td>
                                                 </tr>
-                                                <tr>
-                                                    <td>发布开始时间</td>
-                                                    <td>{{ redis_detail.starttime }}</td>
-                                                    <td></td>
-                                                    <td></td>
-                                                </tr>
-                                            {% endifequal %}
-                                            {% ifequal  pub_record.pub_status 2 %}
-                                                <tr>
-                                                    <td>当前进度</td>
-                                                    <td>发布完成</td>
-                                                    <td>完成时间</td>
-                                                    <td>{{ pub_record.pub_time }}</td>
-                                                </tr>
-                                            {% endifequal %}
-                                            {% ifequal  pub_record.pub_status -1 %}
-                                                <tr>
-                                                    <td>当前进度</td>
-                                                    <td>发布失败</td>
-                                                    <td>失败原因</td>
-                                                    <td>{{ redis_detail.error_detail }}</td>
-                                                </tr>
-                                            {% endifequal %}
+
+                                            {% endif %}
 
 
                                             </tbody>

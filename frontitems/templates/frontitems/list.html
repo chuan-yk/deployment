@@ -46,16 +46,18 @@
                                             <td>{{ thisline.description }}</td>
                                             <td>{{ thisline.user }}</td>
                                             <td>
-                                                {{ thisline.pubuser | default_if_none:"未发布"  }}
+                                                {{ thisline.pubuser | default_if_none:"未发布" }}
                                             </td>
                                             {% ifequal thisline.status 0 %}
                                                 <td><span class="badge" style="background: #0aa89e">
                                                                  待发布
                                                             </span></td>
                                                 <td>
-                                                    <a href="{% url 'frontitems:do_pub' thisline.id %}" class="btn  btn-info btn-rounded">发布<i
+                                                    <a href="{% url 'frontitems:do_pub' thisline.id %}"
+                                                       class="btn  btn-info btn-rounded">发布<i
                                                             class="md glyphicon glyphicon-play"></i></a>
-                                                    <a href="{% url 'frontitems:file_detail' thisline.id %}" class="btn  btn-primary btn-rounded">详情<i
+                                                    <a href="{% url 'frontitems:file_detail' thisline.id %}"
+                                                       class="btn  btn-primary btn-rounded">详情<i
                                                             class="md glyphicon glyphicon-search"></i></a>
                                                     <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
                                                             class="md glyphicon glyphicon-remove"></i></a>
@@ -68,7 +70,8 @@
                                                 <td>
                                                     <a href="#" class="btn  btn-info btn-rounded disabled">发布<i
                                                             class="md glyphicon glyphicon-play"></i></a>
-                                                    <a href="{% url 'frontitems:pub_detail' thisline.id %}" class="btn  btn-primary btn-rounded">详情<i
+                                                    <a href="{% url 'frontitems:pub_detail' thisline.id %}"
+                                                       class="btn  btn-primary btn-rounded">详情<i
                                                             class="md glyphicon glyphicon-search"></i></a>
                                                     <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
                                                             class="md glyphicon glyphicon-remove"></i></a>
@@ -81,9 +84,11 @@
                                                 <td>
                                                     <a href="#" class="btn  btn-info btn-rounded disabled">发布<i
                                                             class="md glyphicon glyphicon-play"></i></a>
-                                                    <a href="{% url 'frontitems:pub_detail' thisline.id %}" class="btn  btn-primary btn-rounded">详情<i
+                                                    <a href="{% url 'frontitems:pub_detail' thisline.id %}"
+                                                       class="btn  btn-primary btn-rounded">详情<i
                                                             class="md glyphicon glyphicon-search"></i></a>
-                                                    <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                    <a href="{% url 'frontitems:pub_return' pub_file.id %}"
+                                                       class="btn  btn-danger btn-rounded disabled">回滚<i
                                                             class="md glyphicon glyphicon-remove"></i></a>
                                                 </td>
                                             {% endifequal %}
@@ -94,9 +99,11 @@
                                                 <td>
                                                     <a href="#" class="btn  btn-info btn-rounded disabled">发布<i
                                                             class="md glyphicon glyphicon-play"></i></a>
-                                                    <a href="{% url 'frontitems:pub_detail' thisline.id %}" class="btn  btn-primary btn-rounded">详情<i
+                                                    <a href="{% url 'frontitems:pub_detail' thisline.id %}"
+                                                       class="btn  btn-primary btn-rounded">详情<i
                                                             class="md glyphicon glyphicon-search"></i></a>
-                                                    <a href="{% url 'frontitems:pub_return' thisline.id %}" class="btn  btn-danger btn-rounded ">回滚<i
+                                                    <a href="{% url 'frontitems:pub_return' thisline.id %}"
+                                                       class="btn  btn-danger btn-rounded ">回滚<i
                                                             class="md glyphicon glyphicon-remove"></i></a>
                                                 </td>
                                             {% endifequal %}
