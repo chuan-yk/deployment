@@ -1,93 +1,76 @@
-import configparser,datetime
+
 from django.shortcuts import render, redirect
-from .remote_run import *
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from tempfile import NamedTemporaryFile
+from django.views.generic import CreateView, DeleteView, ListView
+from fileupload.models import Fileupload
+from django.http import HttpResponse
+from .deploy import DeploySet
+from django_redis import get_redis_connection
+
+
+class deploy_list(ListView):
+    model = Fileupload
+    template_name = 'autojar/deploy_list.html'
+    context_object_name = 'deploy_list'
+    paginate_by = 3
+    queryset = Fileupload.objects.filter(status=0,type__in=(1,2,3)).order_by('-create_date')
 
 
 
-hostConf = 'D:\\Projects\\deployment\\autojar\\host.conf'
-appConf = 'D:\\Projects\\deployment\\autojar\\apppath.conf'
-
-def prepareConfig(section, appname, filenames=hostConf):
-    configdata = configparser.ConfigParser()
-    configdata.read(filenames)
-    if appname == 'sobet':
-        Result = configdata.get(section, appname)
-    if appname == 'lottery':
-        Result = configdata.get(section, appname)
-    if appname == 'admin':
-        Result = configdata.get(section, appname)
-
-    return Result
-
-@login_required
-def upload_file(request):
-    upload_path = "D:\\Projects\\deployment\\autojar\static\\upload"
-    if request.method == "POST":
-        ptid = request.POST.get('plafrom')         #获取平台
-        appid = request.POST.get('appname')        #获取app项目
-        File = request.FILES.get("myfile", None)   # 获取上传的文件,如果没有文件,则默认为None;
-        action = request.POST.get('action')        #是否重启tomcat应用 0不重启,1重启
-        if File is None:
-            return redirect('autojar: jar_upload',messages.error(request,'没有选择文件!','alert-danger'))
-        else:
-            #with open(upload_path+File.name, 'wb+') as f:
-            with NamedTemporaryFile('wb+',delete=False,prefix=File.name,dir=upload_path) as f:
-                for chunk in File.chunks():         # 分块写入文件;
-                    f.write(chunk)
-                    f.close()
-            ResultdicExe = RunCommd(ptid,appid,File.name,f.name,action)
-            Resultdic = deldicNullkey(ResultdicExe)
-
-            if 'Resultstderr' in ResultdicExe.keys():
-                messages.error(request,'发布失败','alert-danger')
-                return render(request, 'autojar/upload.html', Resultdic)
-            messages.success(request, '发布成功！', 'alert-success')
-            return render(request, 'autojar/upload.html', Resultdic)
-
-                #return render(request, 'upload.html', Resultdict[0], Resultdict[1].success(request, '发布成功', 'alert-success'))
-                #return redirect('/deoply/jar', messages.error(request, '发布失败!', 'alert-danger'))
-    else:
-        return render(request, 'autojar/upload.html')
-
-def RunCommd(ptname,appname,Fname,fname,action=0):
-    datenow = datetime.datetime.now().strftime('%Y%m%d-%H%M')
-    t = SSHManager(prepareConfig(ptname, appname), 22)
-    t.ssh_connect()
-    url = 'http://127.0.0.1/'
-    path = '/tmp/' + os.path.split(fname)[1]
-
-    execResult = t.ssh_exec_cmd('''wget -T 3 -q {url}{tmpname1} -P /tmp/{tmpname};
-               cp -r {apppath}webapps/{appname} /back/{appname}_{date};
-               unzip -q /tmp/{tmpname}/{tmpname1} -d /tmp/{tmpname}/{name};
-                cd {expath};
-                jar -uvf {apppath}lib/{name}.jar {name}
-                '''.format(url=url, tmpname1='jstl.zip', tmpname=os.path.split(fname)[1],
-                name=os.path.splitext(Fname)[0], expath=path,appname=appname,date=datenow,
-                apppath=prepareConfig(ptname, appname,appConf)))
-
-    Resultdic = {'Title': '执行结果', 'Resultstdout': execResult[0][:-1].split('\n'),
-                 'Resultstderr': execResult[1][0:-1].split('\n')}
+def delfile(request):
+    if request.method == 'GET':
+        try:
+            ID = request.GET.get('id', default=0)
+            Fileupload.objects.filter(id=ID).delete()
+            messages.success(request, '删除成功！', 'alert-success')
+        except:
+            messages.error(request, '删除失败！', 'alert-danger')
+    return redirect('/autojar/deploy_list/')
 
 
-    if execResult[2] != 0:
-        return Resultdic
-    if action == '1':
-        print('restart')
-        result = t.ssh_exec_cmd('''
-        ps -ef|grep {apppath}conf|grep -v grep |grep -v tail|xargs kill -9;
-        {apppath}bin/startup.sh
-        '''.format(apppath=prepareConfig(ptname, appname,appConf)))
-        #print(result)
-    print(Resultdic)
-    return  Resultdic
 
 
-def deldicNullkey(dic):
-    for key,value in list(dic.items()):  #字典在遍历时无法变更,建议采用list和tuple后再操作
-        if len(dic[key]) <= 1:
-            del dic[key]
-    return dic
+def RunEnter(request):
+     if request.method == "GET":
+         id = request.GET.get('id')
+         obj =  Fileupload.objects.get(id=id)
+         fileobj = Fileupload.objects.get(id=id)
+         redisObj = get_redis_connection('default')
+         add_key = ("{pt}:{app}:{type}_{id}"
+                 .format(pt=fileobj.platform, app=fileobj.app, type=fileobj.type, id=id))
+
+         redis_lock = redisObj.get(add_key)
+
+         if redisObj.exists(add_key):
+            messages.error(request, '任务已经进入发布状态，请勿重新操作！', 'alert-danger')
+            return redirect('/autojar/deploy_list/')
+         else:
+             redisObj.set(add_key,id)
+     else:
+         messages.error(request, '无效的请求方法！', 'alert-danger')
+         return redirect('/autojar/deploy_list/')
+     if obj.type == 1:
+         print(obj.type)
+         objdepy = DeploySet(obj.platform, obj.app, obj.name, obj.type)
+
+     elif obj.type == 2:
+        print(obj.type)
+        objdepy = DeploySet(obj.platform, obj.app, obj.name, obj.type)
+
+
+     elif obj.type == 3:
+        print(obj.type)
+        objdepy = DeploySet(obj.platform, obj.app, obj.name, obj.type)
+        result = objdepy.jar()
+        print(result)
+
+     Fileupload.objects.filter(id=id).update(status=2)
+     return render(request,'autojar/Result.html',result)
+
+
+
+
 
