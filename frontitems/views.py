@@ -50,7 +50,10 @@ def list_detail(request, pk):
                                        tmpdir='media',
                                        )
         MD5 = pub_task.checkfiledetail()
-
+        try:
+            MD5.pop('error_detail')
+        except Exception as e:
+            pass
     else:
         show = False
         MD5 = {'None': None}
@@ -178,7 +181,7 @@ def pubreturn(request, pk):
                        '当前版本发布内容非发布完成状态，请选择正确的回滚版本',
                        'alert-danger')
         return redirect(reverse('frontitems:file_detail', args=[pk, ]))
-    RecordOfStatic.objects.filter(pk=pub_record.pk).update(return_user=request.user.username)   # 更新 return_user
+
     shouldbackdir = set([i.strip() for i in pub_record.backuplist.split(',')])
     backup_ver = pub_record.backupsavedir
     pub_task = RemoteReplaceWorker(pjt_info.ipaddress,
@@ -194,6 +197,10 @@ def pubreturn(request, pk):
                        '当前版本备份文件不完整，无法回滚',
                        'alert-danger')
         return redirect(reverse('frontitems:pub_detail', args=[pk, ]))  # 返回详情页面 错误信息
-    threading_task = threading.Thread(target=pub_task.rollback, )  # 正式使用
+    RecordOfStatic.objects.filter(pk=pub_record.pk).update(return_user=request.user.username)  # 更新 return_user
+    pub_record.pub_status = 4                                      # 更改状态为发布中
+    pub_record.save()
+    pub_record.refresh_from_db()
+    threading_task = threading.Thread(target=pub_task.rollback, )  # 另起线程调用， 异步执行
     threading_task.start()
     return redirect(reverse('frontitems:pub_detail', args=[pk, ]))

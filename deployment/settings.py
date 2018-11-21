@@ -25,7 +25,7 @@ SECRET_KEY = 'c17gt84+(g=ioojsdvrhiq&pg%)h10mb7i+6=zopnih24t#u39'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*',]
 
 # BROKER_URL = 'django://127.0.0.1:9000'
 
