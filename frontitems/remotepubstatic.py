@@ -271,6 +271,8 @@ class RemoteReplaceWorker(object):
                 self.ssh.exec_command("mv {}/* {}".format(os.path.join(self._dstdir, tdir), roll_back_dir_add))
                 self.ssh.exec_command("mv {}/* {}".format(os.path.join(self._backup_ver, tdir),
                                                       os.path.join(self._dstdir, tdir)))
+                print("debug Function rollback: mv {}/* {}".format(os.path.join(self._backup_ver, tdir),
+                                                      os.path.join(self._dstdir, tdir)))
             if not onpub:   # 直接调用回滚操作
                 self.redis_cli.delete(self._lockkey)  # 回滚完成，释放发布lock
                 RecordOfStatic.objects.filter(pk=self._records_instance.pk).update(backuplist='', pub_status=5, )
