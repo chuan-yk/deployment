@@ -196,7 +196,7 @@ def pubreturn(request, pk):
                                    )
     if not pub_task.checkbackdir():
         messages.error(request,
-                       '当前版本备份文件不完整，无法回滚',
+                       '当前版本备份文件不完整{}，无法回滚'.format(pub_record.backupsavedir),
                        'alert-danger')
         return redirect(reverse('frontitems:pub_detail', args=[pk, ]))  # 返回详情页面 错误信息
     RecordOfStatic.objects.filter(pk=pub_record.pk).update(return_user=request.user.username)  # 更新 return_user

@@ -186,7 +186,7 @@ class RemoteReplaceWorker(object):
         self.ssh = self._remote_server.get_sshclient()
         for i in self.shouldbackdir:
             if i in self.newdir:            # 新增文件跳过备份过程
-                print('new  dir  {} ignore back step ， continue...')
+                print('new  dir  {} ignore back step ， continue...'.format(i))
                 continue
             try:
                 backupdir = os.path.join(self._backup_ver, i)  # 备份完整路径 /xxx/xx/项目/project_201YddHHMMSS/static/lottery
