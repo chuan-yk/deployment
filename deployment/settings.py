@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'cmdb',
     'django_crontab',
     'fileupload',
+    'frontapp',
     # 'django.conf.OrdersConfig'
 ]
 

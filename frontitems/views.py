@@ -1,17 +1,14 @@
 import os
+import threading
+
 from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, HttpResponseRedirect
-from django.template import loader
-import threading
-import time
-from datetime import datetime, date, timedelta
-from django.core.exceptions import ObjectDoesNotExist
 from django_redis import get_redis_connection
+
 from fileupload.models import Fileupload
 from frontitems.models import RecordOfStatic
-from cmdb.models import ServerInfo, ProjectInfo
+from cmdb.models import ProjectInfo
 from .remotepubstatic import RemoteReplaceWorker, file_as_byte_md5sum
 
 

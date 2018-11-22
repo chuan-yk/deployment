@@ -31,6 +31,6 @@ urlpatterns = [
     url(r'^autojar/', include('autojar.urls')),
     url(r'^$', views.indexpage, name='indexhome'),
     url(r'coming_soon$', views.comingsoon, name='not_finish_page'),
-    #path('', lambda x: HttpResponseRedirect('/upload/new/')),
+    url(r'frontapp/', include('frontapp.urls')),
     path('upload/', include('fileupload.urls')),
 ]

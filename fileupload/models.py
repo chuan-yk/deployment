@@ -2,11 +2,8 @@
 from django.db import models
 from django.urls import reverse
 from datetime import datetime
-from cmdb.models import ProjectInfo
 
-class Application(models.Model):
-    app_name = models.CharField(max_length=100, null=True)
-    platform = models.CharField(max_length=100, null=True)
+from cmdb.models import ProjectInfo
 
 
 def upload_to(instance, fielname):
