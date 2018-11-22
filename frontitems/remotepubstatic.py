@@ -131,7 +131,7 @@ class RemoteReplaceWorker(object):
                            pub_status=pub_status).save()
         elif RecordOfStatic.objects.get(
                 record_id=self.record_id).pub_status == 0:  # RecordOfStatic Exist， pub_status = 0
-            RecordOfStatic.objects.filter(pk=self._records_instance.pk).update(pub_status=pub_status)      # 发布状态更改为3
+            RecordOfStatic.objects.filter(pk=self._records_instance.pk).update(pub_status=pub_status)  # 发布状态更改为3
         self.cleantmp()
         return self.md5dict
 
@@ -185,11 +185,13 @@ class RemoteReplaceWorker(object):
                 backupdir = os.path.join(self._backup_ver, i)  # 备份完整路径 /xxx/xx/项目/project_201YddHHMMSS/static/lottery
                 stdin, stdout, stderr = self.ssh.exec_command("mkdir -p {}".format(backupdir))
                 stderr_txt = stderr.read().decode()
-                if stderr_txt != '': raise IOError(stderr_txt)
+                if stderr_txt != '':
+                    raise IOError(stderr_txt)
                 stdin, stdout, stderr = self.ssh.exec_command(
                     "/bin/cp -r {0}/*  {1}/".format(os.path.join(self._dstdir, i), backupdir))
                 stderr_txt = stderr.read().decode()
-                if stderr_txt != '': raise IOError(stderr_txt)
+                if stderr_txt != '':
+                    raise IOError(stderr_txt)
                 self.backuplist.append(backupdir)
             except Exception as e:
                 print('backup catch Exception', e)
@@ -238,7 +240,7 @@ class RemoteReplaceWorker(object):
 
     def checkbackdir(self):
         """检查备份文件是否存在"""
-        if len(self.shouldbackdir) == 0 :
+        if len(self.shouldbackdir) == 0:
             return False
         for tdir in self.shouldbackdir:
             if not self._remote_server.if_exist_dir(os.path.join(self._backup_ver, tdir)):
@@ -268,16 +270,26 @@ class RemoteReplaceWorker(object):
                 stderr_txt3 = stderr.read().decode()
                 if stderr_txt3 != '':
                     raise IOError(stderr_txt3)
-                self.ssh.exec_command("mv {}/* {}".format(os.path.join(self._dstdir, tdir), roll_back_dir_add))
-                self.ssh.exec_command("mv {}/* {}".format(os.path.join(self._backup_ver, tdir),
-                                                      os.path.join(self._dstdir, tdir)))
+                stdin, stdout, stderr = self.ssh.exec_command(
+                    "mv {}/* {}".format(os.path.join(self._dstdir, tdir), roll_back_dir_add))
+                stderr_txt3 = stderr.read().decode()
+                if stderr_txt3 != '':
+                    raise IOError(stderr_txt3)
+                stdin, stdout, stderr = self.ssh.exec_command("mv {}/* {}".format(os.path.join(self._backup_ver, tdir),
+                                                                                  os.path.join(self._dstdir, tdir)))
+                stderr_txt3 = stderr.read().decode()
+                if stderr_txt3 != '':
+                    raise IOError(stderr_txt3)
                 print("debug Function rollback: mv {}/* {}".format(os.path.join(self._backup_ver, tdir),
-                                                      os.path.join(self._dstdir, tdir)))
-            if not onpub:   # 直接调用回滚操作
+                                                                   os.path.join(self._dstdir, tdir)))
+
+            if not onpub:  # 直接调用回滚操作
                 self.redis_cli.delete(self._lockkey)  # 回滚完成，释放发布lock
                 RecordOfStatic.objects.filter(pk=self._records_instance.pk).update(backuplist='', pub_status=5, )
                 Fileupload.objects.filter(type=self._fileupload_instace.type,
-                                          pk__gte=self._fileupload_instace.pk).update(status=0)     # 更改回滚影响文件的发布状态
+                                          pk__gte=self._fileupload_instace.pk).update(status=0,
+                                                                                      pubuser='')  # 更改回滚影响文件的发布状态
+                self.cleantmp()
 
         except IOError as e3:
             print("Unknown Exception as:", e3)
@@ -286,7 +298,6 @@ class RemoteReplaceWorker(object):
             if not onpub:
                 self.redis_cli.hmset(self.record_id, {'error_detail': str(self.success_status) + '  ' + e3})
                 RecordOfStatic.objects.filter(pk=self._records_instance.pk).update(pub_status=-2, )  # 回滚失败， -2
-
 
         self._remote_server.sshclient_close()
         self._remote_server.xftpclient_close()
@@ -299,8 +310,8 @@ class RemoteReplaceWorker(object):
                                              'pub_user': self._records_instance.pub_user,
                                              'pub_current_status': 'Start pub...',
                                              })
-        RecordOfStatic.objects.filter(pk=self._records_instance.pk).update(pub_status=1, )      # 修改发布状态
-        Fileupload.objects.filter(pk=self._fileupload_instace.pk).update(status=1,)             # 修改发布状态
+        RecordOfStatic.objects.filter(pk=self._records_instance.pk).update(pub_status=1, )  # 修改发布状态
+        Fileupload.objects.filter(pk=self._fileupload_instace.pk).update(status=1, )  # 修改发布状态
         if not self.have_error:
             self.make_ready()
             self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.success_status})  # 发布过程更新状态
@@ -317,8 +328,8 @@ class RemoteReplaceWorker(object):
             newdir=', '.join(self.newdir),
             newfile=', '.join(self.newfile),
             ignore_new=self.ignore_new,
-            backupsavedir=self._backup_ver, )       # 更新records 记录
-        self._records_instance.refresh_from_db()    # 重新读取数据库值
+            backupsavedir=self._backup_ver, )  # 更新records 记录
+        self._records_instance.refresh_from_db()  # 重新读取数据库值
         if self.have_error:
             RecordOfStatic.objects.filter(pk=self._records_instance.pk).update(pub_status=-1, )  # 修改发布状态
             Fileupload.objects.filter(pk=self._fileupload_instace.pk).update(status=-1, )  # 修改发布状态
