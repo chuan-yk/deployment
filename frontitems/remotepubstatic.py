@@ -155,9 +155,9 @@ class RemoteReplaceWorker(object):
                     self.shouldbackdir.add(seconddir)
             print("debug make ready shouldbackdir:", self.shouldbackdir)
             for file in self.unzipfilelist:
-                if self.redis_cli.hget("{0}:{1}:{2}".format(self._pjtname, self._items, file), "Exist"):
+                if self.redis_cli.hget("{0}:{1}:{2}".format(self._pjtname, self._items, file), "Exist"):    # redis 文件是否存在
                     continue
-                elif self._remote_server.if_exist_file(os.path.join(self._dstdir, file)):
+                elif self._remote_server.if_exist_file(os.path.join(self._dstdir, file)):   # 远程检查文件是否存在
                     self.redis_cli.hmset("{0}:{1}:{2}".format(self._pjtname, self._items, file),
                                          {"Exist": True, "Type": 'f'})
                     continue
@@ -166,9 +166,9 @@ class RemoteReplaceWorker(object):
                                          {"Type": 'f'})
                     self.newfile.append(file)
             for the_dir in self.unzipdirlist:
-                if self.redis_cli.hget("{0}:{1}:{2}".format(self._pjtname, self._items, the_dir), "Exist"):
+                if self.redis_cli.hget("{0}:{1}:{2}".format(self._pjtname, self._items, the_dir), "Exist"):     # redis 文件目录是否存在
                     continue
-                elif self._remote_server.if_exist_dir(os.path.join(self._dstdir, the_dir)):
+                elif self._remote_server.if_exist_dir(os.path.join(self._dstdir, the_dir)):                     # 远程检查目录是否存在
                     self.redis_cli.hmset("{0}:{1}:{2}".format(self._pjtname, self._items, the_dir),
                                          {"Exist": True, "Type": 'd'})
                     continue
@@ -185,6 +185,9 @@ class RemoteReplaceWorker(object):
     def do_backup(self):
         self.ssh = self._remote_server.get_sshclient()
         for i in self.shouldbackdir:
+            if i in self.newdir:            # 新增文件跳过备份过程
+                print('new  dir  {} ignore back step ， continue...')
+                continue
             try:
                 backupdir = os.path.join(self._backup_ver, i)  # 备份完整路径 /xxx/xx/项目/project_201YddHHMMSS/static/lottery
                 stdin, stdout, stderr = self.ssh.exec_command("mkdir -p {}".format(backupdir))
@@ -324,6 +327,7 @@ class RemoteReplaceWorker(object):
                                              })
         RecordOfStatic.objects.filter(pk=self._records_instance.pk).update(pub_status=1, )  # 修改发布状态
         Fileupload.objects.filter(pk=self._fileupload_instace.pk).update(status=1, )  # 修改发布状态
+        self.redis_cli.hmset(self._lockkey, {'pub_current_status': 'check original file '})  # 发布过程更新状态
         if not self.have_error:
             self.make_ready()
             self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.success_status})  # 发布过程更新状态
