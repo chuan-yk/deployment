@@ -87,6 +87,7 @@ class RemoteReplaceWorker(object):
         self._lockkey = '{}_{}_{}_lock'.format(self._pjtname, self._items, self.pub_type)
         self.ssh = None
         self.sftp = None
+        print("debug class init:", self.shouldbackdir)
 
     def checkfiledetail(self):
         """检查文件详情，存redis """

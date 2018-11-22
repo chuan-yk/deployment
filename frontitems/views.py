@@ -114,13 +114,13 @@ def pub(request, pk):
     pub_record = RecordOfStatic.objects.get(record_id=record_id, )
     RecordOfStatic.objects.filter(pk=pub_record.pk).update(pub_user=request.user.username)  # 更新Records 表 pub_user 字段
     Fileupload.objects.filter(pk=pub_file.pk).update(pubuser=request.user.username)  # 更新fileupload 表 pubuser 字段
-
     pub_task = RemoteReplaceWorker(pjt_info.ipaddress,
                                    pub_file,
                                    pjt_info,
                                    pub_record,
                                    tmpdir='media',  # 解压临时文件，跟进环境调整
                                    )
+    print("debug view pub:", pub_task.shouldbackdir)
     threading_task = threading.Thread(target=pub_task.pip_run, )  # 正式使用
     # threading_task = threading.Thread(target=pub_task.test_run, )  # windows 开发过程调试
     threading_task.start()
