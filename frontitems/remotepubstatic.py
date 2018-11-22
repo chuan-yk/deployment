@@ -33,7 +33,7 @@ from fileupload.models import Fileupload
 
 class RemoteReplaceWorker(object):
     def __init__(self, serverinfo_instance, fileupload_instace, projectinfo_instance, records_instance,
-                 shouldbackdir=set(),
+                 shouldbackdir,
                  backup_ver='', ignore_new=True, tmpdir='/tmp'):
         """serverinfo_instance:服务器 ssh 实例
         fileupload_instace: 文件上传行内容
@@ -87,7 +87,7 @@ class RemoteReplaceWorker(object):
         self._lockkey = '{}_{}_{}_lock'.format(self._pjtname, self._items, self.pub_type)
         self.ssh = None
         self.sftp = None
-        print("debug class init:", self.shouldbackdir)
+        # print("debug class init:", self.shouldbackdir)
 
     def checkfiledetail(self):
         """检查文件详情，存redis """

@@ -47,6 +47,7 @@ def list_detail(request, pk):
                                        pub_file,
                                        pjt_info,
                                        RecordOfStatic.objects.get(record_id=record_id),
+                                       shouldbackdir=set(),
                                        tmpdir='media',
                                        )
         MD5 = pub_task.checkfiledetail()
@@ -118,9 +119,10 @@ def pub(request, pk):
                                    pub_file,
                                    pjt_info,
                                    pub_record,
+                                   shouldbackdir=set(),
                                    tmpdir='media',  # 解压临时文件，跟进环境调整
                                    )
-    print("debug view pub:", pub_task.shouldbackdir)
+
     threading_task = threading.Thread(target=pub_task.pip_run, )  # 正式使用
     # threading_task = threading.Thread(target=pub_task.test_run, )  # windows 开发过程调试
     threading_task.start()
