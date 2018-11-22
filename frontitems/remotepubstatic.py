@@ -300,8 +300,9 @@ class RemoteReplaceWorker(object):
                 self.redis_cli.delete(self._lockkey)  # 回滚完成，释放发布lock
                 RecordOfStatic.objects.filter(pk=self._records_instance.pk).update(backuplist='', pub_status=5, )
                 Fileupload.objects.filter(type=self._fileupload_instace.type,
-                                          pk__gte=self._fileupload_instace.pk).update(status=0,
-                                                                                      pubuser='')  # 更改回滚影响文件的发布状态
+                                          pk__gte=self._fileupload_instace.pk,
+                                          project_id=self._fileupload_instace.project_id,
+                                          ).update(status=0, pubuser='')  # 更改回滚影响文件的发布状态
                 self.cleantmp()
 
         except IOError as e3:
