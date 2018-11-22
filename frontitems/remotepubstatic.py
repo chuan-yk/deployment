@@ -74,6 +74,7 @@ class RemoteReplaceWorker(object):
         self.newfile = []  # 新文件
         self.success_status = ''
         self.have_error = False
+        self.error_reason = ''
         if tmpdir != '':
             tempfile.tempdir = tmpdir
         else:
@@ -227,6 +228,12 @@ class RemoteReplaceWorker(object):
                 print('sftp put {} {}'.format(os.path.join(self._tmpdir, '_dist', pub_file),
                                               os.path.join(self._dstdir, pub_file)))
                 self.sftp.put(os.path.join(self._tmpdir, '_dist', pub_file), os.path.join(self._dstdir, pub_file))
+        except FileNotFoundError as e:  # 捕获xftp put 过程目的文件夹不存在的异常
+            print('Sftp put file error', e)
+            self.have_error = True
+            self.rollback(onpub=True)
+            self.error_reason = 'scp {} {} Sftp put file error: {}'.format(
+                os.path.join(self._tmpdir, '_dist', pub_file), os.path.join(self._dstdir, pub_file), e)
 
         except Exception as e:
             print("Unknown Exception as:", e)
@@ -295,8 +302,10 @@ class RemoteReplaceWorker(object):
             print("Unknown Exception as:", e3)
             print('Debug there, rollback dir {}'.format(roll_back_dir))
             self.redis_cli.delete(self._lockkey)  # 回滚失败，任务结束，释放锁
+            self.error_reason = str(e3)
             if not onpub:
-                self.redis_cli.hmset(self.record_id, {'error_detail': str(self.success_status) + '  ' + e3})
+                self.redis_cli.hmset(self.record_id,
+                                     {'error_detail': str(self.success_status) + '  ' + self.error_reason})
                 RecordOfStatic.objects.filter(pk=self._records_instance.pk).update(pub_status=-2, )  # 回滚失败， -2
 
         self._remote_server.sshclient_close()
@@ -333,7 +342,7 @@ class RemoteReplaceWorker(object):
         if self.have_error:
             RecordOfStatic.objects.filter(pk=self._records_instance.pk).update(pub_status=-1, )  # 修改发布状态
             Fileupload.objects.filter(pk=self._fileupload_instace.pk).update(status=-1, )  # 修改发布状态
-            self.redis_cli.hmset(self.record_id, {'error_detail': self.success_status})
+            self.redis_cli.hmset(self.record_id, {'error_detail': self.success_status + ': ' + self.error_reason})
             self.redis_cli.expire(self.record_id, 60 * 60 * 24 * 14)
         else:
             RecordOfStatic.objects.filter(pk=self._records_instance.pk).update(pub_status=2, )  # 修改发布状态
