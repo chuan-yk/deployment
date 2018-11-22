@@ -148,9 +148,11 @@ class RemoteReplaceWorker(object):
                 for file in files:
                     self.unzipfilelist.append(os.path.join(root.split('_dist/')[1], file))  #
             # 需备份文件夹
+            print("debug make ready unzipdirlist:", self.unzipdirlist)
             for seconddir in self.unzipdirlist:
                 if seconddir.split('/').__len__() < 3 and seconddir != 'static':
                     self.shouldbackdir.add(seconddir)
+            print("debug make ready shouldbackdir:", self.shouldbackdir)
             for file in self.unzipfilelist:
                 if self.redis_cli.hget("{0}:{1}:{2}".format(self._pjtname, self._items, file), "Exist"):
                     continue
