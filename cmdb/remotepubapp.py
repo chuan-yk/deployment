@@ -63,7 +63,7 @@ class RemoteAppReplaceWorker(object):
         except Exception as e:
             print('Error: ', e)
             self.have_error = True
-            self.error_reason = 'back file {} fail, Error: {}'.format(self._dstfile, stderr_txt)
+            self.error_reason = 'back file {} fail, Error: {}'.format(self._dstfile, e)
         finally:
             if self.have_error:
                 self.success_status = 'backup_fail'
@@ -88,7 +88,7 @@ class RemoteAppReplaceWorker(object):
             print("Unknown Exception as:", e)
             self.have_error = True
             self.error_reason = """RemoteAppReplaceWorker do_cover Function scp  {}  {} fail, 
-                                Error: {}""".format(self._fromfile, self._dstfile, stderr_txt)
+                                Error: {}""".format(self._fromfile, self._dstfile, e)
         if not self.have_error:
             self.remote_server.sshclient_close()
             self.remote_server.xftpclient_close()

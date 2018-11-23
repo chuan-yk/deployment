@@ -87,6 +87,8 @@ def apppub(request, pk):
     threading_task.start()
     return redirect(reverse('frontapp:file_detail', args=[pk, ]))
 
+
+@login_required
 def approllback(request, pk):
     pub_file = get_object_or_404(Fileupload, pk=pk)
     pjt_info = get_object_or_404(ProjectInfo, items=pub_file.app, platform=pub_file.platform,
