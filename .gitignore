@@ -176,3 +176,5 @@ tmp/
 cmdb/migrations/*.py
 frontitems/migrations/*.py
 media/
+!/frontapp/migrations/__init__.py
+!/frontapp/migrations/
