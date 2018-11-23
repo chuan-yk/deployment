@@ -1,6 +1,6 @@
 {% extends 'layout.html' %}
 
-{% block title %} 静态文件发布列表 {% endblock %}
+{% block title %} APP文件发布列表 {% endblock %}
 
 {% block body %}
     <section>
@@ -35,7 +35,7 @@
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    {% for thisline in static_uploadfile_list %}
+                                    {% for thisline in pub_file_list %}
                                         <tr class="gradeX">
                                             <td>{{ thisline.id }}</td>
                                             <td>{{ thisline.slug }}</td>
@@ -53,10 +53,10 @@
                                                                  待发布
                                                             </span></td>
                                                 <td>
-                                                    <a href="{% url 'frontitems:do_pub' thisline.id %}"
+                                                    <a href="{% url 'frontapp:do_pub' thisline.id %}"
                                                        class="btn  btn-info btn-rounded">发布<i
                                                             class="md glyphicon glyphicon-play"></i></a>
-                                                    <a href="{% url 'frontitems:file_detail' thisline.id %}"
+                                                    <a href="{% url 'frontapp:file_detail' thisline.id %}"
                                                        class="btn  btn-primary btn-rounded">详情<i
                                                             class="md glyphicon glyphicon-search"></i></a>
                                                     <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
@@ -70,7 +70,7 @@
                                                 <td>
                                                     <a href="#" class="btn  btn-info btn-rounded disabled">发布<i
                                                             class="md glyphicon glyphicon-play"></i></a>
-                                                    <a href="{% url 'frontitems:pub_detail' thisline.id %}"
+                                                    <a href="{% url 'frontapp:file_detail' thisline.id %}"
                                                        class="btn  btn-primary btn-rounded">详情<i
                                                             class="md glyphicon glyphicon-search"></i></a>
                                                     <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
@@ -84,10 +84,10 @@
                                                 <td>
                                                     <a href="#" class="btn  btn-info btn-rounded disabled">发布<i
                                                             class="md glyphicon glyphicon-play"></i></a>
-                                                    <a href="{% url 'frontitems:pub_detail' thisline.id %}"
+                                                    <a href="{% url 'frontapp:file_detail' thisline.id %}"
                                                        class="btn  btn-primary btn-rounded">详情<i
                                                             class="md glyphicon glyphicon-search"></i></a>
-                                                    <a href="{% url 'frontitems:pub_return' pub_file.id %}"
+                                                    <a href="{% url 'frontapp:pub_return' pub_file.id %}"
                                                        class="btn  btn-danger btn-rounded disabled">回滚<i
                                                             class="md glyphicon glyphicon-remove"></i></a>
                                                 </td>
@@ -99,10 +99,10 @@
                                                 <td>
                                                     <a href="#" class="btn  btn-info btn-rounded disabled">发布<i
                                                             class="md glyphicon glyphicon-play"></i></a>
-                                                    <a href="{% url 'frontitems:pub_detail' thisline.id %}"
+                                                    <a href="{% url 'frontapp:pub_detail' thisline.id %}"
                                                        class="btn  btn-primary btn-rounded">详情<i
                                                             class="md glyphicon glyphicon-search"></i></a>
-                                                    <a href="{% url 'frontitems:pub_return' thisline.id %}"
+                                                    <a href="{% url 'frontapp:pub_return' thisline.id %}"
                                                        class="btn  btn-danger btn-rounded ">回滚<i
                                                             class="md glyphicon glyphicon-remove"></i></a>
                                                 </td>

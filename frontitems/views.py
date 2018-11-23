@@ -1,4 +1,3 @@
-import os
 import threading
 
 from django.shortcuts import render, get_object_or_404, redirect, reverse
@@ -9,8 +8,10 @@ from django_redis import get_redis_connection
 from fileupload.models import Fileupload
 from frontitems.models import RecordOfStatic
 from cmdb.models import ProjectInfo
-from .remotepubstatic import RemoteReplaceWorker, file_as_byte_md5sum
+from cmdb.remotepubstatic import RemoteReplaceWorker, file_as_byte_md5sum
 
+
+redis_for_pub_cli = get_redis_connection("default")
 
 @login_required
 def list(request):
@@ -89,14 +90,6 @@ def pub(request, pk):
     pub_lock_key = '{0}_{1}_{2}_{3}'.format(pjt_info.platform, pjt_info.items, '0', 'lock')  # 发布任务锁
     record_id = '{0}_{1}_{2}_{3}'.format(pjt_info.platform, pjt_info.items, '0', pk)  # 唯一任务值
     pub_user = request.user.username
-    if RecordOfStatic.objects.filter(record_id=record_id).count() == 0:  # 初始化插入 Record 记录
-        uploadfile_md5 = file_as_byte_md5sum(pub_file.file.read())  # 上传文件Md5
-        RecordOfStatic(pub_filemd5sum=uploadfile_md5,
-                       items=ProjectInfo.objects.get(items=pjt_info.items, platform=pjt_info.platform, type=0),
-                       pub_user=pub_user,
-                       record_id=record_id,
-                       pub_status=0  # 初始状态
-                       ).save()
 
     if redis_for_pub_cli.exists(pub_lock_key):  # 发布锁定状态，返回占用提示
         lock_task = redis_for_pub_cli.hget(pub_lock_key, 'lock_task').decode()
@@ -109,7 +102,13 @@ def pub(request, pk):
 
         return render(request, 'frontitems/list.html', {'static_uploadfile_list': static_uploadfile_list})  # 返回默认发布页面
 
-    pub_record = RecordOfStatic.objects.get(record_id=record_id, )
+    pub_record, ncreate = RecordOfStatic.objects.get_or_create(record_id=record_id, defaults={
+        'pub_filemd5sum': file_as_byte_md5sum(pub_file.file.read()),
+        'items': ProjectInfo.objects.get(items=pjt_info.items, platform=pjt_info.platform, type=0),
+        'pub_user': pub_user,
+        'pub_status': 0,
+    })
+
     RecordOfStatic.objects.filter(pk=pub_record.pk).update(pub_user=request.user.username)  # 更新Records 表 pub_user 字段
     Fileupload.objects.filter(pk=pub_file.pk).update(pubuser=request.user.username)  # 更新fileupload 表 pubuser 字段
     pub_task = RemoteReplaceWorker(pjt_info.ipaddress,
@@ -174,13 +173,19 @@ def pubreturn(request, pk):
                                  type=pub_file.type)
 
     record_id = '{0}_{1}_{2}_{3}'.format(pjt_info.platform, pjt_info.items, '0', pk)  # 唯一任务值
+    pub_lock_key = '{0}_{1}_{2}_{3}'.format(pjt_info.platform, pjt_info.items, '0', 'lock')  # 发布任务锁
     pub_record = get_object_or_404(RecordOfStatic, record_id=record_id, )
-    if pub_record.pub_status != 2 or len(pub_record.backuplist) == 0 or len(pub_record.backupsavedir) == 0:
+
+    if pub_record.pub_status != 2 or len(pub_record.backuplist) == 0 or len(pub_record.backupsavedir) == 0: # 检验当前任务是否已发布
         messages.error(request,
                        '当前版本发布内容非发布完成状态，请选择正确的回滚版本',
                        'alert-danger')
         return redirect(reverse('frontitems:file_detail', args=[pk, ]))
-
+    if redis_for_pub_cli.exists(pub_lock_key):  # 发布占用锁定状态,
+        messages.error(request,
+                       '当前回滚内容被其他通类型发布任务占用，暂无法执行',
+                       'alert-danger')
+        return redirect(reverse('frontitems:file_detail', args=[pk, ]))
     shouldbackdir = set([i.strip() for i in pub_record.backuplist.split(',')])
     backup_ver = pub_record.backupsavedir
     pub_task = RemoteReplaceWorker(pjt_info.ipaddress,
@@ -197,7 +202,7 @@ def pubreturn(request, pk):
                        'alert-danger')
         return redirect(reverse('frontitems:pub_detail', args=[pk, ]))  # 返回详情页面 错误信息
     RecordOfStatic.objects.filter(pk=pub_record.pk).update(return_user=request.user.username)  # 更新 return_user
-    pub_record.pub_status = 4                                      # 更改状态为发布中
+    pub_record.pub_status = 4  # 更改状态为发布中
     Fileupload.objects.filter(pk=pub_file.pk).update(status=1)
     pub_record.save()
     pub_record.refresh_from_db()

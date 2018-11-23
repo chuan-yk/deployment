@@ -1,7 +1,6 @@
-from django.test import TestCase
 import paramiko
 
-from .remotepubstatic import RemoteReplaceWorker
+from cmdb.remotepubstatic import RemoteReplaceWorker
 
 
 # class for debug
@@ -84,8 +83,6 @@ class Rserver(object):
 
 
 if __name__ == "__main__":
-    import os
-
     # os.environ.setdefault("DJANGO_SETTINGS_MODULE", "D:\\deployment\\deployment\\deployment.settings.py")
     # sys.path.extend(['D:\\deployment', 'D:\\Program Files\\PyCharm 2018.1.4\\helpers\\pycharm',
     #                  'D:\\Program Files\\PyCharm 2018.1.4\\helpers\\pydev'])
