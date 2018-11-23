@@ -87,9 +87,9 @@
                                                     class="text-center"> {{ pub_record.backup_file}}
                                                 </th>
                                                 {% endifequal %}
-                                                {% ifequal pub_record -1 %}
+                                                {% ifequal pub_record.pub_status -1 %}
                                                 <th class="text-left"> 发布失败 </th>
-                                                <th style="width:140px" class="text-right">备份路径:</th>
+                                                <th style="width:140px" class="text-right">错误详情:</th>
                                                 <th style="width:180px"
                                                     class="text-center"> {{ pub_record.backup_file}}
                                                 </th>

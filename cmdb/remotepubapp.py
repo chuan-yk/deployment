@@ -74,12 +74,8 @@ class RemoteAppReplaceWorker(object):
         self.ssh = self.remote_server.get_sshclient()
         self.sftp = self.remote_server.get_xftpclient()
         try:
-            stdin, stdout, stderr = self.sftp.put(self._fromfile, self._dstfile)
-            stderr_txt = stderr.read().decode()
-            if len(stderr_txt) > 0:
-                self.have_error = True
-                raise IOError("""RemoteAppReplaceWorker do_cover Function scp  {}  {} fail, 
-                                Error: {}""".format(self._fromfile, self._dstfile, stderr_txt))
+            self.sftp.put(self._fromfile, self._dstfile)
+
         except FileNotFoundError as e:  # 捕获xftp put 过程目的文件夹不存在的异常
             print('Sftp put file error', e)
             self.have_error = True
@@ -114,6 +110,8 @@ class RemoteAppReplaceWorker(object):
                                              'pub_user': self.records_instance.pub_user,
                                              'pub_current_status': self.success_status,
                                              })  # 回滚过程加锁
+        self.redis_cli.hmset(self.record_id, {'error_detail': self.error_reason})   # 初始化，error_detail
+        self.redis_cli.expire(self.record_id, 60 * 60 * 24 * 14)
         stdin, stdout, stderr = self.ssh.exec_command(
             "/bin/cp {} {}".format(os.path.join(self._backup_ver, self.fileupload_instace.slug), self._dstfile))
         stderr_txt = stderr.read().decode()
@@ -123,7 +121,6 @@ class RemoteAppReplaceWorker(object):
                 os.path.join(self._backup_ver, self.fileupload_instace.slug),
                 self._dstfile))
             self.redis_cli.hmset(self.record_id, {'error_detail': self.error_reason})
-            self.redis_cli.expire(self.record_id, 60 * 60 * 24 * 14)
             RecordOfApp.objects.filter(pk=self.records_instance.pk).update(pub_status=-2, )  # 修改发布状态,回滚失败
 
         else:
@@ -138,6 +135,8 @@ class RemoteAppReplaceWorker(object):
                                              'pub_user': self.records_instance.pub_user,
                                              'pub_current_status': 'Start pub...',
                                              })
+        self.redis_cli.hmset(self.record_id, {'error_detail': self.error_reason})  # 初始化，error_detail
+        self.redis_cli.expire(self.record_id, 60 * 60 * 24 * 14)
         RecordOfApp.objects.filter(pk=self.records_instance.pk).update(pub_status=1, )  # 修改发布状态
         Fileupload.objects.filter(pk=self.fileupload_instace.pk).update(status=1, )  # 修改发布状态
         self.redis_cli.hmset(self._lockkey, {'pub_current_status': 'check original file '})  # 发布过程更新状态
@@ -156,7 +155,6 @@ class RemoteAppReplaceWorker(object):
             RecordOfApp.objects.filter(pk=self.records_instance.pk).update(pub_status=-1, )  # 修改发布状态 ，发布失败
             Fileupload.objects.filter(pk=self.fileupload_instace.pk).update(status=-1, )  # 修改发布状态， 发布失败
             self.redis_cli.hmset(self.record_id, {'error_detail': self.success_status + ': ' + self.error_reason})
-            self.redis_cli.expire(self.record_id, 60 * 60 * 24 * 14)
         else:
             RecordOfApp.objects.filter(pk=self.records_instance.pk).update(pub_status=2, )  # 修改发布状态，发布完成
             Fileupload.objects.filter(pk=self.fileupload_instace.pk).update(status=2, )  # 修改发布状态，发布完成

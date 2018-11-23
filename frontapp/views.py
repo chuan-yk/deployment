@@ -47,6 +47,10 @@ def list_detail(request, pk):
                     }
     else:
         pub_lock = {'lock': False, 'pubtask': None, 'pub_current_status': None, 'starttime': None, 'pub_user': None, }
+    try:
+        pub_lock['error_detail'] = redis_for_app_cli.hget(record_id, 'error_detail').decode()
+    except Exception as e:
+        pass
     context = {'pub_file': pub_file, 'pub_lock': pub_lock, 'pub_record': pub_record, 'pjt_info': pjt_info}
     return render(request, 'frontapp/list_detail.html', context)
 
