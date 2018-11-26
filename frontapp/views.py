@@ -1,6 +1,7 @@
 from django.shortcuts import render
 import os
 import threading
+import os
 
 from django.shortcuts import render, get_object_or_404, redirect, reverse, HttpResponse
 from django.contrib import messages
@@ -87,7 +88,7 @@ def apppub(request, pk):
     pub_file.save()
     print('Start pub {} {}'.format(pub_file.platform, pub_file.app))
     pub_task = RemoteAppReplaceWorker(pjt_info.ipaddress, pub_file, pjt_info, pub_record)
-    threading_task = threading.Thread(target=pub_task.pip_run, )        # 多线程执行发布过程
+    threading_task = threading.Thread(target=pub_task.pip_run, )  # 多线程执行发布过程
     threading_task.start()
     return redirect(reverse('frontapp:file_detail', args=[pk, ]))
 
@@ -102,20 +103,26 @@ def approllback(request, pk):
     pub_record, created = RecordOfApp.objects.get_or_create(record_id=record_id, items=pjt_info, defaults={
         'pub_filemd5sum': file_as_byte_md5sum(pub_file.file.read())})
 
-    if pub_record.pub_status != 2:
+    if pub_record.pub_status != 2 and pub_file.status != 2:
         messages.error(request,
                        '当前版本发布内容非发布完成状态，请选择正确的回滚版本',
                        'alert-danger')
+        return redirect(reverse('frontapp:file_detail', args=[pk, ]))
+    if pub_record.pub_status != 2 and pub_file.status == 2:
+        messages.error(request, '当前版本回滚失败', 'alert-danger')
         return redirect(reverse('frontapp:file_detail', args=[pk, ]))
     if redis_for_app_cli.exists(pub_lock_key):  # 检查同类型任务发布锁定状态
         messages.error(request,
                        '当前{0}-{1}发布通道被占用，请稍后重试'.format(pjt_info.platform, pjt_info.items, ),
                        'alert-danger')
         return redirect(reverse('frontapp:file_detail', args=[pk, ]))
-    backup_ver = pub_record.backup_file
+    backup_ver = os.path.dirname(pub_record.backup_file)
+    pub_task = RemoteAppReplaceWorker(pjt_info.ipaddress, pub_file, pjt_info, pub_record, backup_ver=backup_ver)
+    if not pub_task.checkbackdir():
+        messages.error(request, '当前版本备份文件不存在，无法回滚', 'alert-danger')
+        return redirect(reverse('frontapp:file_detail', args=[pk, ]))
     pub_record.pub_status = 4
     pub_record.save()
-    pub_task = RemoteAppReplaceWorker(pjt_info.ipaddress, pub_file, pjt_info, pub_record, backup_ver=backup_ver)
     threading_task = threading.Thread(target=pub_task.rollback(), )  # 多线程执行发布过程
     threading_task.start()
     return redirect(reverse('frontapp:file_detail', args=[pk, ]))
