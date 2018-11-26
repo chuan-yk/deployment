@@ -100,10 +100,7 @@ class RemoteAppReplaceWorker(object):
             return False
 
     def rollback(self):
-        """
-        :param: onpub 正常发布状态， 出现失败回滚
-        :return:
-        """
+
         self.ssh = self.remote_server.get_sshclient()
         self.success_status = "roll_back_Start"
         self.redis_cli.hmset(self._lockkey, {'lock_task': self.record_id, 'starttime': self._operatingtime,
@@ -149,7 +146,7 @@ class RemoteAppReplaceWorker(object):
         self.redis_cli.delete(self._lockkey)
 
         RecordOfApp.objects.filter(pk=self.records_instance.pk).update(
-            backup_file=self._dstfile)  # 更新records 记录, 存入备份文件路径信息
+            backup_file=os.path.join(self._backup_ver, self.fileupload_instace.slug))  # 更新records 记录, 存入备份文件路径信息
         self.records_instance.refresh_from_db()  # 重新读取数据库值
         if self.have_error:
             RecordOfApp.objects.filter(pk=self.records_instance.pk).update(pub_status=-1, )  # 修改发布状态 ，发布失败
