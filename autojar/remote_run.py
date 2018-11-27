@@ -11,13 +11,14 @@ class SSHManager(object):
         self.host = host
         self.user = user
         self.port = port
+        self.sftp_client = paramiko.SFTPClient()
         self._ssh = paramiko.SSHClient()
         self._sshkey = 'C:\\keys\\id_rsa_2048_shine'
 
-    def __del__(self):
-
-        if self._ssh:
-            self._ssh.close()
+    # def __del__(self):
+    #
+    #     if self._ssh:
+    #         self._ssh.close()
 
     def ssh_connect(self):
 
@@ -33,6 +34,11 @@ class SSHManager(object):
         except Exception:
             raise RuntimeError ("ssh connected to [host:%s, usr:%s] failed" %
                                (self.host, self.user))
+
+    def get_sftp_client(self):
+        if not self.sftp_client:
+            self.sftp_client = paramiko.SFTPClient.from_transport(self.client.get_transport())
+        return self.sftp_client
 
     def ssh_exec_cmd(self,cmd, path='~'):
         try:
@@ -58,8 +64,6 @@ class SSHManager(object):
         except Exception as e:
             raise RuntimeError('ssh exec shell failed [%s]' % str(e))
         return result[0].decode("utf-8"),result[1].decode("utf-8")
-
-
 
 
 
