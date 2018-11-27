@@ -1,12 +1,7 @@
-
 from django.shortcuts import render, redirect
-
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from tempfile import NamedTemporaryFile
 from django.views.generic import CreateView, DeleteView, ListView
 from fileupload.models import Fileupload
-from django.http import HttpResponse
 from .deploy import DeploySet
 from django_redis import get_redis_connection
 
@@ -15,8 +10,8 @@ class deploy_list(ListView):
     model = Fileupload
     template_name = 'autojar/deploy_list.html'
     context_object_name = 'deploy_list'
-    paginate_by = 3
-    queryset = Fileupload.objects.filter(status=0,type__in=(1,2,3)).order_by('-create_date')
+    paginate_by = 10
+    queryset = Fileupload.objects.filter(status=0,type=3).order_by('-create_date')   #type__in=(1,2,3)
 
 
 
@@ -36,18 +31,19 @@ def delfile(request):
 def RunEnter(request):
      if request.method == "GET":
          id = request.GET.get('id')
+         action = request.GET.get('action')
          obj =  Fileupload.objects.get(id=id)
          fileobj = Fileupload.objects.get(id=id)
-         redisObj = get_redis_connection('default')
-         add_key = ("{pt}:{app}:{type}_{id}"
-                 .format(pt=fileobj.platform, app=fileobj.app, type=fileobj.type, id=id))
 
+         redisObj = get_redis_connection('default')
+         add_key = ("{pt}:{app}:{filename}".format(pt=fileobj.platform, app=fileobj.app,filename=fileobj.slug))
 
          if redisObj.exists(add_key):
             messages.error(request, '任务已经进入发布状态，请勿重新操作！', 'alert-danger')
             return redirect('/autojar/deploy_list/')
          else:
-             redisObj.set(add_key,id)
+             redisObj.set(add_key,id+':'+fileobj.slug)
+
      else:
          messages.error(request, '无效的请求方法！', 'alert-danger')
          return redirect('/autojar/deploy_list/')
@@ -61,13 +57,16 @@ def RunEnter(request):
 
 
      elif obj.type == 3:
-        objdepy = DeploySet(obj.platform, obj.app, obj.name, obj.type)
-        result = objdepy.jar()
-        if len(result['Resultstderr']) != 0:
+
+        objdepy = DeploySet(id,obj.platform, obj.app, obj.name,obj.type)
+        result = objdepy.jar(action)
+        if len(result['Resultstderr'][0]) != 0:
             Fileupload.objects.filter(id=id).update(status=-1)
             messages.error(request, '发布失败！', 'alert-danger')
             return render(request, 'autojar/Result.html', result)
      Fileupload.objects.filter(id=id).update(status=2)
+     messages.error(request, '发布成功！', 'alert-success')
+     redisObj.delete(add_key)
      return render(request,'autojar/Result.html',result)
 
 

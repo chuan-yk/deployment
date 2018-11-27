@@ -35,45 +35,49 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for user in deploy_list %}
+                    {% for i in deploy_list %}
                         <tr>
-                            <td>{{ user.id }}</td>
-                            <td>{{ user.pt_name }}</td>
-                            <td>{{ user.app }}</td>
-                            <td>{{ user.name }}</td>
+                            <td>{{ i.id }}</td>
+                            <td>{{ i.pt_name }}</td>
+                            <td>{{ i.app }}</td>
+                            <td>{{ i.name }}</td>
                             <td>
-                                {% if user.type == 0 %}
+                                {% if i.type == 0 %}
                                     前端静态
                                 {% endif %}
-                                {% if user.type == 1 %}
+                                {% if i.type == 1 %}
                                     全量包
                                 {% endif %}
-                                 {% if user.type == 2 %}
+                                 {% if i.type == 2 %}
                                     增量包
                                 {% endif %}
-                                {% if user.type == 3 %}
+                                {% if i.type == 3 %}
                                     Jar包
                                 {% endif %}
                             </td>
-                            <td>{{ user.user }}</td>
-                            <td>{{ user.bug_id }}</td>
-                            <td>{{ user.description}}</td>
-                            <td>{{ user.create_date }}</td>
+                            <td>{{ i.user }}</td>
+                            <td>{{ i.bug_id }}</td>
+                            <td>{{ i.description}}</td>
+                            <td>{{ i.create_date }}</td>
                             <td>
                                 <select class="selectBtn" name="" id="">
-                                    <option value="0">重启</option>
-                                    <option value="1">不重启</option>
+                                    <option value="1">重启</option>
+                                    <option value="0">不重启</option>
 
                                 </select>
-                                <script>
-                                    $(".btn-success").click(function () {
-                                        console.log($(".selectBtn").value())
-                                    })
-                                </script>
-                                <a class="btn btn-success" href="{% url 'autojar:RunEnter' %}?id={{ user.id }}">发布</a>
-                                <a class="btn btn-danger" href="{% url 'autojar:del_file' %}?id={{ user.id }}">删除</a>
+
+                                <a class="btn btn-success" data-id="{{ i.id }}" href="javascript:;">发布</a>
+                                <a class="btn btn-danger" href="{% url 'autojar:del_file' %}?id={{ i.id }}">删除</a>
                             </td>
                         </tr>
+                        <script>
+                            $(".btn-success").click(function () {
+                                var id = $(this).attr("data-id");
+                                console.log(id);
+                                window.location.href = "{% url 'autojar:RunEnter' %}?id="+id+"&action="+$(".selectBtn").val()
+                                {#console.log(window.location)#}
+                            })
+                        </script>
                     {% endfor %}
                     </tbody>
                 </table>
@@ -86,6 +90,7 @@
                             <li class="disabled"><span>&laquo;</span></li>
                         {% endif %}
                         {% for i in paginator.page_range %}
+
                             {% if page_obj.number == i %}
                                 <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
                             {% else %}
