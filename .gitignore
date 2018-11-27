@@ -178,3 +178,4 @@ frontitems/migrations/*.py
 media/
 !/frontapp/migrations/__init__.py
 !/frontapp/migrations/
+!/tomcatwar/migrations/__init__.py
