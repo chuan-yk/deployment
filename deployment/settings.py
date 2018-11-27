@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'django_crontab',
     'fileupload',
     'frontapp',
+    'tomcatwar',
     # 'django.conf.OrdersConfig'
 ]
 

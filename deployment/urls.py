@@ -20,7 +20,7 @@ from django.contrib.auth.decorators import login_required
 from . import views
 from django.urls import include, path
 from django.http import HttpResponseRedirect
-
+from django.views.generic.base import RedirectView
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
@@ -32,5 +32,7 @@ urlpatterns = [
     url(r'^$', views.indexpage, name='indexhome'),
     url(r'coming_soon$', views.comingsoon, name='not_finish_page'),
     url(r'frontapp/', include('frontapp.urls')),
+    url(r'tomcatwar/', include('tomcatwar.urls')),
     path('upload/', include('fileupload.urls')),
+    url(r'^favicon\.ico$', RedirectView.as_view(url='/static/img/favicon.ico')),
 ]
