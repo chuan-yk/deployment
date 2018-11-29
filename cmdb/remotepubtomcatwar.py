@@ -123,7 +123,7 @@ class RemoteWarReplaceWorker(object):
                 raise IOError(err_str1)
             for configfile in self.configlist:
                 self.ssh.exec_command(
-                    """/bin/cp {} {}""".format(os.path.join(self._dstdir, configfile),
+                    """/bin/cp {} {}""".format(os.path.join(self._dstdir, self._items,configfile),
                                                os.path.join(self._remote_unzipdir, configfile)))
             #  配置文件修改功能在此补充
         except Exception as e1:
