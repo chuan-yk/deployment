@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import os,paramiko
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 class ParamikoClient(object):
 
@@ -8,7 +10,7 @@ class ParamikoClient(object):
         self.host = host
         self.user = user
         self.port = port
-        self._sshkey = 'C:\\keys\\id_rsa_2048_shine'
+        self._sshkey = '{}\sshkey\id_rsa'.format(BASE_DIR)
         self._pkey = paramiko.RSAKey.from_private_key_file(self._sshkey)
 
     def exec_commd(self, cmd):
