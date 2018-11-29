@@ -103,28 +103,39 @@ class RemoteWarReplaceWorker(object):
         self.ssh = self.remote_server.get_sshclient()
         self.sftp = self.remote_server.get_xftpclient()
         try:
-            stdin, stdout, stderr = self.ssh.exec_command(
-                "mktemp -t -d upload_{}_{}_.XXXX".format(self._pjtname, self._items))
+            print("{0}   Info: {1} 创建文件夹 mktemp -t -d upload_{2}_{3}_.XXXX ".format(
+                datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                self.remote_server, self._pjtname, self._items))
+            stdin, stdout, stderr = self.ssh.exec_command("mktemp -t -d upload_{}_{}_.XXXX".format(self._pjtname,
+                                                                                                   self._items))
             err_str1 = stderr.read().decode()
             if err_str1 != '':
                 raise IOError(err_str1)
-            else:
-                self._tmpdir = stdout.read().decode()
-                self._remote_filename = os.path.join(self._tmpdir, self.fileupload_instace.slug)
-                self._remote_unzipdir = os.path.join(self._tmpdir, self._items)
+            self._tmpdir = stdout.read().decode().strip()
+            print("{0}   Info: {1} 创建临时目录成功: {2}, 开始上传".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                                                               self.remote_server, self._tmpdir))
+            self._remote_filename = os.path.join(self._tmpdir, self.fileupload_instace.slug)
+            self._remote_unzipdir = os.path.join(self._tmpdir, self._items)
             self.sftp.put(self._fromfile, self._remote_filename)
             stdin, stdout, stderr = self.ssh.exec_command("""if [ `which unzip 2>/dev/null`'x' == 'x' ]; then 
                 yum install -y unzip ; fi ;
                 mkdir -p {0};
-                unzip -qo {1} -d {0}""".format(self._remote_unzipdir, self._remote_filename, )
-                                                          )
+                unzip -qo {1} -d {0}""".format(self._remote_unzipdir, self._remote_filename, ))
+            print("{0}   Info: {1} 创建临时目录成功: {2}".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                                                         self.remote_server, self._tmpdir))
             err_str1 = stderr.read().decode()
             if err_str1 != '':
                 raise IOError(err_str1)
+            print("{0}   Info: {1} 上传{2} 至 {3}完成 ".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                                                          self.remote_server, self.fileupload_instace.slug,
+                                                          self._remote_filename))
             for configfile in self.configlist:
                 self.ssh.exec_command(
-                    """/bin/cp {} {}""".format(os.path.join(self._dstdir, self._items,configfile),
+                    """/bin/cp {} {}""".format(os.path.join(self._dstdir, self._items, configfile),
                                                os.path.join(self._remote_unzipdir, configfile)))
+                print("{0}   Info: {1} 配置 {2} 文件替换完成".format(
+                    datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                    self.remote_server, configfile))
             #  配置文件修改功能在此补充
         except Exception as e1:
             self.have_error = True
@@ -138,11 +149,18 @@ class RemoteWarReplaceWorker(object):
     def do_backup(self):
         self.ssh = self.remote_server.get_sshclient()
         try:
+            print("{0}   Info: {1} 创建备份文件夹 mkdir -p {2} {2}_mv_as_remove".format(
+                datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                self.remote_server, self._backup_ver))
             stdin, stdout, stderr = self.ssh.exec_command("""mkdir -p {0} {0}_mv_as_remove; 
             chown -R {1}:{1} {0} {0}_mv_as_remove""".format(self._backup_ver, self.projectinfo_instance.runuser))
             str_err2 = stderr.read().decode()
             if str_err2 != "":
                 raise IOError(str_err2)
+            print("{0}   Info: {1} 备份文件 cp -r {2} {3}".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                                                              self.remote_server,
+                                                              os.path.join(self._dstdir, self._items),
+                                                              self._backup_ver))
             stdin, stdout, stderr = self.ssh.exec_command(
                 """cp -r {0} {1}""".format(os.path.join(self._dstdir, self._items), self._backup_ver))
             str_err2 = stderr.read().decode()
@@ -154,9 +172,8 @@ class RemoteWarReplaceWorker(object):
             self.success_status = "backup_failed"
             print('Error e1:', e3)
         if not self.have_error:
-            print("{0} Info: {1} Backup old file success~\ncp -r {2} {3}".format(
-                datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), self.remote_server,
-                os.path.join(self._dstdir, self._items), self._backup_ver))
+            print("{0} Info: {1} Backup old file success~".format(
+                datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), self.remote_server, ))
             self.success_status = "backup_success"
 
     def stop_tomcat(self):
@@ -164,10 +181,13 @@ class RemoteWarReplaceWorker(object):
         try:
             # 检查进程
             stdin, stdout, stderr = self.ssh.exec_command("""
-                            ps -ef|grep java |grep -v 'grep'|grep {0}/conf 
+                            ps -ef|grep java |grep -v grep|grep {0}/conf 
                         """.format(os.path.dirname(self._dstdir)))
             err_str1 = stderr.read().decode()
-            stdout_str = stdout.read().decode()
+            stdout_str = stdout.read().decode().strip()
+            if len(stdout_str) == 0:
+                print("{0}   Info: {1}检测tomcat进程未启动")
+                return None     # 跳出stop函数
             print("{0}   Info: {1}检测tomcat进程详情为\n{2}".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                                                              self.remote_server, stdout_str))
             if err_str1 != '':
@@ -176,7 +196,7 @@ class RemoteWarReplaceWorker(object):
             print("{0}   Info: {1} Start kill {2} java进程, continue".format(
                 datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), self.remote_server, self._dstdir))
             stdin, stdout, stderr = self.ssh.exec_command(
-                """ps -ef|grep java |grep {0}/conf """.format(os.path.dirname(self._dstdir)) +
+                """ps -ef|grep java |grep -v grep|grep {0}/conf """.format(os.path.dirname(self._dstdir)) +
                 "|awk '{print $2}' |xargs kill -9 ")
             err_str1 = stderr.read().decode()
             if err_str1 != '':
@@ -204,7 +224,7 @@ class RemoteWarReplaceWorker(object):
             err_str1 = stderr.read().decode()
             if err_str1 != '':
                 raise IOError(err_str1)
-            print("{0} Debug: {1} 启动tomcat ，操作详情 su {2} -c '{3}/bin/startup.sh' ".format(
+            print("{0}   Debug: {1} 启动tomcat ，操作详情 su {2} -c '{3}/bin/startup.sh' ".format(
                 datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), self.remote_server,
                 self.projectinfo_instance.runuser, os.path.dirname(self._dstdir)))
             stdin, stdout, stderr = self.ssh.exec_command(
@@ -223,7 +243,7 @@ class RemoteWarReplaceWorker(object):
             self.success_status = 'Start tomcat failure'
         if not self.have_error:
             self.success_status = 'pub_success'
-            print("{0} Info: {1} 启动tomcat完成，操作详情 su {2} -c '{3}/bin/startup.sh' ".format(
+            print("{0}   Info: {1} 启动tomcat完成，操作详情 su {2} -c '{3}/bin/startup.sh' ".format(
                 datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), self.remote_server,
                 self.projectinfo_instance.runuser, os.path.dirname(self._dstdir)))
 
@@ -237,15 +257,18 @@ class RemoteWarReplaceWorker(object):
                 "mv {0} {1}_mv_as_remove".format(os.path.join(self._dstdir, self._items), self._backup_ver))
             err_str1 = stderr.read().decode()
             if err_str1 != '':
-                print("{0}   Error: {1}移除tomcat异常，详情 mv {2} {3}_mv_as_remove".format(
+                print("{0}   Error: {1} 移除tomcat异常，详情 mv {2} {3}_mv_as_remove".format(
                     datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), self.remote_server,
                     os.path.join(self._dstdir, self._items), self._backup_ver))
                 self.start_tomcat()
                 raise IOError(err_str1)
-            print("{0} Info: {1}删(移)除{2}， 详情 mv {2} {3}_mv_as_remove".format(
+            print("{0}   Info: {1} 删(移)除{2}， 详情 mv {2} {3}_mv_as_remove".format(
                 datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), self.remote_server,
                 os.path.join(self._dstdir, self._items), self._backup_ver))
             # 更新webapps ，放入更新文件
+            print("{0}   Info: {1} 更新{2}, 详情 mv {3} {4}".format(
+                datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), self.remote_server, self._dstdir,
+                self._remote_unzipdir, self._dstdir))
             stdin, stdout, stderr = self.ssh.exec_command("""mv  {0} {1}""".format(self._remote_unzipdir, self._dstdir))
             err_str1 = stderr.read().decode()
             if err_str1 != '':
@@ -342,7 +365,7 @@ class RemoteWarReplaceWorker(object):
             self.start_tomcat()
             self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.success_status})
         self.redis_cli.delete(self._lockkey)
-        self.cleantmp()
+        # self.cleantmp()
         RecordOfwar.objects.filter(pk=self.records_instance.pk).update(
             backupsavedir=self._backup_ver, )  # 更新records 记录
         self.records_instance.refresh_from_db()  # 重新读取数据库值
