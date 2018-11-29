@@ -11,7 +11,9 @@
       "dst_file_path": "/var/www/html",
       "backup_file_dir": "/backup/mc",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "",
+      "runuser": "root"
     }
   },
   {
@@ -26,7 +28,9 @@
       "dst_file_path": "/var/www/html",
       "backup_file_dir": "/backup/mc",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "",
+      "runuser": "root"
     }
   },
   {
@@ -41,7 +45,9 @@
       "dst_file_path": "/var/www/html/mobile",
       "backup_file_dir": "/backup/mc",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "",
+      "runuser": "root"
     }
   },
   {
@@ -56,7 +62,9 @@
       "dst_file_path": "/var/www/html",
       "backup_file_dir": "/backup/mc",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "",
+      "runuser": "root"
     }
   },
   {
@@ -71,7 +79,9 @@
       "dst_file_path": "/var/www/html/xpt",
       "backup_file_dir": "/backup/md",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "",
+      "runuser": "root"
     }
   },
   {
@@ -86,7 +96,9 @@
       "dst_file_path": "/var/www/html/xpt",
       "backup_file_dir": "/backup/md",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "",
+      "runuser": "root"
     }
   },
   {
@@ -101,7 +113,9 @@
       "dst_file_path": "/var/www/html/xpt/mobile",
       "backup_file_dir": "/backup/md",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "",
+      "runuser": "root"
     }
   },
   {
@@ -116,7 +130,9 @@
       "dst_file_path": "/var/www/html/xpt",
       "backup_file_dir": "/backup/md",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "",
+      "runuser": "root"
     }
   },
   {
@@ -131,7 +147,9 @@
       "dst_file_path": "/var/www/html/static/app/android",
       "backup_file_dir": "/backup/mc/app",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "",
+      "runuser": "root"
     }
   },
   {
@@ -146,7 +164,9 @@
       "dst_file_path": "/var/www/html/static/app/ios",
       "backup_file_dir": "/backup/mc/app",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "",
+      "runuser": "root"
     }
   },
   {
@@ -161,7 +181,9 @@
       "dst_file_path": "/var/www/html/static/app/update",
       "backup_file_dir": "/backup/mc/app",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "",
+      "runuser": "root"
     }
   },
   {
@@ -176,7 +198,9 @@
       "dst_file_path": "/var/www/html/static/app",
       "backup_file_dir": "/backup/mc/app",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "",
+      "runuser": "root"
     }
   },
   {
@@ -191,7 +215,9 @@
       "dst_file_path": "/var/www/html/xpt/static/app/android",
       "backup_file_dir": "/backup/md/app",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "",
+      "runuser": "root"
     }
   },
   {
@@ -206,7 +232,9 @@
       "dst_file_path": "/var/www/html/xpt/static/app/android",
       "backup_file_dir": "/backup/md/app",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "",
+      "runuser": "root"
     }
   },
   {
@@ -221,7 +249,9 @@
       "dst_file_path": "/var/www/html/xpt/static/app/update",
       "backup_file_dir": "/backup/md/app",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "",
+      "runuser": "root"
     }
   },
   {
@@ -236,7 +266,9 @@
       "dst_file_path": "/var/www/html/xpt/static/app",
       "backup_file_dir": "/backup/md/app",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "",
+      "runuser": "root"
     }
   },
   {
@@ -251,7 +283,9 @@
       "dst_file_path": "/usr/local/tomcat8.5_sobet/webapps",
       "backup_file_dir": "/backup/mc/java_war",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "[\"WEB-INF/classes/application.properties\", \"WEB-INF/classes/applicationContext-pay.xml\", \"WEB-INF/classes/applicationContext-thirdparty.xml\", \"WEB-INF/classes/applicationContext.xml\", \"WEB-INF/classes/config.properties\", \"WEB-INF/classes/gateway-keys.propertes\", \"WEB-INF/classes/hosted.wsdl\", \"WEB-INF/classes/jubaopay.cer\", \"WEB-INF/classes/log4jdbc.properties\", \"WEB-INF/classes/logback.xml\", \"WEB-INF/classes/partnerTest.jks\", \"WEB-INF/classes/schema1.xsd\", \"WEB-INF/classes/schema2.xsd\", \"WEB-INF/classes/shanghu.pfx\", \"WEB-INF/classes/sso.properties\", \"WEB-INF/classes/test.pfx\", \"WEB-INF/classes/config/permission.xml\", \"WEB-INF/classes/config/ssoConfig.xml\", \"WEB-INF/classes/config/system.properties\"]",
+      "runuser": "root"
     }
   },
   {
@@ -266,7 +300,9 @@
       "dst_file_path": "/usr/local/tomcat8.5_lottery/webapps",
       "backup_file_dir": "/backup/mc/java_war",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "[\"WEB-INF/classes/applicationContext.xml\", \"WEB-INF/classes/httpurl.properties\", \"WEB-INF/classes/jedis.properties\", \"WEB-INF/classes/logback.xml\", \"WEB-INF/classes/lottery.properties\", \"WEB-INF/classes/permission.xml\", \"WEB-INF/classes/sso.properties\", \"WEB-INF/classes/res365/lotterySource365.xml\", \"WEB-INF/classes/jetty/webdefault-windows.xml\", \"WEB-INF/classes/conf/spring-datasource.xml\"]",
+      "runuser": "root"
     }
   },
   {
@@ -281,7 +317,9 @@
       "dst_file_path": "/usr/local/tomcat8.5_peak/webapps",
       "backup_file_dir": "/backup/mc/java_war",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "[\"WEB-INF/classes/application.properties\", \"WEB-INF/classes/config.properties\", \"WEB-INF/classes/logback.xml\"]",
+      "runuser": "root"
     }
   },
   {
@@ -296,7 +334,9 @@
       "dst_file_path": "/usr/local/tomcat8.5_sso/webapps",
       "backup_file_dir": "/backup/mc/java_war",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "[\"WEB-INF/classes/config/ssoConfig.xml\", \"WEB-INF/classes/applicationContext-http.xml\", \"WEB-INF/classes/applicationContext.xml\", \"WEB-INF/classes/logback.xml\", \"WEB-INF/classes/sso-api.properties\", \"WEB-INF/classes/sso-private.key\", \"WEB-INF/classes/sso-private.pem\", \"WEB-INF/classes/sso-public.key\", \"WEB-INF/classes/sso-public.pem\", \"WEB-INF/classes/sso.properties\"]",
+      "runuser": "root"
     }
   },
   {
@@ -311,7 +351,9 @@
       "dst_file_path": "/usr/local/tomcat8.5_query-center/webapps",
       "backup_file_dir": "/backup/mc/java_war",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "[\"WEB-INF/classes/applicationContext.xml\", \"WEB-INF/classes/logback.xml\", \"WEB-INF/classes/lottery.properties\", \"WEB-INF/classes/sso.properties\", \"WEB-INF/classes/jetty/webdefault-windows.xml\", \"WEB-INF/classes/conf/spring-datasource.xml\"]",
+      "runuser": "root"
     }
   },
   {
@@ -326,7 +368,9 @@
       "dst_file_path": "/usr/local/tomcat8.5_sport/webapps",
       "backup_file_dir": "/backup/mc/java_war",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "[\"WEB-INF/classes/credentials/VBETCNYTLE.key\", \"WEB-INF/classes/credentials/VBETCNYTLE.p12\", \"WEB-INF/classes/credentials/VBETCNYTLE.pass\", \"WEB-INF/classes/credentials/VBETCNYTLE.pem\", \"WEB-INF/classes/merchant/merchant.properties\", \"WEB-INF/classes/application.development.properties\", \"WEB-INF/classes/application.phtest.properties\", \"WEB-INF/classes/application.production.properties\", \"WEB-INF/classes/application.properties\", \"WEB-INF/classes/application.test.properties\", \"WEB-INF/classes/applicationContext-modules.xml\", \"WEB-INF/classes/applicationContext-habanero.xml\", \"WEB-INF/classes/applicationContext.xml\", \"WEB-INF/classes/logback.xml\", \"WEB-INF/classes/sso.properties\"]",
+      "runuser": "root"
     }
   },
   {
@@ -341,7 +385,9 @@
       "dst_file_path": "/usr/local/tomcat8.5_sporttask/webapps",
       "backup_file_dir": "/backup/mc/java_war",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "[\"WEB-INF/classes/ftp.properties\", \"WEB-INF/classes/applicationContext-habanero.xml\", \"WEB-INF/classes/credentials/VBETCNYTLE.key\", \"WEB-INF/classes/credentials/VBETCNYTLE.p12\", \"WEB-INF/classes/credentials/VBETCNYTLE.pass\", \"WEB-INF/classes/credentials/VBETCNYTLE.pem\", \"WEB-INF/classes/merchant/merchant.properties\", \"WEB-INF/classes/application.properties\", \"WEB-INF/classes/applicationContext-modules.xml\", \"WEB-INF/classes/applicationContext.xml\", \"WEB-INF/classes/logback.xml\", \"WEB-INF/classes/schedule/applicationContext-quartz-cron-local.xml\"]",
+      "runuser": "root"
     }
   },
   {
@@ -356,7 +402,9 @@
       "dst_file_path": "/usr/local/tomcat8.5_lottery-push/webapps",
       "backup_file_dir": "/backup/mc/java_war",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "[\"WEB-INF/classes/pushserver.properties\", \"WEB-INF/classes/logback.xml\"]",
+      "runuser": "root"
     }
   },
   {
@@ -371,7 +419,9 @@
       "dst_file_path": "/usr/local/tomcat8.5_im-push-server/webapps",
       "backup_file_dir": "/backup/mc/java_war",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "[\"WEB-INF/classes/config.properties\", \"WEB-INF/classes/logback-spring.xml\", \"WEB-INF/classes/application.yml\", \"WEB-INF/classes/application-online.yml\"]",
+      "runuser": "root"
     }
   },
   {
@@ -386,7 +436,9 @@
       "dst_file_path": "/usr/local/tomcat8.5_lottery-crawl/webapps",
       "backup_file_dir": "/backup/mc/java_war",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "[\"WEB-INF/classes/jdbc.properties\", \"WEB-INF/classes/logback.xml\"]",
+      "runuser": "root"
     }
   },
   {
@@ -401,7 +453,9 @@
       "dst_file_path": "/usr/local/tomcat8.5_lottery-draw-agent/webapps",
       "backup_file_dir": "/backup/mc/java_war",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "[\"WEB-INF/classes/award-agent.properties\", \"WEB-INF/classes/lottery.properties\", \"WEB-INF/classes/logback.xml\"]",
+      "runuser": "root"
     }
   },
   {
@@ -416,7 +470,9 @@
       "dst_file_path": "/usr/local/lottery-task-server/lib",
       "backup_file_dir": "/backup/mc/java_war",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "[\"conf/task-server.conf\", \"conf/logback.xml\", \"conf/log4j.properties\", \"var/conf/lottery/task-server.properties\", \"var/conf/lottery/lottery.properties\"]",
+      "runuser": "root"
     }
   },
   {
@@ -431,7 +487,9 @@
       "dst_file_path": "/usr/local/tomcat8.5_admin/webapps",
       "backup_file_dir": "/backup/mc/java_war",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "[\"WEB-INF/classes/application.properties\", \"WEB-INF/classes/config.properties\", \"WEB-INF/classes/configuration.xml\", \"WEB-INF/classes/log4j.properties\", \"WEB-INF/classes/system.properties\", \"WEB-INF/classes/ValidationMessages_zh_CN.properties\", \"WEB-INF/classes/ValidationMessages.properties\", \"WEB-INF/classes/spring/applicationContext-config.xml\", \"WEB-INF/classes/spring/applicationContext-datasource.xml\", \"WEB-INF/classes/spring/applicationContext-ibatis3-dao.xml\", \"WEB-INF/classes/spring/applicationContext-mq.xml\", \"WEB-INF/classes/spring/applicationContext-quartz.xml\", \"WEB-INF/classes/spring/applicationContext-redis.xml\", \"WEB-INF/classes/spring/applicationContext-resource.xml\", \"WEB-INF/classes/spring/applicationContext-service.xml\", \"WEB-INF/classes/spring/applicationContext-validator.xml\", \"ueditor/jsp/config.json\", \"ueditor/jsp/controller.jsp\"]",
+      "runuser": "root"
     }
   },
   {
@@ -446,7 +504,9 @@
       "dst_file_path": "/usr/local/tomcat8.5_lottery-admin/webapps",
       "backup_file_dir": "/backup/mc/java_war",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "[\"WEB-INF/classes/application.properties\", \"WEB-INF/classes/applicationContext-shiro.xml\", \"WEB-INF/classes/applicationContext.xml\", \"WEB-INF/classes/log4j.properties\", \"WEB-INF/classes/logback.xml\", \"WEB-INF/classes/mybatis-config.xml\", \"WEB-INF/classes/jetty/webdefault-windows.xml\", \"WEB-INF/classes/ehcache/ehcache-shiro.xml\"]",
+      "runuser": "root"
     }
   },
   {
@@ -461,7 +521,9 @@
       "dst_file_path": "/usr/local/tomcat8.5_lottery-quartz-job/webapps",
       "backup_file_dir": "/backup/mc/java_war",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "[\"WEB-INF/classes/applicationContext-datasource.xml\", \"WEB-INF/classes/applicationContext.xml\", \"WEB-INF/classes/logback.xml\", \"WEB-INF/classes/lottery.properties\", \"WEB-INF/classes/report.properties\", \"WEB-INF/classes/spring-mvc.xml\"]",
+      "runuser": "root"
     }
   },
   {
@@ -476,7 +538,9 @@
       "dst_file_path": "/usr/local/tomcat8.5_lottery-report-server/webapps",
       "backup_file_dir": "/backup/mc/java_war",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "[\"WEB-INF/classes/application.properties\", \"WEB-INF/classes/applicationContext-dao.xml\", \"WEB-INF/classes/applicationContext-datasource.xml\", \"WEB-INF/classes/applicationContext-quartz.xml\", \"WEB-INF/classes/applicationContext.xml\", \"WEB-INF/classes/logback.xml\", \"WEB-INF/classes/lottery.properties\", \"WEB-INF/classes/report.properties\", \"WEB-INF/classes/spring-mvc.xml\", \"WEB-INF/web.xml\", \"\"]",
+      "runuser": "root"
     }
   },
   {
@@ -491,7 +555,9 @@
       "dst_file_path": "/usr/local/xpt/tomcat8.5_sobet/webapps",
       "backup_file_dir": "/backup/md/java_war",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "[\"WEB-INF/classes/application.properties\", \"WEB-INF/classes/applicationContext-pay.xml\", \"WEB-INF/classes/applicationContext-thirdparty.xml\", \"WEB-INF/classes/applicationContext.xml\", \"WEB-INF/classes/config.properties\", \"WEB-INF/classes/gateway-keys.propertes\", \"WEB-INF/classes/hosted.wsdl\", \"WEB-INF/classes/jubaopay.cer\", \"WEB-INF/classes/log4jdbc.properties\", \"WEB-INF/classes/logback.xml\", \"WEB-INF/classes/partnerTest.jks\", \"WEB-INF/classes/schema1.xsd\", \"WEB-INF/classes/schema2.xsd\", \"WEB-INF/classes/shanghu.pfx\", \"WEB-INF/classes/sso.properties\", \"WEB-INF/classes/test.pfx\", \"WEB-INF/classes/config/permission.xml\", \"WEB-INF/classes/config/ssoConfig.xml\", \"WEB-INF/classes/config/system.properties\"]",
+      "runuser": "root"
     }
   },
   {
@@ -506,7 +572,9 @@
       "dst_file_path": "/usr/local/xpt/tomcat8.5_sobet/webapps",
       "backup_file_dir": "/backup/md/java_war",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "[\"WEB-INF/classes/applicationContext.xml\", \"WEB-INF/classes/httpurl.properties\", \"WEB-INF/classes/jedis.properties\", \"WEB-INF/classes/logback.xml\", \"WEB-INF/classes/lottery.properties\", \"WEB-INF/classes/permission.xml\", \"WEB-INF/classes/sso.properties\", \"WEB-INF/classes/res365/lotterySource365.xml\", \"WEB-INF/classes/jetty/webdefault-windows.xml\", \"WEB-INF/classes/conf/spring-datasource.xml\"]",
+      "runuser": "root"
     }
   },
   {
@@ -521,7 +589,9 @@
       "dst_file_path": "/usr/local/xpt/tomcat8.5_sobet/webapps",
       "backup_file_dir": "/backup/md/java_war",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "[\"WEB-INF/classes/application.properties\", \"WEB-INF/classes/config.properties\", \"WEB-INF/classes/logback.xml\"]",
+      "runuser": "root"
     }
   },
   {
@@ -536,7 +606,9 @@
       "dst_file_path": "/usr/local/xpt/tomcat8.5_sobet/webapps",
       "backup_file_dir": "/backup/md/java_war",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "[\"WEB-INF/classes/config/ssoConfig.xml\", \"WEB-INF/classes/applicationContext-http.xml\", \"WEB-INF/classes/applicationContext.xml\", \"WEB-INF/classes/logback.xml\", \"WEB-INF/classes/sso-api.properties\", \"WEB-INF/classes/sso-private.key\", \"WEB-INF/classes/sso-private.pem\", \"WEB-INF/classes/sso-public.key\", \"WEB-INF/classes/sso-public.pem\", \"WEB-INF/classes/sso.properties\"]",
+      "runuser": "root"
     }
   },
   {
@@ -551,7 +623,9 @@
       "dst_file_path": "/usr/local/xpt/tomcat8.5_sobet/webapps",
       "backup_file_dir": "/backup/md/java_war",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "[\"WEB-INF/classes/applicationContext.xml\", \"WEB-INF/classes/logback.xml\", \"WEB-INF/classes/lottery.properties\", \"WEB-INF/classes/sso.properties\", \"WEB-INF/classes/jetty/webdefault-windows.xml\", \"WEB-INF/classes/conf/spring-datasource.xml\"]",
+      "runuser": "root"
     }
   },
   {
@@ -566,7 +640,9 @@
       "dst_file_path": "/usr/local/xpt/tomcat8.5_sobet/webapps",
       "backup_file_dir": "/backup/md/java_war",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "[\"WEB-INF/classes/credentials/VBETCNYTLE.key\", \"WEB-INF/classes/credentials/VBETCNYTLE.p12\", \"WEB-INF/classes/credentials/VBETCNYTLE.pass\", \"WEB-INF/classes/credentials/VBETCNYTLE.pem\", \"WEB-INF/classes/merchant/merchant.properties\", \"WEB-INF/classes/application.development.properties\", \"WEB-INF/classes/application.phtest.properties\", \"WEB-INF/classes/application.production.properties\", \"WEB-INF/classes/application.properties\", \"WEB-INF/classes/application.test.properties\", \"WEB-INF/classes/applicationContext-modules.xml\", \"WEB-INF/classes/applicationContext-habanero.xml\", \"WEB-INF/classes/applicationContext.xml\", \"WEB-INF/classes/logback.xml\", \"WEB-INF/classes/sso.properties\"]",
+      "runuser": "root"
     }
   },
   {
@@ -581,7 +657,9 @@
       "dst_file_path": "/usr/local/xpt/tomcat8.5_sobet/webapps",
       "backup_file_dir": "/backup/md/java_war",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "[\"WEB-INF/classes/ftp.properties\", \"WEB-INF/classes/applicationContext-habanero.xml\", \"WEB-INF/classes/credentials/VBETCNYTLE.key\", \"WEB-INF/classes/credentials/VBETCNYTLE.p12\", \"WEB-INF/classes/credentials/VBETCNYTLE.pass\", \"WEB-INF/classes/credentials/VBETCNYTLE.pem\", \"WEB-INF/classes/merchant/merchant.properties\", \"WEB-INF/classes/application.properties\", \"WEB-INF/classes/applicationContext-modules.xml\", \"WEB-INF/classes/applicationContext.xml\", \"WEB-INF/classes/logback.xml\", \"WEB-INF/classes/schedule/applicationContext-quartz-cron-local.xml\"]",
+      "runuser": "root"
     }
   },
   {
@@ -596,7 +674,9 @@
       "dst_file_path": "/usr/local/xpt/tomcat8.5_sobet/webapps",
       "backup_file_dir": "/backup/md/java_war",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "[\"WEB-INF/classes/pushserver.properties\", \"WEB-INF/classes/logback.xml\"]",
+      "runuser": "root"
     }
   },
   {
@@ -611,7 +691,9 @@
       "dst_file_path": "/usr/local/xpt/tomcat8.5_sobet/webapps",
       "backup_file_dir": "/backup/md/java_war",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "[\"WEB-INF/classes/config.properties\", \"WEB-INF/classes/logback-spring.xml\", \"WEB-INF/classes/application.yml\", \"WEB-INF/classes/application-online.yml\"]",
+      "runuser": "root"
     }
   },
   {
@@ -626,7 +708,9 @@
       "dst_file_path": "/usr/local/xpt/tomcat8.5_sobet/webapps",
       "backup_file_dir": "/backup/md/java_war",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "[\"WEB-INF/classes/jdbc.properties\", \"WEB-INF/classes/logback.xml\"]",
+      "runuser": "root"
     }
   },
   {
@@ -641,7 +725,9 @@
       "dst_file_path": "/usr/local/xpt/tomcat8.5_sobet/webapps",
       "backup_file_dir": "/backup/md/java_war",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "[\"WEB-INF/classes/award-agent.properties\", \"WEB-INF/classes/lottery.properties\", \"WEB-INF/classes/logback.xml\"]",
+      "runuser": "root"
     }
   },
   {
@@ -656,7 +742,9 @@
       "dst_file_path": "/usr/local/xpt/tomcat8.5_sobet/webapps",
       "backup_file_dir": "/backup/md/java_war",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "[\"conf/task-server.conf\", \"conf/logback.xml\", \"conf/log4j.properties\", \"var/conf/lottery/task-server.properties\", \"var/conf/lottery/lottery.properties\"]",
+      "runuser": "root"
     }
   },
   {
@@ -671,7 +759,9 @@
       "dst_file_path": "/usr/local/xpt/tomcat8.5_sobet/webapps",
       "backup_file_dir": "/backup/md/java_war",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "[\"WEB-INF/classes/application.properties\", \"WEB-INF/classes/config.properties\", \"WEB-INF/classes/configuration.xml\", \"WEB-INF/classes/log4j.properties\", \"WEB-INF/classes/system.properties\", \"WEB-INF/classes/ValidationMessages_zh_CN.properties\", \"WEB-INF/classes/ValidationMessages.properties\", \"WEB-INF/classes/spring/applicationContext-config.xml\", \"WEB-INF/classes/spring/applicationContext-datasource.xml\", \"WEB-INF/classes/spring/applicationContext-ibatis3-dao.xml\", \"WEB-INF/classes/spring/applicationContext-mq.xml\", \"WEB-INF/classes/spring/applicationContext-quartz.xml\", \"WEB-INF/classes/spring/applicationContext-redis.xml\", \"WEB-INF/classes/spring/applicationContext-resource.xml\", \"WEB-INF/classes/spring/applicationContext-service.xml\", \"WEB-INF/classes/spring/applicationContext-validator.xml\", \"ueditor/jsp/config.json\", \"ueditor/jsp/controller.jsp\"]",
+      "runuser": "root"
     }
   },
   {
@@ -686,7 +776,9 @@
       "dst_file_path": "/usr/local/xpt/tomcat8.5_sobet/webapps",
       "backup_file_dir": "/backup/md/java_war",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "[\"WEB-INF/classes/application.properties\", \"WEB-INF/classes/applicationContext-shiro.xml\", \"WEB-INF/classes/applicationContext.xml\", \"WEB-INF/classes/log4j.properties\", \"WEB-INF/classes/logback.xml\", \"WEB-INF/classes/mybatis-config.xml\", \"WEB-INF/classes/jetty/webdefault-windows.xml\", \"WEB-INF/classes/ehcache/ehcache-shiro.xml\"]",
+      "runuser": "root"
     }
   },
   {
@@ -701,7 +793,9 @@
       "dst_file_path": "/usr/local/xpt/tomcat8.5_sobet/webapps",
       "backup_file_dir": "/backup/md/java_war",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "[\"WEB-INF/classes/applicationContext-datasource.xml\", \"WEB-INF/classes/applicationContext.xml\", \"WEB-INF/classes/logback.xml\", \"WEB-INF/classes/lottery.properties\", \"WEB-INF/classes/report.properties\", \"WEB-INF/classes/spring-mvc.xml\"]",
+      "runuser": "root"
     }
   },
   {
@@ -716,7 +810,43 @@
       "dst_file_path": "/usr/local/xpt/tomcat8.5_sobet/webapps",
       "backup_file_dir": "/backup/md/java_war",
       "validate_user": "-",
-      "ipaddress": 1
+      "ipaddress": 1,
+      "configs": "[\"WEB-INF/classes/application.properties\", \"WEB-INF/classes/applicationContext-dao.xml\", \"WEB-INF/classes/applicationContext-datasource.xml\", \"WEB-INF/classes/applicationContext-quartz.xml\", \"WEB-INF/classes/applicationContext.xml\", \"WEB-INF/classes/logback.xml\", \"WEB-INF/classes/lottery.properties\", \"WEB-INF/classes/report.properties\", \"WEB-INF/classes/spring-mvc.xml\", \"WEB-INF/web.xml\", \"\"]",
+      "runuser": "root"
+    }
+  },
+  {
+    "model": "cmdb.projectinfo",
+    "pk": 49,
+    "fields": {
+      "items": "wadmin",
+      "platform": "mc",
+      "platform_cn": "\u6469\u81e3",
+      "package_name": "wadmin.war",
+      "type": 1,
+      "dst_file_path": "/usr/local/tomcat8.0_admin/webapps",
+      "backup_file_dir": "/backup/mc/java_war",
+      "validate_user": "-",
+      "ipaddress": 1,
+      "configs": "[\"WEB-INF/classes/properties/jeeplus.properties\", \"WEB-INF/classes/properties/quartz.properties\", \"WEB-INF/classes/j2cache/j2cache.properties\"]",
+      "runuser": "root"
+    }
+  },
+  {
+    "model": "cmdb.projectinfo",
+    "pk": 50,
+    "fields": {
+      "items": "wadmin",
+      "platform": "md",
+      "platform_cn": "\u6469\u767b",
+      "package_name": "wadmin.war",
+      "type": 1,
+      "dst_file_path": "/usr/local/tomcat8.0_admin/webapps",
+      "backup_file_dir": "/backup/md/java_war",
+      "validate_user": "-",
+      "ipaddress": 1,
+      "configs": "[\"WEB-INF/classes/properties/jeeplus.properties\", \"WEB-INF/classes/properties/quartz.properties\", \"WEB-INF/classes/j2cache/j2cache.properties\"]",
+      "runuser": "root"
     }
   }
 ]

@@ -176,7 +176,8 @@
                     <!--start submenu -->
                     <ul>
                        {% comment %} <li><a href="{% url 'change_password' %}"><span class="title">项目发布</span></a></li>{% endcomment %}
-                        <li><a href="{% url 'autojar:deploy_list' %}"><span class="title">项目发布</span></a></li>
+                        <li><a href="{% url 'autojar:deploy_list' %}"><span class="title">Jar文件发布</span></a></li>
+                        <li><a href="{% url 'tmct_url_tag:list_all' %}"><span class="title">tomcat全量包发布</span></a></li>
                         <li><a href="{% url 'not_finish_page' %}"><span class="title">版本回滚</span></a></li>
                         <li><a href="{% url 'upload-new' %}"><span class="title">文件上传</span></a></li>
                     </ul><!--end /submenu -->

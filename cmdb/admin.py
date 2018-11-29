@@ -1,3 +1,5 @@
+from .models import ServerInfo, ProjectInfo
 from django.contrib import admin
 
-# Register your models here.
+admin.site.register(ServerInfo)
+admin.site.register(ProjectInfo)

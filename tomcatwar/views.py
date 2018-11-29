@@ -13,7 +13,7 @@ from fileupload.models import Fileupload
 from .models import RecordOfwar
 from cmdb.models import ProjectInfo
 from cmdb.mytools import file_as_byte_md5sum
-from cmdb.remotepubapp import RemoteAppReplaceWorker
+from cmdb.remotepubtomcatwar import RemoteWarReplaceWorker
 
 redis_for_app_cli = get_redis_connection("default")
 
@@ -21,6 +21,7 @@ redis_for_app_cli = get_redis_connection("default")
 class IndexView(generic.ListView):
     template_name = 'tomcatwar/tomcat_list.html'
     model = Fileupload
+
     # context_object_name = ''
 
     def get_queryset(self):
@@ -57,14 +58,13 @@ def list_detail(request, pk):
 
 @login_required
 def apppub(request, pk):
-    return HttpResponse('it is ok , tomcat war pub produce')
     """APP 文件发布过程"""
     pub_file = get_object_or_404(Fileupload, pk=pk)
     pjt_info = get_object_or_404(ProjectInfo, items=pub_file.app, platform=pub_file.platform,
                                  type=pub_file.type)
     record_id = '{0}:{1}:{2}:{3}'.format(pjt_info.platform, pjt_info.items, pub_file.type, pk)  # 唯一任务值mc_apk_4_pk
     pub_lock_key = '{0}:{1}:{2}:lock'.format(pjt_info.platform, pjt_info.items, pub_file.type, )  # 发布锁键值
-    pub_record, created = RecordOfApp.objects.get_or_create(record_id=record_id, items=pjt_info, defaults={
+    pub_record, created = RecordOfwar.objects.get_or_create(record_id=record_id, items=pjt_info, defaults={
         'pub_filemd5sum': file_as_byte_md5sum(pub_file.file.read())})
     if redis_for_app_cli.exists(pub_lock_key):  # 检查同类型任务发布锁定状态
         pub_lock = {'lock': True, 'pubtask': redis_for_app_cli.hget(pub_lock_key, 'lock_task').decode(),
@@ -77,8 +77,8 @@ def apppub(request, pk):
                        'alert-danger')
         messages.error(request,
                        '发布任务{0}尚未完成'.format(pub_lock['lock_task'], ), 'alert-danger')
-        pub_file_list = Fileupload.objects.filter(type=4).order_by('-id', '-create_date')
-        return render(request, 'frontapp/list_detail.html', {'pub_file_list': pub_file_list})  # 返回默认发布页面
+
+        return redirect(reverse('tmct_url_tag:file_detail', args=[pk, ]))  # 返回详情页面
 
     pub_record.pub_status = 1
     pub_record.pub_user = request.user.username
@@ -86,44 +86,44 @@ def apppub(request, pk):
     pub_file.status = 1
     pub_file.pubuser = request.user.username
     pub_file.save()
-    print('Start pub {} {}'.format(pub_file.platform, pub_file.app))
-    pub_task = RemoteAppReplaceWorker(pjt_info.ipaddress, pub_file, pjt_info, pub_record)
+    print('Start  pub {} {} tomcat war '.format(pub_file.platform, pub_file.app))
+    pub_task = RemoteWarReplaceWorker(pjt_info.ipaddress, pub_file, pjt_info, pub_record)
     threading_task = threading.Thread(target=pub_task.pip_run, )  # 多线程执行发布过程
     threading_task.start()
-    return redirect(reverse('frontapp:file_detail', args=[pk, ]))
+    messages.error(request, '提交发布任务成功，任务发布中', 'alert-success')
+    return redirect(reverse('tmct_url_tag:file_detail', args=[pk, ]))
 
 
 @login_required
 def approllback(request, pk):
-    return HttpResponse('it is ok , tomcat war return produce ')
     pub_file = get_object_or_404(Fileupload, pk=pk)
     pjt_info = get_object_or_404(ProjectInfo, items=pub_file.app, platform=pub_file.platform,
                                  type=pub_file.type)
     record_id = '{0}:{1}:{2}:{3}'.format(pjt_info.platform, pjt_info.items, pub_file.type, pk)  # 唯一任务值mc_apk_4_pk
     pub_lock_key = '{0}:{1}:{2}:lock'.format(pjt_info.platform, pjt_info.items, pub_file.type, )  # 发布锁键值
-    pub_record, created = RecordOfApp.objects.get_or_create(record_id=record_id, items=pjt_info, defaults={
+    pub_record, created = RecordOfwar.objects.get_or_create(record_id=record_id, items=pjt_info, defaults={
         'pub_filemd5sum': file_as_byte_md5sum(pub_file.file.read())})
-
-    if pub_record.pub_status != 2 and pub_file.status != 2:
-        messages.error(request,
-                       '当前版本发布内容非发布完成状态，请选择正确的回滚版本',
-                       'alert-danger')
-        return redirect(reverse('frontapp:file_detail', args=[pk, ]))
-    if pub_record.pub_status != 2 and pub_file.status == 2:
-        messages.error(request, '当前版本回滚失败', 'alert-danger')
-        return redirect(reverse('frontapp:file_detail', args=[pk, ]))
     if redis_for_app_cli.exists(pub_lock_key):  # 检查同类型任务发布锁定状态
         messages.error(request,
                        '当前{0}-{1}发布通道被占用，请稍后重试'.format(pjt_info.platform, pjt_info.items, ),
                        'alert-danger')
+        return redirect(reverse('tmct_url_tag:file_detail', args=[pk, ]))
+    if pub_record.pub_status != 2 and pub_file.status != 2:
+        messages.error(request,
+                       '当前版本发布内容非发布完成状态，请选择正确的回滚版本',
+                       'alert-danger')
+        return redirect(reverse('tmct_url_tag:file_detail', args=[pk, ]))
+    if pub_record.pub_status != 2 and pub_file.status == 2:
+        messages.error(request, '当前版本回滚失败', 'alert-danger')
         return redirect(reverse('frontapp:file_detail', args=[pk, ]))
-    backup_ver = os.path.dirname(pub_record.backup_file)
-    pub_task = RemoteAppReplaceWorker(pjt_info.ipaddress, pub_file, pjt_info, pub_record, backup_ver=backup_ver)
+
+    backup_ver = pub_record.backupsavedir
+    pub_task = RemoteWarReplaceWorker(pjt_info.ipaddress, pub_file, pjt_info, pub_record, backup_ver=backup_ver)
     if not pub_task.checkbackdir():
         messages.error(request, '当前版本备份文件不存在，无法回滚', 'alert-danger')
         return redirect(reverse('frontapp:file_detail', args=[pk, ]))
     pub_record.pub_status = 4
     pub_record.save()
-    threading_task = threading.Thread(target=pub_task.rollback(), )  # 多线程执行发布过程
+    threading_task = threading.Thread(target=pub_task.rollback_run(), )  # 多线程执行发布过程
     threading_task.start()
     return redirect(reverse('frontapp:file_detail', args=[pk, ]))
