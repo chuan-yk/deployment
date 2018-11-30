@@ -131,7 +131,7 @@ class RemoteWarReplaceWorker(object):
             self._remote_filename = os.path.join(self._tmpdir, self.fileupload_instace.slug)
             self._remote_unzipdir = os.path.join(self._tmpdir, self._items)
             self.sftp.put(self._fromfile, self._remote_filename)
-            self.mylogway("上传文件 {} 至 {}".format(self._dstdir, self._tmpdir), level="Debug")
+            self.mylogway("上传文件 {} 至 {}".format(self._fromfile, self._tmpdir), level="Debug")
             self.myexecute("""if [ `which unzip 2>/dev/null`'x' == 'x' ]; then 
                 yum install -y unzip ; fi ;
                 mkdir -p {0};
@@ -153,8 +153,7 @@ class RemoteWarReplaceWorker(object):
             self.have_error = True
             self.error_reason = str(e1)
             self.success_status = "unzip_failed"
-            print('Error e1:', e1)
-            print("Error: ", "远程解压War文件过程异常")
+            self.mylogway("远程解压War文件过程异常, 详情 {}".format(e1), level="Error")
         if not self.have_error:
             self.success_status = 'unziped_success'
 
@@ -162,7 +161,7 @@ class RemoteWarReplaceWorker(object):
         self.ssh = self.remote_server.get_sshclient()
         try:
             self.myexecute("mkdir -p {0} {0}_mv_as_remove; chown -R {1}:{1} {0} {0}_mv_as_remove".format(
-                                                                self._backup_ver, self.projectinfo_instance.runuser))
+                self._backup_ver, self.projectinfo_instance.runuser))
             self.myexecute("cp -r {0} {1}".format(os.path.join(self._dstdir, self._items), self._backup_ver))
         except Exception as e3:
             self.have_error = True
@@ -170,7 +169,7 @@ class RemoteWarReplaceWorker(object):
             self.success_status = "backup_failed"
             print('Error e1:', e3)
         if not self.have_error:
-            self.mylogway("备份文件完成: {}".format(self._backup_ver))
+            self.mylogway("备份文件完成: {}".format(self._backup_ver), level="Info")
             self.success_status = "backup_success"
 
     def stop_tomcat(self):
@@ -178,9 +177,9 @@ class RemoteWarReplaceWorker(object):
         try:
             # 检查进程
             tpro = self.myexecute("ps -ef|grep java |grep -v grep|grep {0}/conf ".format(os.path.dirname(self._dstdir)))
-            self.mylogway("检测tomcat进程为{}".format(': \n' + str(tpro)), level="Info")
-            if len(tpro):
-                self.mylogway("当前{} JAVA 进程未启动，跳出 stop 函数".format(self.fileupload_instace.slug))
+            self.mylogway("进程返回结果长度为：{}, 检测tomcat进程为{}".format(len(tpro), ': \n' + str(tpro)), level="Info")
+            if not len(tpro):
+                self.mylogway("当前{} JAVA 进程未启动，跳出 stop 函数".format(self.fileupload_instace.slug), level="Info")
                 return None  # 进程未启动，跳出stop
             # 结束tomcat进程
             self.myexecute("ps -ef|grep java |grep -v grep|grep {0}/conf".format(self._dstdir) +
@@ -218,9 +217,11 @@ class RemoteWarReplaceWorker(object):
             # 删除webapps下旧项目
             self.myexecute("mv {0} {1}_mv_as_remove".format(os.path.join(self._dstdir, self._items), self._backup_ver))
             try:
-                self.sftp("mv  {0} {1}".format(self._remote_unzipdir, self._dstdir))
+                self.myexecute("mv  {0} {1}".format(self._remote_unzipdir, self._dstdir))
             except Exception as e:
                 self.mylogway("更新文件过程异常，详情{}\n开始自动还原...".format(e), level="Error")
+                self.have_error = True
+                self.error_reason = str(e)
                 self.autoturnback()
                 self.start_tomcat()
 
@@ -269,9 +270,9 @@ class RemoteWarReplaceWorker(object):
             if len(self._tmpdir) < 4:
                 raise IOError("远程临时目录变量 {} 为空，无法删除".format(self._tmpdir))
             self.myexecute("rm -rf {}".format(self._tmpdir))
-            self.mylogway("删除文件临时目录完成， {}".format(self._tmpdir))
+            self.mylogway("删除文件临时目录完成， {}".format(self._tmpdir), level="Info")
         except Exception as e:
-            self.mylogway("删除文件临时目录失败，原因{}".format(self._tmpdir))
+            self.mylogway("删除文件临时目录失败，原因{}".format(self._tmpdir), level="Error")
 
     def pip_run(self):
 
@@ -308,11 +309,11 @@ class RemoteWarReplaceWorker(object):
             Fileupload.objects.filter(pk=self.fileupload_instace.pk).update(status=-1, )  # 修改发布状态
             self.redis_cli.hmset(self.record_id, {'error_detail': self.success_status + ': ' + self.error_reason})
             self.redis_cli.expire(self.record_id, 60 * 60 * 24 * 14)
-            self.mylogway("发布流程结束，发布任务失败!!!")
+            self.mylogway("发布流程结束，发布任务失败!!!", level="Error")
         else:
             RecordOfwar.objects.filter(pk=self.records_instance.pk).update(pub_status=2, )  # 修改发布状态
             Fileupload.objects.filter(pk=self.fileupload_instace.pk).update(status=2, )  # 修改发布状态
-            self.mylogway("发布流程结束，发布任务成功!!!")
+            self.mylogway("发布流程结束，发布任务成功!!!", level="Info")
 
     def rollback_run(self):
         self.ssh = self.remote_server.get_sshclient()
