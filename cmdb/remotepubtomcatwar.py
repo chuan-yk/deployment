@@ -18,9 +18,12 @@ class RemoteWarReplaceWorker(object):
         fileupload_instace: 文件上传行内容
         backup_ver: 备份所在文件夹
         """
-        # Debug #fileupload_instace = Fileupload.objects.get(pk=11)
-        # Debug #projectinfo_instance = fileupload_instace.project
-        # Debug #records_instance = RecordOfwar.objects.get(pk=2)
+        # Debug #
+        fileupload_instace = Fileupload.objects.get(pk=11)
+        # Debug #
+        projectinfo_instance = fileupload_instace.project
+        # Debug #
+        records_instance = RecordOfwar.objects.get(pk=2)
         self.remote_server = serverinfo_instance
         self.fileupload_instace = fileupload_instace
         self.projectinfo_instance = projectinfo_instance
@@ -47,8 +50,8 @@ class RemoteWarReplaceWorker(object):
         self.pub_type = fileupload_instace.type  # 发布类型 1：静态文件
         self.record_id = self.records_instance.record_id  # '{0}:{1}:{2}:{3}'.format(self._pjtname, self._items, self.pub_type, self._pk)
         self._lockkey = '{}:{}:{}:lock'.format(self._pjtname, self._items, self.pub_type)
-        self.ssh = None
-        self.sftp = None
+        self.ssh = self.remote_server.get_sshclient()
+        self.sftp = self.remote_server.get_xftpclient()
         # print("debug class init:", self.shouldbackdir)
 
     def checkfiledetail(self):
@@ -61,7 +64,6 @@ class RemoteWarReplaceWorker(object):
                 self.md5dict[rkey.decode()] = rvalue.decode()
             self.cleantmp()
             return self.md5dict
-
         try:
             shutil.unpack_archive(self._fromfile, extract_dir=self._tmpdir, format='zip')
             if not os.path.isdir(os.path.join(self._tmpdir, '_dist')):
@@ -99,44 +101,58 @@ class RemoteWarReplaceWorker(object):
         self.cleantmp()
         return self.md5dict
 
+    def mylogway(self, logstr, level="Error"):
+        # if level.capitalize() in ["Error", "Info", ]:  # 调整日志级别
+        if level.capitalize() in ["Error", "Info", "Debug", ]:  # 调整日志级别
+            print("{0}   [{1}]: {2} {3} {4}".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), level,
+                                                    self.remote_server, self.record_id, logstr))
+
+    def myexecute(self, cmd, stdinstr=''):
+        """远程命令执行，检测执行结果"""
+        self.mylogway("执行远程命令: {} , 交互参数 stdin = {}".format(cmd, stdinstr), "Debug")
+        stdin, stdout, stderr = self.ssh.exec_command(cmd)
+        if stdinstr != '':  # stdin. write in
+            pass
+        stdout_str = stdout.read().decode().strip()
+        stderr_str = stderr.read().decode()
+        if stderr_str != '':
+            self.mylogway("执行远程命令失败: {} , 交互参数 stdin = {}".format(cmd, stdinstr), "Error")
+            raise IOError(stderr_str)
+        return stdout_str
+
     def make_ready(self):
-        self.ssh = self.remote_server.get_sshclient()
-        self.sftp = self.remote_server.get_xftpclient()
+
         try:
-            print("{0}   Info: {1} 创建文件夹 mktemp -t -d upload_{2}_{3}_.XXXX ".format(
-                datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                self.remote_server, self._pjtname, self._items))
-            stdin, stdout, stderr = self.ssh.exec_command("mktemp -t -d upload_{}_{}_.XXXX".format(self._pjtname,
-                                                                                                   self._items))
-            err_str1 = stderr.read().decode()
-            if err_str1 != '':
-                raise IOError(err_str1)
-            self._tmpdir = stdout.read().decode().strip()
-            print("{0}   Info: {1} 创建临时目录成功: {2}, 开始上传".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                                                               self.remote_server, self._tmpdir))
+            # 检测webapps配置文件是否完整
+            for configfile in self.configlist:
+                if not self.remote_server.if_exist_file(os.path.join(self._dstdir, self._items, configfile)):
+                    self.mylogway("{} not Exist, 请检查发布项目是否正确", level="Error")
+                    raise IOError("Project_info config file list not match, 请检查配置文件是否缺失或项目不匹配")
+            # 上传&解压
+            self.remote_server.if_exist_file()
+            self._tmpdir = self.myexecute("mktemp -t -d upload_{}_{}_.XXXX".format(self._pjtname, self._items))
+            self.mylogway("远程服务器临时文件夹 {}".format(self._tmpdir), level="Debug")
             self._remote_filename = os.path.join(self._tmpdir, self.fileupload_instace.slug)
             self._remote_unzipdir = os.path.join(self._tmpdir, self._items)
             self.sftp.put(self._fromfile, self._remote_filename)
-            stdin, stdout, stderr = self.ssh.exec_command("""if [ `which unzip 2>/dev/null`'x' == 'x' ]; then 
+            self.mylogway("上传文件 {} 至 {}".format(self._dstdir, self._tmpdir), level="Debug")
+            self.myexecute("""if [ `which unzip 2>/dev/null`'x' == 'x' ]; then 
                 yum install -y unzip ; fi ;
                 mkdir -p {0};
-                unzip -qo {1} -d {0}""".format(self._remote_unzipdir, self._remote_filename, ))
-            print("{0}   Info: {1} 创建临时目录成功: {2}".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                                                         self.remote_server, self._tmpdir))
-            err_str1 = stderr.read().decode()
-            if err_str1 != '':
-                raise IOError(err_str1)
-            print("{0}   Info: {1} 上传{2} 至 {3}完成 ".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                                                          self.remote_server, self.fileupload_instace.slug,
-                                                          self._remote_filename))
+                unzip -qo {1} -d {0}""".format(self._remote_unzipdir, self._remote_filename))
+            self.mylogway("解压文件成功， 临时目录{}".format(self._remote_filename), level="Debug")
+            # 配置文件更新
             for configfile in self.configlist:
-                self.ssh.exec_command(
-                    """/bin/cp {} {}""".format(os.path.join(self._dstdir, self._items, configfile),
-                                               os.path.join(self._remote_unzipdir, configfile)))
-                print("{0}   Info: {1} 配置 {2} 文件替换完成".format(
-                    datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                    self.remote_server, configfile))
-            #  配置文件修改功能在此补充
+                # 检查更新内容配置目录是否完整，谨慎为好
+                if not self.remote_server.if_exist_dir(
+                        os.path.dirname(os.path.join(os.path.join(self._dstdir, self._items, configfile)))):
+                    self.mylogway("更新包中不包含 {} 目录， 请检查更新包是否正确".format(configfile), level="Error")
+                    raise IOError("更新包无{}目录".format(configfile))
+                self.myexecute("""/bin/cp {} {}""".format(os.path.join(self._dstdir, self._items, configfile),
+                                                          os.path.join(self._remote_unzipdir, configfile)))
+            self.mylogway("覆盖配置文件完成", level="Info")
+
+            # 配置文件修改功能在此补充, vim ,sed ..
         except Exception as e1:
             self.have_error = True
             self.error_reason = str(e1)
@@ -172,7 +188,7 @@ class RemoteWarReplaceWorker(object):
             self.success_status = "backup_failed"
             print('Error e1:', e3)
         if not self.have_error:
-            print("{0} Info: {1} Backup old file success~".format(
+            print("{0}   Info: {1} Backup old file success~".format(
                 datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), self.remote_server, ))
             self.success_status = "backup_success"
 
@@ -180,36 +196,17 @@ class RemoteWarReplaceWorker(object):
         """停止tomcat进程"""
         try:
             # 检查进程
-            stdin, stdout, stderr = self.ssh.exec_command("""
-                            ps -ef|grep java |grep -v grep|grep {0}/conf 
-                        """.format(os.path.dirname(self._dstdir)))
-            err_str1 = stderr.read().decode()
-            stdout_str = stdout.read().decode().strip()
-            if len(stdout_str) == 0:
-                print("{0}   Info: {1}检测tomcat进程未启动")
-                return None     # 跳出stop函数
-            print("{0}   Info: {1}检测tomcat进程详情为\n{2}".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                                                             self.remote_server, stdout_str))
-            if err_str1 != '':
-                raise IOError(err_str1)
+            tpro = self.myexecute("ps -ef|grep java |grep -v grep|grep {0}/conf ".format(os.path.dirname(self._dstdir)))
+            self.mylogway("检测tomcat进程为{}".format(': \n' + str(tpro)), level="Info")
+            if len(tpro):
+                return None  # 进程未启动，跳出stop
             # 结束tomcat进程
-            print("{0}   Info: {1} Start kill {2} java进程, continue".format(
-                datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), self.remote_server, self._dstdir))
-            stdin, stdout, stderr = self.ssh.exec_command(
-                """ps -ef|grep java |grep -v grep|grep {0}/conf """.format(os.path.dirname(self._dstdir)) +
-                "|awk '{print $2}' |xargs kill -9 ")
-            err_str1 = stderr.read().decode()
-            if err_str1 != '':
-                raise IOError(err_str1)
-            print("{0}   Info: {1} kill {2} java进程成功, continue".format(
-                datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), self.remote_server, self._dstdir))
+            self.myexecute("ps -ef|grep java |grep -v grep|grep {0}/conf".format(self._dstdir) +
+                           "|awk '{print $2}' |xargs kill -9 ")
+            self.mylogway("kill {} java进程成功, continue".format(self.projectinfo_instance.items), level="Info")
         except Exception as e:
-            except_str = "{0}   Info: {1} 停止tomcat {2}进程失败\n{3}".format(
-                datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                self.remote_server, self._dstdir, str(e))
-            print(except_str)
             self.have_error = True
-            self.error_reason = except_str
+            self.mylogway("结束 tomcat 进程异常, 详情{}".format(e), level="Error")
             self.success_status = "stop tomcat failure"
         if not self.have_error:
             self.success_status = "stop tomcat successful"
@@ -219,96 +216,52 @@ class RemoteWarReplaceWorker(object):
         self.ssh = self.remote_server.get_sshclient()
         try:
             # 检查目录赋权
-            stdin, stdout, stderr = self.ssh.exec_command(
-                "chown -R {0}:{0} {1}".format(self.projectinfo_instance.runuser, self._dstdir))
-            err_str1 = stderr.read().decode()
-            if err_str1 != '':
-                raise IOError(err_str1)
-            print("{0}   Debug: {1} 启动tomcat ，操作详情 su {2} -c '{3}/bin/startup.sh' ".format(
-                datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), self.remote_server,
-                self.projectinfo_instance.runuser, os.path.dirname(self._dstdir)))
-            stdin, stdout, stderr = self.ssh.exec_command(
-                "su {0} -c '{1}/bin/startup.sh'".format(self.projectinfo_instance.runuser,
-                                                        os.path.dirname(self._dstdir)))
-            err_str1 = stderr.read().decode()
-            if err_str1 != '':
-                raise IOError(err_str1)
+            self.myexecute("chown -R {0}:{0} {1}".format(self.projectinfo_instance.runuser, self._dstdir))
+            self.myexecute("su {0} -c '{1}/bin/startup.sh'".format(self.projectinfo_instance.runuser,
+                                                                   os.path.dirname(self._dstdir)))
+            pro = self.myexecute("ps -ef|grep java |grep -v grep|grep {0}/conf ".format(os.path.dirname(self._dstdir)))
+            if len(pro):
+                self.mylogway("启动tomcat 成功，新进程详情: \n{}".format(pro), level="Info")
         except Exception as e:
-            except_str = "{0}   Info: {1} 启动tomcat {2}进程失败\n{3}".format(
-                datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                self.remote_server, self._dstdir, str(e))
-            print(except_str)
+            self.mylogway("启动tomcat 进程失败,详情{}".format(e), 'Error')
             self.have_error = True
-            self.error_reason = except_str
+            self.error_reason = str(e)
             self.success_status = 'Start tomcat failure'
         if not self.have_error:
             self.success_status = 'pub_success'
-            print("{0}   Info: {1} 启动tomcat完成，操作详情 su {2} -c '{3}/bin/startup.sh' ".format(
-                datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), self.remote_server,
-                self.projectinfo_instance.runuser, os.path.dirname(self._dstdir)))
 
     def do_cover(self):
-        self.ssh = self.remote_server.get_sshclient()
-        self.sftp = self.remote_server.get_xftpclient()
         try:
             # 维护状态检测，在此补充
             # 删除webapps下旧项目
-            stdin, stdout, stderr = self.ssh.exec_command(
-                "mv {0} {1}_mv_as_remove".format(os.path.join(self._dstdir, self._items), self._backup_ver))
-            err_str1 = stderr.read().decode()
-            if err_str1 != '':
-                print("{0}   Error: {1} 移除tomcat异常，详情 mv {2} {3}_mv_as_remove".format(
-                    datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), self.remote_server,
-                    os.path.join(self._dstdir, self._items), self._backup_ver))
-                self.start_tomcat()
-                raise IOError(err_str1)
-            print("{0}   Info: {1} 删(移)除{2}， 详情 mv {2} {3}_mv_as_remove".format(
-                datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), self.remote_server,
-                os.path.join(self._dstdir, self._items), self._backup_ver))
-            # 更新webapps ，放入更新文件
-            print("{0}   Info: {1} 更新{2}, 详情 mv {3} {4}".format(
-                datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), self.remote_server, self._dstdir,
-                self._remote_unzipdir, self._dstdir))
-            stdin, stdout, stderr = self.ssh.exec_command("""mv  {0} {1}""".format(self._remote_unzipdir, self._dstdir))
-            err_str1 = stderr.read().decode()
-            if err_str1 != '':
-                print("{0} Error: {1} 更新文件失败，自动回滚，错误详情 mv {2} {3}".format(
-                    datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), self.remote_server, self._remote_unzipdir,
-                    self._dstdir))
+            self.myexecute("mv {0} {1}_mv_as_remove".format(os.path.join(self._dstdir, self._items), self._backup_ver))
+            try:
+                self.sftp("mv  {0} {1}".format(self._remote_unzipdir, self._dstdir))
+            except Exception as e:
+                self.mylogway("更新文件过程异常，详情{}\n开始自动还原...".format(e), level="Error")
                 self.autoturnback()
                 self.start_tomcat()
-                raise IOError(err_str1 + '更新文件移入webapps 出错，发布自动回滚并重启')
-            print("{0} Error: {1} 更新文件成功，操作详情 mv {2} {3}".format(
-                datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), self.remote_server, self._remote_unzipdir,
-                self._dstdir))
-        except FileNotFoundError as e:  # 捕获xftp put 过程目的文件夹不存在的异常
-            print('Sftp put file error', e)
-            self.have_error = True
-            self.error_reason = str(e)
-            self.success_status = 'do cover failed'
+
         except IOError as e1:
             self.have_error = True
             self.error_reason = str(e1)
             self.success_status = 'do cover failed'
         if not self.have_error:
+            self.mylogway("更新文件成功", level="Info")
             self.success_status = "restart successful"
 
     def autoturnback(self):
         """还原更新过程"""
-        stdin, stdout, stderr = self.ssh.exec_command(
-            """/bin/mv -b {0}/* {1}_mv_as_remove/ ;mv  {2} {0}""".format(self._dstdir, self._backup_ver,
-                                                                         os.path.join(self._backup_ver, self._items), ))
-        err_str1 = stderr.read().decode()
-        print("{0} Info: {1} 自动还原过程，操作详情 /bin/mv -b {2}/* {3}_mv_as_remove/ ;\n mv  {4} {2}".format(
-            datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), self.remote_server, self._dstdir, self._backup_ver,
-            os.path.join(self._backup_ver, self._items)))
-        if err_str1 != '':
-            print("{0} Info: {1} 发布异常，自动还原失败".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                                                     self.remote_server))
+        try:
+            self.myexecute("/bin/mv -b {0}/* {1}_mv_as_remove/ ;mv  {2} {0}".format(self._dstdir, self._backup_ver,
+                                                                                    os.path.join(self._backup_ver,
+                                                                                                 self._items), ))
+            self.mylogway("自动还原完成，已恢复初始状态 ！", level="Error")
+        except Exception as e:
+            self.mylogway("自动还原也失败了，运维看日志排查问题吧 ！", level="Error")
 
     def checkbackdir(self):
         """还原过程检查备份文件是否存在"""
-        self.ssh = self.remote_server.get_sshclient()
         if self.remote_server.if_exist_dir(os.path.join(self._backup_ver, self._items)):
             return True
         else:
@@ -316,30 +269,27 @@ class RemoteWarReplaceWorker(object):
 
     def rollback(self):
         """回滚"""
-        self.ssh = self.remote_server.get_sshclient()
         try:
-            print("{0} Info: {1} 创建目录 {2}_rollback".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                                                           self.remote_server, self._backup_ver))
-            stdin, stdout, stderr = self.ssh.exec_command("""mkdir -p  {0}_rollback; 
-                    chown -R {1}:{1}  {0}_rollback""".format(self._backup_ver, self.projectinfo_instance.runuser))
-            str_err2 = stderr.read().decode()
-            if str_err2 != "":
-                raise IOError(str_err2)
-            print("{0} Info: {1} 还原备份目录\n详情：/bin/cp -r {2} {3}".format(self.remote_server, self._dstdir,
-                                                                       os.path.join(self._backup_ver, self._items),
-                                                                       self._dstdir))
-            stdin, stdout, stderr = self.ssh.exec_command(
-                "/bin/cp -r {0} {1}".format(os.path.join(self._backup_ver, self._items), self._dstdir))
-            str_err2 = stderr.read().decode()
-            if str_err2 != "":
-                raise IOError(str_err2)
+            self.mylogway("创建目录 {}_rollback".format(self._backup_ver), level='Info')
+            self.myexecute("mkdir -p  {0}_rollback; chown -R {1}:{1}  {0}_rollback".format(
+                self._backup_ver, self.projectinfo_instance.runuser))
+            self.myexecute("/bin/mv -b {}/* {}_rollback/".format(self._dstdir, self._backup_ver))
+            self.myexecute("/bin/cp -r {0} {1}".format(os.path.join(self._backup_ver, self._items), self._dstdir))
         except Exception as e:
-            print("{0} {1}回滚过程异常:{2}".format(self.remote_server, self._dstdir, str(e)))
+            self.mylogway("回滚过程出现异常，原因{}".format(e), level="Info")
         if not self.have_error:
+            self.mylogway("回滚功能，回滚文件完成，下一步启动JAVA进程".format(e), level="Info")
             self.success_status = "roll file back success"
 
     def cleantmp(self):
-        shutil.rmtree(self._tmpdir)
+        # shutil.rmtree(self._tmpdir)
+        try:
+            if len(self._tmpdir) < 4:
+                raise IOError("远程临时目录变量 {} 为空，无法删除".format(self._tmpdir))
+            self.myexecute("rm -rf {}".format(self._tmpdir))
+            self.mylogway("删除文件临时目录完成， {}".format(self._tmpdir))
+        except Exception as e:
+            self.mylogway("删除文件临时目录失败，原因{}".format(self._tmpdir))
 
     def pip_run(self):
 
@@ -353,6 +303,9 @@ class RemoteWarReplaceWorker(object):
         Fileupload.objects.filter(pk=self.fileupload_instace.pk).update(status=1, )  # 修改发布状态
         self.redis_cli.hmset(self._lockkey, {'pub_current_status': 'upload file to Remote server'})  # 发布过程更新状态
         if not self.have_error:
+            self.make_ready()
+            self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.success_status})  # 发布过程更新状态
+        if not self.have_error:
             self.do_backup()
             self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.success_status})  # 发布过程更新状态
         if not self.have_error:
@@ -365,18 +318,19 @@ class RemoteWarReplaceWorker(object):
             self.start_tomcat()
             self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.success_status})
         self.redis_cli.delete(self._lockkey)
-        # self.cleantmp()
-        RecordOfwar.objects.filter(pk=self.records_instance.pk).update(
-            backupsavedir=self._backup_ver, )  # 更新records 记录
+        self.cleantmp()
+        RecordOfwar.objects.filter(pk=self.records_instance.pk).update(backupsavedir=self._backup_ver, )  # 更新records 记录
         self.records_instance.refresh_from_db()  # 重新读取数据库值
         if self.have_error:
             RecordOfwar.objects.filter(pk=self.records_instance.pk).update(pub_status=-1, )  # 修改发布状态
             Fileupload.objects.filter(pk=self.fileupload_instace.pk).update(status=-1, )  # 修改发布状态
             self.redis_cli.hmset(self.record_id, {'error_detail': self.success_status + ': ' + self.error_reason})
             self.redis_cli.expire(self.record_id, 60 * 60 * 24 * 14)
+            self.mylogway("发布流程结束，发布任务失败!!!")
         else:
             RecordOfwar.objects.filter(pk=self.records_instance.pk).update(pub_status=2, )  # 修改发布状态
             Fileupload.objects.filter(pk=self.fileupload_instace.pk).update(status=2, )  # 修改发布状态
+            self.mylogway("发布流程结束，发布任务成功!!!")
 
     def rollback_run(self):
         self.ssh = self.remote_server.get_sshclient()
@@ -402,9 +356,11 @@ class RemoteWarReplaceWorker(object):
         if self.have_error:
             RecordOfwar.objects.filter(pk=self.records_instance.pk).update(pub_status=-2)
             Fileupload.objects.filter(pk=self.fileupload_instace.pk).update(status=-2)
+            self.mylogway("回滚流程结束，回滚任务失败!!!")
         else:
             RecordOfwar.objects.filter(pk=self.records_instance.pk).update(pub_status=5)
             Fileupload.objects.filter(pk=self.fileupload_instace.pk).update(status=0)
+            self.mylogway("回滚流程结束，回滚任务成功!!!")
 
 # cache = TTLCache(maxsize=100, ttl=365*24*60*60)
 # @cached(cache)

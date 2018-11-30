@@ -86,7 +86,7 @@ def apppub(request, pk):
     pub_file.status = 1
     pub_file.pubuser = request.user.username
     pub_file.save()
-    print('Start  pub {} {} tomcat war '.format(pub_file.platform, pub_file.app))
+    print('Start  pub {} {} tomcat war, task: {}'.format(pub_file.platform, pub_file.app, record_id))
     pub_task = RemoteWarReplaceWorker(pjt_info.ipaddress, pub_file, pjt_info, pub_record)
     threading_task = threading.Thread(target=pub_task.pip_run, )  # 多线程执行发布过程
     threading_task.start()
@@ -115,15 +115,15 @@ def approllback(request, pk):
         return redirect(reverse('tmct_url_tag:file_detail', args=[pk, ]))
     if pub_record.pub_status != 2 and pub_file.status == 2:
         messages.error(request, '当前版本回滚失败', 'alert-danger')
-        return redirect(reverse('frontapp:file_detail', args=[pk, ]))
+        return redirect(reverse('tmct_url_tag:file_detail', args=[pk, ]))
 
     backup_ver = pub_record.backupsavedir
     pub_task = RemoteWarReplaceWorker(pjt_info.ipaddress, pub_file, pjt_info, pub_record, backup_ver=backup_ver)
     if not pub_task.checkbackdir():
         messages.error(request, '当前版本备份文件不存在，无法回滚', 'alert-danger')
-        return redirect(reverse('frontapp:file_detail', args=[pk, ]))
+        return redirect(reverse('tmct_url_tag:file_detail', args=[pk, ]))
     pub_record.pub_status = 4
     pub_record.save()
     threading_task = threading.Thread(target=pub_task.rollback_run(), )  # 多线程执行发布过程
     threading_task.start()
-    return redirect(reverse('frontapp:file_detail', args=[pk, ]))
+    return redirect(reverse('tmct_url_tag:file_detail', args=[pk, ]))
