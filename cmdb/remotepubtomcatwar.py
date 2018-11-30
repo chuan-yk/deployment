@@ -18,12 +18,9 @@ class RemoteWarReplaceWorker(object):
         fileupload_instace: 文件上传行内容
         backup_ver: 备份所在文件夹
         """
-        # Debug #
-        fileupload_instace = Fileupload.objects.get(pk=11)
-        # Debug #
-        projectinfo_instance = fileupload_instace.project
-        # Debug #
-        records_instance = RecordOfwar.objects.get(pk=2)
+        # Debug #fileupload_instace = Fileupload.objects.get(pk=11)
+        # Debug #projectinfo_instance = fileupload_instace.project
+        # Debug #records_instance = RecordOfwar.objects.get(pk=2)
         self.remote_server = serverinfo_instance
         self.fileupload_instace = fileupload_instace
         self.projectinfo_instance = projectinfo_instance
