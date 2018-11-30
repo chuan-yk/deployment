@@ -123,10 +123,9 @@ class RemoteWarReplaceWorker(object):
             # 检测webapps配置文件是否完整
             for configfile in self.configlist:
                 if not self.remote_server.if_exist_file(os.path.join(self._dstdir, self._items, configfile)):
-                    self.mylogway("{} not Exist, 请检查发布项目是否正确", level="Error")
+                    self.mylogway("{} not Exist, 请检查发布项目是否正确".format(configfile), level="Error")
                     raise IOError("Project_info config file list not match, 请检查配置文件是否缺失或项目不匹配")
             # 上传&解压
-            self.remote_server.if_exist_file()
             self._tmpdir = self.myexecute("mktemp -t -d upload_{}_{}_.XXXX".format(self._pjtname, self._items))
             self.mylogway("远程服务器临时文件夹 {}".format(self._tmpdir), level="Debug")
             self._remote_filename = os.path.join(self._tmpdir, self.fileupload_instace.slug)
@@ -162,31 +161,16 @@ class RemoteWarReplaceWorker(object):
     def do_backup(self):
         self.ssh = self.remote_server.get_sshclient()
         try:
-            print("{0}   Info: {1} 创建备份文件夹 mkdir -p {2} {2}_mv_as_remove".format(
-                datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                self.remote_server, self._backup_ver))
-            stdin, stdout, stderr = self.ssh.exec_command("""mkdir -p {0} {0}_mv_as_remove; 
-            chown -R {1}:{1} {0} {0}_mv_as_remove""".format(self._backup_ver, self.projectinfo_instance.runuser))
-            str_err2 = stderr.read().decode()
-            if str_err2 != "":
-                raise IOError(str_err2)
-            print("{0}   Info: {1} 备份文件 cp -r {2} {3}".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                                                              self.remote_server,
-                                                              os.path.join(self._dstdir, self._items),
-                                                              self._backup_ver))
-            stdin, stdout, stderr = self.ssh.exec_command(
-                """cp -r {0} {1}""".format(os.path.join(self._dstdir, self._items), self._backup_ver))
-            str_err2 = stderr.read().decode()
-            if str_err2 != "":
-                raise IOError(str_err2)
+            self.myexecute("mkdir -p {0} {0}_mv_as_remove; chown -R {1}:{1} {0} {0}_mv_as_remove".format(
+                                                                self._backup_ver, self.projectinfo_instance.runuser))
+            self.myexecute("cp -r {0} {1}".format(os.path.join(self._dstdir, self._items), self._backup_ver))
         except Exception as e3:
             self.have_error = True
             self.error_reason = str(e3)
             self.success_status = "backup_failed"
             print('Error e1:', e3)
         if not self.have_error:
-            print("{0}   Info: {1} Backup old file success~".format(
-                datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), self.remote_server, ))
+            self.mylogway("备份文件完成: {}".format(self._backup_ver))
             self.success_status = "backup_success"
 
     def stop_tomcat(self):
@@ -196,6 +180,7 @@ class RemoteWarReplaceWorker(object):
             tpro = self.myexecute("ps -ef|grep java |grep -v grep|grep {0}/conf ".format(os.path.dirname(self._dstdir)))
             self.mylogway("检测tomcat进程为{}".format(': \n' + str(tpro)), level="Info")
             if len(tpro):
+                self.mylogway("当前{} JAVA 进程未启动，跳出 stop 函数".format(self.fileupload_instace.slug))
                 return None  # 进程未启动，跳出stop
             # 结束tomcat进程
             self.myexecute("ps -ef|grep java |grep -v grep|grep {0}/conf".format(self._dstdir) +
