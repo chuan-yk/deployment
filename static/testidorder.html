@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title> tomcat全量包发布列表 | Django CMDB</title>
+
+    <!-- BEGIN META -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="keywords" content="your,keywords">
+    <meta name="description" content="Short explanation about this website">
+    <!-- END META -->
+    <style>
+        a {
+            color: #3333ff;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        a:hover {
+            color: #6666ff;
+        }
+    </style>
+
+    <!-- BEGIN STYLESHEETS ?? -->
+    <!-- <link href='http://fonts.googleapis.com/css?family=Roboto:300italic,400italic,300,400,500,700,900' rel='stylesheet' type='text/css'/> -->
+    <link type="text/css" rel="stylesheet" href="/static/css/bootstrap.css"/>
+    <link type="text/css" rel="stylesheet" href="/static/css/layout.css"/>
+    <link type="text/css" rel="stylesheet" href="/static/css/materialadmin.css"/>
+    <link type="text/css" rel="stylesheet" href="/static/css/font-awesome.min.css"/>
+    <link type="text/css" rel="stylesheet" href="/static/css/material-design-iconic-font.min.css"/>
+    <link type="text/css" rel="stylesheet" href="/static/css/libs/DataTables/jquery.dataTables.css"/>
+    <link type="text/css" rel="stylesheet" href="/static/css/libs/DataTables/extensions/dataTables.colVis.css"/>
+    <link type="text/css" rel="stylesheet"
+          href="/static/css/libs/DataTables/extensions/dataTables.tableTools.css"/>
+    <link type="text/css" rel="stylesheet" href="/static/css/libs/toastr/toastr.css"/>
+    <link type="text/css" rel="stylesheet" href="/static/css/print.css"/>
+    <!-- END STYLESHEETS -->
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+		<script type="text/javascript" src="../../assets/js/libs/utils/html5shiv.js?1403934957"></script>
+		<script type="text/javascript" src="../../assets/js/libs/utils/respond.min.js?1403934956"></script>
+		<![endif]-->
+</head>
+
+
+<body class="menubar-pin menubar-hoverable header-fixed "> <!--max sidemenu: menubar-pin -->
+
+<!-- BEGIN HEADER-->
+<header id="header">
+    <div class="headerbar">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="headerbar-left">
+            <ul class="header-nav header-nav-options">
+                <li class="header-nav-brand">
+                    <div class="brand-holder">
+                        <a href="/">
+
+                            <span class="text-lg text-light text-danger">运维自动化</span><span
+                                class="text-lg text-bold text-primary"> 发布辅助工具</span>
+                        </a>
+                    </div>
+                </li>
+                <li>
+                    <a class="btn btn-icon-toggle menubar-toggle" data-toggle="menubar" href="javascript:void(0);">
+                        <i class="fa fa-bars"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="headerbar-right">
+            <ul class="header-nav header-nav-profile">
+                <li class="dropdown">
+                    <a href="javascript:void(0);" class="dropdown-toggle ink-reaction" data-toggle="dropdown">
+								<span class="profile-info">
+									<h4 class="text-lg text-bold text-primary">Devops Application</h4>
+								</span>
+                    </a>
+                    <ul class="dropdown-menu animation-dock">
+                        <li class="dropdown-header">My profile</li>
+                        <li><a href="/users/change_password/">修改密码</a></li>
+                        <li class="divider"></li>
+                        <li><a href="/users/logout/"><i class="fa fa-fw fa-power-off text-danger"></i> 退出</a>
+                        </li>
+                    </ul><!--end .dropdown-menu -->
+                </li><!--end .dropdown -->
+            </ul><!--end .header-nav-profile -->
+        </div><!--end #header-navbar-collapse -->
+    </div>
+</header>
+<!-- END HEADER-->
+
+<!-- BEGIN BASE-->
+<div id="base">
+
+    <!-- BEGIN OFFCANVAS LEFT -->
+    <div class="offcanvas">
+    </div><!--end .offcanvas-->
+    <!-- END OFFCANVAS LEFT -->
+
+    <!-- BEGIN CONTENT-->
+    <div id="content">
+
+
+        <section>
+            <div class="section-body">
+                <!-- BEGIN DATATABLE 2 -->
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="card-head style-primary">
+                                <header>War文件发布列表</header>
+                                <div class="tools">
+                                    <a class="btn btn-icon-toggle btn-collapse"><i class="fa fa-angle-down"></i></a>
+                                    <a class="btn btn-icon-toggle btn-close"><i class="md md-close"></i></a>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table id="datatable1" class="table order-column hover">
+                                        <thead>
+                                        <tr>
+                                            <th>编号</th>
+                                            <th width="160px">文件名</th>
+                                            <th>平台</th>
+                                            <th>项目</th>
+                                            <th>时间</th>
+                                            <th>[禅道]任务编号</th>
+                                            <th>开发者描述</th>
+                                            <th>开发提交人员</th>
+                                            <th>发布人</th>
+                                            <th>状态</th>
+                                            <th width="260px" align="center">操作选项</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+
+                                        <tr class="gradeX">
+                                            <td>40</td>
+                                            <td>sobet2.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Dec. 3, 2018, 11:39 a.m.</td>
+                                            <td>108</td>
+                                            <td>sobet 全量包 发布测试22222</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/40/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/40/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>39</td>
+                                            <td>sobet2.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Dec. 3, 2018, 11:39 a.m.</td>
+                                            <td>108</td>
+                                            <td>sobet 全量包 发布测试22222</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/39/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/39/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>38</td>
+                                            <td>sobet2.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Dec. 3, 2018, 11:39 a.m.</td>
+                                            <td>108</td>
+                                            <td>sobet 全量包 发布测试22222</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/38/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/38/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>37</td>
+                                            <td>sobet2.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Dec. 3, 2018, 11:39 a.m.</td>
+                                            <td>108</td>
+                                            <td>sobet 全量包 发布测试22222</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/37/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/37/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>36</td>
+                                            <td>sobet2.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Dec. 3, 2018, 11:39 a.m.</td>
+                                            <td>108</td>
+                                            <td>sobet 全量包 发布测试22222</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/36/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/36/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>35</td>
+                                            <td>sobet2.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Dec. 3, 2018, 11:39 a.m.</td>
+                                            <td>108</td>
+                                            <td>sobet 全量包 发布测试22222</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/35/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/35/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>34</td>
+                                            <td>sobet2.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Dec. 3, 2018, 11:39 a.m.</td>
+                                            <td>108</td>
+                                            <td>sobet 全量包 发布测试22222</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/34/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/34/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>33</td>
+                                            <td>sobet2.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Dec. 3, 2018, 11:39 a.m.</td>
+                                            <td>108</td>
+                                            <td>sobet 全量包 发布测试22222</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/33/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/33/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>32</td>
+                                            <td>sobet2.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Dec. 3, 2018, 11:39 a.m.</td>
+                                            <td>108</td>
+                                            <td>sobet 全量包 发布测试22222</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/32/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/32/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>31</td>
+                                            <td>sobet2.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Dec. 3, 2018, 11:39 a.m.</td>
+                                            <td>108</td>
+                                            <td>sobet 全量包 发布测试22222</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/31/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/31/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>30</td>
+                                            <td>sobet2.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Dec. 3, 2018, 11:39 a.m.</td>
+                                            <td>108</td>
+                                            <td>sobet 全量包 发布测试22222</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/30/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/30/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>29</td>
+                                            <td>sobet2.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Dec. 3, 2018, 11:39 a.m.</td>
+                                            <td>108</td>
+                                            <td>sobet 全量包 发布测试22222</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/29/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/29/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>28</td>
+                                            <td>sobet2.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Dec. 3, 2018, 11:39 a.m.</td>
+                                            <td>108</td>
+                                            <td>sobet 全量包 发布测试22222</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/28/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/28/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>27</td>
+                                            <td>sobet2.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Dec. 3, 2018, 11:39 a.m.</td>
+                                            <td>108</td>
+                                            <td>sobet 全量包 发布测试22222</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/27/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/27/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>26</td>
+                                            <td>sobet2.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Dec. 3, 2018, 11:39 a.m.</td>
+                                            <td>108</td>
+                                            <td>sobet 全量包 发布测试22222</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/26/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/26/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>25</td>
+                                            <td>sobet2.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Dec. 3, 2018, 11:39 a.m.</td>
+                                            <td>108</td>
+                                            <td>sobet 全量包 发布测试22222</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/25/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/25/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>24</td>
+                                            <td>sobet2.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Dec. 3, 2018, 11:39 a.m.</td>
+                                            <td>108</td>
+                                            <td>sobet 全量包 发布测试22222</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/24/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/24/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>23</td>
+                                            <td>sobet2.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Dec. 3, 2018, 11:39 a.m.</td>
+                                            <td>108</td>
+                                            <td>sobet 全量包 发布测试22222</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/23/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/23/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>22</td>
+                                            <td>sobet2.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Dec. 3, 2018, 11:39 a.m.</td>
+                                            <td>108</td>
+                                            <td>sobet 全量包 发布测试22222</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/22/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/22/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>21</td>
+                                            <td>sobet2.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Dec. 3, 2018, 11:39 a.m.</td>
+                                            <td>108</td>
+                                            <td>sobet 全量包 发布测试22222</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/21/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/21/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>20</td>
+                                            <td>sobet2.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Dec. 3, 2018, 11:39 a.m.</td>
+                                            <td>108</td>
+                                            <td>sobet 全量包 发布测试22222</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/20/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/20/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>19</td>
+                                            <td>sobet2.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Dec. 3, 2018, 11:39 a.m.</td>
+                                            <td>108</td>
+                                            <td>sobet 全量包 发布测试22222</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/19/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/19/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>18</td>
+                                            <td>sobet2.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Dec. 3, 2018, 11:39 a.m.</td>
+                                            <td>108</td>
+                                            <td>sobet 全量包 发布测试22222</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/18/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/18/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>17</td>
+                                            <td>sobet2.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Dec. 3, 2018, 11:39 a.m.</td>
+                                            <td>108</td>
+                                            <td>sobet 全量包 发布测试22222</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/17/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/17/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>16</td>
+                                            <td>sobet2.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Dec. 3, 2018, 11:39 a.m.</td>
+                                            <td>108</td>
+                                            <td>sobet 全量包 发布测试22222</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/16/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/16/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>15</td>
+                                            <td>sobet2.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Dec. 3, 2018, 11:39 a.m.</td>
+                                            <td>108</td>
+                                            <td>sobet 全量包 发布测试22222</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/15/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/15/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>14</td>
+                                            <td>sobet2.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Dec. 3, 2018, 11:39 a.m.</td>
+                                            <td>108</td>
+                                            <td>sobet 全量包 发布测试22222</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/14/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/14/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>13</td>
+                                            <td>sobet2.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Dec. 3, 2018, 11:39 a.m.</td>
+                                            <td>108</td>
+                                            <td>sobet 全量包 发布测试22222</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/13/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/13/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>12</td>
+                                            <td>sobet2.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Dec. 3, 2018, 11:39 a.m.</td>
+                                            <td>108</td>
+                                            <td>sobet 全量包 发布测试22222</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/12/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/12/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>11</td>
+                                            <td>sobet2.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Dec. 3, 2018, 11:39 a.m.</td>
+                                            <td>108</td>
+                                            <td>sobet 全量包 发布测试22222</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/11/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/11/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>10</td>
+                                            <td>sobet2.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Dec. 3, 2018, 11:39 a.m.</td>
+                                            <td>108</td>
+                                            <td>sobet 全量包 发布测试22222</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/10/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/10/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>9</td>
+                                            <td>sobet2.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Dec. 3, 2018, 11:18 a.m.</td>
+                                            <td>110</td>
+                                            <td>sobxxxxxxxxxxxxxxxxxxxxxxxxx</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+
+                                            <td><span class="badge" style="background: #0ed616">
+                                                                    发布完成
+                                                                    </span></td>
+                                            <td>
+                                                <a href="#" class="btn  btn-info btn-rounded disabled">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/9/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="/tomcatwar/pub/9/return/"
+                                                   class="btn  btn-danger btn-rounded ">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>8</td>
+                                            <td>sobet2.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Dec. 3, 2018, 11:19 a.m.</td>
+                                            <td>108</td>
+                                            <td>sobet 全量包 发布测试22222</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/8/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/8/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+                                        </tr>
+                                        <tr class="gradeX">
+                                            <td>7</td>
+                                            <td>sobet.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Nov. 30, 2018, 4:19 p.m.</td>
+                                            <td>106</td>
+                                            <td>sobet war 发布测试xxxx</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/7/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/7/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>6</td>
+                                            <td>sobet.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Nov. 30, 2018, 4:14 p.m.</td>
+                                            <td>105</td>
+                                            <td>sobet 全量包发布测试5</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/6/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/6/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>5</td>
+                                            <td>sobet.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Nov. 30, 2018, 10:54 a.m.</td>
+                                            <td>104</td>
+                                            <td>xxxxxxxxx</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/5/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/5/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>4</td>
+                                            <td>sobet.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Nov. 30, 2018, 10:39 a.m.</td>
+                                            <td>103</td>
+                                            <td>sobet_23333333333333</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/4/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/4/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>2</td>
+                                            <td>sobet.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Nov. 30, 2018, 10:13 a.m.</td>
+                                            <td>103</td>
+                                            <td>sobet war 2222222</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/2/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/2/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        <tr class="gradeX">
+                                            <td>1</td>
+                                            <td>sobet.war</td>
+                                            <td>摩臣</td>
+                                            <td>sobet</td>
+                                            <td>Nov. 29, 2018, 5:39 p.m.</td>
+                                            <td>103</td>
+                                            <td>测试sobet war 发布 111111</td>
+                                            <td>dendi</td>
+                                            <td>
+                                                dendi
+                                            </td>
+
+                                            <td><span class="badge" style="background: #0aa89e">
+                                                                 待发布
+                                                            </span></td>
+                                            <td>
+                                                <a href="/tomcatwar/pub/1/do"
+                                                   class="btn  btn-info btn-rounded">发布<i
+                                                        class="md glyphicon glyphicon-play"></i></a>
+                                                <a href="/tomcatwar/list/1/detail/"
+                                                   class="btn  btn-primary btn-rounded">详情<i
+                                                        class="md glyphicon glyphicon-search"></i></a>
+                                                <a href="#" class="btn  btn-danger btn-rounded disabled">回滚<i
+                                                        class="md glyphicon glyphicon-remove"></i></a>
+                                            </td>
+
+
+                                        </tr>
+
+                                        </tbody>
+                                    </table>
+                                </div><!--end .table-responsive -->
+                            </div>
+                        </div>
+                    </div><!--end .col -->
+                </div><!--end .row -->
+                <!-- END DATATABLE 2 -->
+
+            </div><!--end .section-body -->
+        </section>
+
+
+    </div><!--end #content-->
+    <!-- END CONTENT -->
+
+    <!-- BEGIN MENUBAR-->
+    <div id="menubar" class="menubar-inverse ">
+        <div class="menubar-fixed-panel">
+            <div>
+                <a class="btn btn-icon-toggle btn-default menubar-toggle" data-toggle="menubar"
+                   href="javascript:void(0);">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+            <div class="expanded">
+                <a href="/">
+
+                    <span class="text-lg text-bold text-primary ">MATERIAL&nbsp;ADMIN</span>
+                </a>
+            </div>
+        </div>
+        <div class="menubar-scroll-panel">
+
+            <!-- BEGIN MAIN MENU -->
+            <ul id="main-menu" class="gui-controls">
+
+                <!-- BEGIN DASHBOARD -->
+                <li>
+
+                    <a href="/" class="active">
+                        <div class="gui-icon"><i class="md md-home"></i></div>
+                        <span class="title">菜单栏</span>
+                    </a>
+                </li><!--end /menu-li -->
+                <!-- END DASHBOARD -->
+
+                <!-- BEGIN ORDER -->
+                <li class="gui-folder">
+                    <a>
+                        <div class="gui-icon"><i class="fa fa-shopping-cart"></i></div>
+                        <span class="title">前端静态发布</span>
+                    </a>
+                    <!--start submenu -->
+                    <ul>
+
+                        <li><a href="/frontitems/list/"><span class="title">TK环境静态文件发布</span></a></li>
+                        <li><a href="/frontapp/list/"><span class="title">TK环境APP发布</span></a></li>
+                        <li><a href="/coming_soon"><span class="title">TK环境发布查询</span></a></li>
+
+                    </ul><!--end /submenu -->
+                </li><!--end /menu-li -->
+                <!-- END ORDER -->
+
+                <!-- BEGIN PROFILE -->
+                <li class="gui-folder">
+                    <a>
+                        <div class="gui-icon"><i class="fa fa-user"></i></div>
+                        <span class="title">TK环境JAVA应用发布</span>
+                    </a>
+                    <!--start submenu -->
+                    <ul>
+
+                        <li><a href="/autojar/deploy_list/"><span class="title">Jar文件发布</span></a></li>
+                        <li><a href="/tomcatwar/list/"><span class="title">tomcat全量包发布</span></a></li>
+                        <li><a href="/coming_soon"><span class="title">版本回滚</span></a></li>
+                        <li><a href="/upload/new/"><span class="title">文件上传</span></a></li>
+                    </ul><!--end /submenu -->
+                </li><!--end /menu-li -->
+                <!-- END PROFILE -->
+                <li class="gui-folder">
+                    <div class="gui-icon"><i class="fa fa-user"></i></div>
+                    <a href="/upload/new/"><span class="title">文件上传</span></a>
+
+                    <!--start submenu -->
+
+                </li><!--end /menu-li -->
+            </ul><!--end .main-menu -->
+            <!-- END MAIN MENU -->
+
+            <div class="menubar-foot-panel">
+                <small class="no-linebreak hidden-folded">
+                    <span class="opacity-75">Copyright &copy; 2018</span> <strong>INFTECH Solutions</strong>
+                </small>
+            </div>
+        </div><!--end .menubar-scroll-panel-->
+    </div><!--end #menubar-->
+    <!-- END MENUBAR -->
+
+</div><!--end #base-->
+<!-- END BASE -->
+
+<!-- BEGIN JAVASCRIPT -->
+<script src="/static/js/libs/jquery/jquery-1.11.2.min.js"></script>
+<script src="/static/js/libs/jquery/jquery-migrate-1.2.1.min.js"></script>
+<script src="/static/js/libs/bootstrap/bootstrap.min.js"></script>
+
+<script src="/static/js/libs/nanoscroller/jquery.nanoscroller.min.js"></script>
+
+<!-- DATATABLE -->
+<script src="/static/js/libs/DataTables/jquery.dataTables.min.js"></script>
+<script src="/static/js/libs/DataTables/extensions/ColVis/js/dataTables.colVis.min.js"></script>
+<script src="/static/js/libs/DataTables/extensions/TableTools/js/dataTables.tableTools.min.js"></script>
+<script src="/static/js/libs/toastr/toastr.js"></script>
+
+<script src="/static/js/core/App.js"></script>
+<script src="/static/js/core/AppNavigation.js"></script>
+<script src="/static/js/core/AppOffcanvas.js"></script>
+<script src="/static/js/core/AppCard.js"></script>
+<script src="/static/js/core/AppForm.js"></script>
+<script src="/static/js/core/AppVendor.js"></script>
+<script src="/static/js/core/Demo.js"></script>
+<script src="/static/js/core/DemoTableDynamic.js"></script>
+<!-- END JAVASCRIPT -->
+
+
+</body>
+</html>

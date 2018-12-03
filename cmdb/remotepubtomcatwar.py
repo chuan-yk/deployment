@@ -261,7 +261,7 @@ class RemoteWarReplaceWorker(object):
         except Exception as e:
             self.mylogway("回滚过程出现异常，原因{}".format(e), level="Info")
         if not self.have_error:
-            self.mylogway("回滚功能，回滚文件完成，下一步启动JAVA进程".format(e), level="Info")
+            self.mylogway("回滚功能，回滚文件完成，下一步启动JAVA进程", level="Info")
             self.success_status = "roll file back success"
 
     def cleantmp(self):

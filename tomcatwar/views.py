@@ -76,7 +76,7 @@ def apppub(request, pk):
                        '当前{0}-{1}发布通道被占用，请稍后重试'.format(pjt_info.platform, pjt_info.items, ),
                        'alert-danger')
         messages.error(request,
-                       '发布任务{0}尚未完成'.format(pub_lock['lock_task'], ), 'alert-danger')
+                       '发布任务{0}尚未完成'.format(pub_lock['pubtask'], ), 'alert-danger')
 
         return redirect(reverse('tmct_url_tag:file_detail', args=[pk, ]))  # 返回详情页面
 
@@ -86,7 +86,7 @@ def apppub(request, pk):
     pub_file.status = 1
     pub_file.pubuser = request.user.username
     pub_file.save()
-    print('Start  pub {} {} tomcat war, task: {}'.format(pub_file.platform, pub_file.app, record_id))
+    print('===   Start  pub {} {} tomcat war, task: {}'.format(pub_file.platform, pub_file.app, record_id))
     pub_task = RemoteWarReplaceWorker(pjt_info.ipaddress, pub_file, pjt_info, pub_record)
     threading_task = threading.Thread(target=pub_task.pip_run, )  # 多线程执行发布过程
     threading_task.start()
