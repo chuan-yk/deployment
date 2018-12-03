@@ -26,7 +26,7 @@ class IndexView(generic.ListView):
 
     def get_queryset(self):
         """Return the type=1 fileload record."""
-        return Fileupload.objects.filter(type=1).order_by("-create_date", )
+        return Fileupload.objects.filter(type=1).order_by("-pk", )
 
 
 @login_required

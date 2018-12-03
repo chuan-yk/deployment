@@ -182,7 +182,7 @@ class RemoteWarReplaceWorker(object):
                 self.mylogway("当前{} JAVA 进程未启动，跳出 stop 函数".format(self.fileupload_instace.slug), level="Info")
                 return None  # 进程未启动，跳出stop
             # 结束tomcat进程
-            self.myexecute("ps -ef|grep java |grep -v grep|grep {0}/conf".format(self._dstdir) +
+            self.myexecute("ps -ef|grep java |grep -v grep|grep {0}/conf".format(os.path.dirname(self._dstdir)) +
                            "|awk '{print $2}' |xargs kill -9 ")
             self.mylogway("kill {} java进程成功, continue".format(self.projectinfo_instance.items), level="Info")
         except Exception as e:
@@ -209,7 +209,7 @@ class RemoteWarReplaceWorker(object):
             self.error_reason = str(e)
             self.success_status = 'Start tomcat failure'
         if not self.have_error:
-            self.success_status = 'pub_success'
+            self.success_status = 'Start tomcat success'
 
     def do_cover(self):
         try:
@@ -231,7 +231,7 @@ class RemoteWarReplaceWorker(object):
             self.success_status = 'do cover failed'
         if not self.have_error:
             self.mylogway("更新文件成功", level="Info")
-            self.success_status = "restart successful"
+            self.success_status = "renew successful"
 
     def autoturnback(self):
         """还原更新过程"""
@@ -299,7 +299,7 @@ class RemoteWarReplaceWorker(object):
             self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.success_status})
         if not self.have_error:
             self.start_tomcat()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.success_status})
+            self.redis_cli.hmset(self._lockkey, {'pub_current_status': 'pub successful !'})
         self.redis_cli.delete(self._lockkey)
         self.cleantmp()
         RecordOfwar.objects.filter(pk=self.records_instance.pk).update(backupsavedir=self._backup_ver, )  # 更新records 记录
