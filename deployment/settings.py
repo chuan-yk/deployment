@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'fileupload',
     'frontapp',
     'tomcatwar',
+    'tomcatzip',
     # 'django.conf.OrdersConfig'
 ]
 

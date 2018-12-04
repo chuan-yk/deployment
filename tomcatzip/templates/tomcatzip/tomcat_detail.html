@@ -2,7 +2,7 @@
 
 {% load staticfiles %}
 
-{% block title %}发布文件详情{% endblock %}
+{% block title %}JAVA class 增量包发布文件详情{% endblock %}
 
 {% block body %}
 
@@ -34,7 +34,7 @@
                                 <div class="row">
                                     <div class="col-xs-8">
                                         <h1 class="text-light" style="margin-top: 0px; color: #f70b0b">运维自动化 <strong
-                                                class="text-accent-dark" style="color: #1ab394">{{ pub_file.app }} 全量包War文件发布</strong></h1>
+                                                class="text-accent-dark" style="color: #1ab394">{{ pub_file.app }} class 增量包文件发布</strong></h1>
                                     </div>
                                     <div class="col-xs-4 text-right">
                                         <h1 class="text-light text-default-light">详情展示</h1>
@@ -147,11 +147,11 @@
                                                     <td> 无</td>
                                                     <td class="text-right">当前可选操作:</td>
                                                     {% ifequal pub_record.pub_status 2 %}
-                                                        <td><a href="{% url 'tmct_url_tag:pub_return' pub_file.id %}"
+                                                        <td><a href="{% url 'tmct_zip_url_tag:pub_return' pub_file.id %}"
                                                                class="btn  btn-info btn-rounded">回滚<i
                                                                 class="md glyphicon glyphicon-play"></i></a></td>
                                                     {% else %}
-                                                        <td><a href="{% url 'tmct_url_tag:do_pub' pub_file.id %}"
+                                                        <td><a href="{% url 'tmct_zip_url_tag:do_pub' pub_file.id %}"
                                                                class="btn  btn-info btn-rounded">可发布<i
                                                                 class="md glyphicon glyphicon-play"></i></a></td>
                                                     {% endifequal %}

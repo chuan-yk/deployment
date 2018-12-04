@@ -1,8 +1,10 @@
+import json
+
 from django.db import models
 import paramiko
 
 key = "sshkey\\id_rsa"
-#key = "/root/.ssh/id_rsa"
+# key = "/root/.ssh/id_rsa"
 # pkey=paramiko.RSAKey.from_private_key_file(key,password='******')
 pkey = paramiko.RSAKey.from_private_key_file(key)
 
@@ -14,7 +16,7 @@ class ServerInfo(models.Model):
     username = models.CharField(max_length=50, default='root')
 
     def __str__(self):
-        return 'Info {}:{}'.format(self.ip, self.port)
+        return 'Server {}:{}'.format(self.ip, self.port)
 
     def connect(self):
         try:
@@ -31,7 +33,7 @@ class ServerInfo(models.Model):
             # Avoid duplicate links
             if self.sshclient.get_transport().is_active():
                 return self.sshclient
-        except AttributeError :
+        except AttributeError:
             self.connect()
             self.sshclient = paramiko.SSHClient()
             self.sshclient._transport = self.transport
@@ -62,23 +64,23 @@ class ServerInfo(models.Model):
         except:
             pass
 
-    def if_exist_dir(self,path):
+    def if_exist_dir(self, path):
         """check path is tag=(file or dir) , return True or false"""
         self.get_sshclient()
         command_argv = '-d'
         stdin, stdout, stderr = self.sshclient.exec_command('test {0} "{1}" && echo True'.format(command_argv, path))
-        #print('===debug ', stdout.read(), stdout.read().decode())
+        # print('===debug ', stdout.read(), stdout.read().decode())
         if stdout.read().decode() == 'True\n':
             return True
         else:
             return False
 
-    def if_exist_file(self,path):
+    def if_exist_file(self, path):
         """check path is tag=(file or dir) , return True or false"""
         self.get_sshclient()
         command_argv = '-f'
         stdin, stdout, stderr = self.sshclient.exec_command('test {0} "{1}" && echo True'.format(command_argv, path))
-        #print('===debug2 ', stdout.read(), stdout.read().decode())
+        # print('===debug2 ', stdout.read(), stdout.read().decode())
         if stdout.read().decode() == 'True\n':
             return True
         else:
@@ -88,7 +90,7 @@ class ServerInfo(models.Model):
 class ProjectInfo(models.Model):
 
     def __str__(self):
-        return '{}'.format(self.id)
+        return '{}:{}'.format(self.platform_cn, self.items)
 
     items = models.CharField(default='sobet', max_length=100, help_text='项目名称，如sobet，lottery，admin')
     platform = models.CharField(max_length=100, default='', help_text='平台名称，如MC\MD\CYQ')
@@ -96,6 +98,15 @@ class ProjectInfo(models.Model):
     package_name = models.CharField(max_length=100, default='', help_text='合法包名，允许字段为空')
     type = models.IntegerField(default='0', help_text='0 静态 1 全量war包 2 增量包 3 Jar包')
     dst_file_path = models.CharField(max_length=200, default='', help_text='文件发布路径')
-    backup_file_dir = models.CharField(max_length=200, default='')
+    backup_file_dir = models.CharField(max_length=200, default='', help_text='备份根目录，如/backup/mc')
     validate_user = models.CharField(max_length=500, default='', help_text='有权限发布的用户/用户组， 暂未使用')
     ipaddress = models.ForeignKey(ServerInfo, on_delete=models.CASCADE, default='1', help_text='服务器IP地址')
+    configs = models.CharField(max_length=3000, default='', help_text='项目配置文件信息')
+    runuser = models.CharField(max_length=100, default='root', help_text='文件属主或启动用户')
+
+    def input_configs(self, inputlist):
+        """inputlist:传入字符串，写入configs 字段"""
+        self.configs = json.dumps(inputlist)
+
+    def output_configs(self):
+        return json.loads(self.configs)
