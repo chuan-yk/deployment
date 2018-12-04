@@ -20,12 +20,9 @@ class RemoteZipReplaceWorker(object):
         fileupload_instace: 文件上传行内容
         backup_ver: 备份所在文件夹
         """
-        # Debug #
-        fileupload_instace = Fileupload.objects.get(pk=12)
-        # Debug #
-        projectinfo_instance = fileupload_instace.project
-        # Debug #
-        records_instance = RecordOfjavazip.objects.get(pk=1)
+        # Debug # fileupload_instace = Fileupload.objects.get(pk=12)
+        # Debug # projectinfo_instance = fileupload_instace.project
+        # Debug # records_instance = RecordOfjavazip.objects.get(pk=1)
         self.remote_server = serverinfo_instance
         self.fileupload_instace = fileupload_instace
         self.projectinfo_instance = projectinfo_instance
@@ -175,11 +172,11 @@ class RemoteZipReplaceWorker(object):
         except Exception as e1:
             self.have_error = True
             self.error_reason = str(e1)
-            self.process_status = "unzip_failed"
+            self.process_status.append("unzip_failed")
             self.mylogway("zip 文件不符合规范, 详情 {}".format(e1), level="Error")
 
         if not self.have_error:
-            self.process_status = 'unziped_success'
+            self.process_status.append('unziped_success')
 
     def do_backup(self):
         self.ssh = self.remote_server.get_sshclient()
@@ -192,7 +189,7 @@ class RemoteZipReplaceWorker(object):
         except Exception as e3:
             self.have_error = True
             self.error_reason = str(e3)
-            self.process_status = "backup_failed"
+            self.process_status.append("backup_failed")
             self.mylogway("备份文件失败: {}".format(e3), level="Error")
             return None
         # 新增文件夹在备份完成之后进行
@@ -206,7 +203,7 @@ class RemoteZipReplaceWorker(object):
             self.mylogway("新增文件夹需手动新建失败:" + str(e4))
             return None
         if not self.have_error:
-            self.process_status = "backup_success"
+            self.process_status.append("backup_success")
 
     def stop_tomcat(self):
         """停止tomcat进程"""
@@ -224,9 +221,9 @@ class RemoteZipReplaceWorker(object):
         except Exception as e:
             self.have_error = True
             self.mylogway("结束 tomcat 进程异常, 详情{}".format(e), level="Error")
-            self.process_status = "stop tomcat failure"
+            self.process_status.append("stop tomcat failure")
         if not self.have_error:
-            self.process_status = "stop tomcat successful"
+            self.process_status.append("stop tomcat successful")
 
     def start_tomcat(self):
         """Start tomcat , reuse"""
@@ -242,9 +239,9 @@ class RemoteZipReplaceWorker(object):
             self.mylogway("启动tomcat 进程失败,详情{}".format(e), 'Error')
             self.have_error = True
             self.error_reason = str(e)
-            self.process_status = 'Start tomcat failure'
+            self.process_status.append('Start tomcat failure')
         if not self.have_error:
-            self.process_status = 'Start tomcat success'
+            self.process_status.append('Start tomcat success')
 
     def do_cover(self):
         try:
@@ -262,7 +259,7 @@ class RemoteZipReplaceWorker(object):
             self.start_tomcat()
 
         if not self.have_error:
-            self.process_status = "renew successful"
+            self.process_status.append("renew successful")
 
     def autoturnback(self):
         """发布过程异常，还原更新过程，脏数据 mv 到 {self._backup_ver}_mv_as_remove"""
@@ -293,7 +290,7 @@ class RemoteZipReplaceWorker(object):
             self.mylogway("回滚过程出现异常，原因{}".format(e), level="Info")
         if not self.have_error:
             self.mylogway("回滚功能，回滚文件完成，下一步启动JAVA进程", level="Info")
-            self.process_status = "roll file back success"
+            self.process_status.append("roll file back success")
 
     def cleantmp(self):
         # shutil.rmtree(self._tmpdir)
@@ -322,16 +319,16 @@ class RemoteZipReplaceWorker(object):
         self.redis_cli.hmset(self._lockkey, {'pub_current_status': 'upload file to Remote server'})  # 发布过程更新状态
         if not self.have_error:
             self.make_ready()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.process_status})  # 发布过程更新状态
+            self.redis_cli.hmset(self._lockkey, {'pub_current_status': str(self.process_status)})  # 发布过程更新状态
         if not self.have_error:
             self.do_backup()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.process_status})  # 发布过程更新状态
+            self.redis_cli.hmset(self._lockkey, {'pub_current_status': str(self.process_status)})  # 发布过程更新状态
         if not self.have_error:
             self.stop_tomcat()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.process_status})
+            self.redis_cli.hmset(self._lockkey, {'pub_current_status': str(self.process_status)})
         if not self.have_error:
             self.do_cover()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.process_status})
+            self.redis_cli.hmset(self._lockkey, {'pub_current_status': str(self.process_status)})
         if not self.have_error:
             self.start_tomcat()
             self.redis_cli.hmset(self._lockkey, {'pub_current_status': 'pub successful !'})
@@ -344,7 +341,7 @@ class RemoteZipReplaceWorker(object):
         if self.have_error:
             RecordOfjavazip.objects.filter(pk=self.records_instance.pk).update(pub_status=-1, )     # 修改发布状态
             Fileupload.objects.filter(pk=self.fileupload_instace.pk).update(status=-1, )            # 修改发布状态
-            self.redis_cli.hmset(self.record_id, {'error_detail': self.process_status + ': ' + self.error_reason})
+            self.redis_cli.hmset(self.record_id, {'error_detail': str(self.process_status) + ': ' + self.error_reason})
             self.redis_cli.expire(self.record_id, 60 * 60 * 24 * 14)
             self.mylogway("发布流程结束，发布任务失败!!!", level="Error")
         else:
@@ -354,7 +351,7 @@ class RemoteZipReplaceWorker(object):
 
     def rollback_run(self):
         self.ssh = self.remote_server.get_sshclient()
-        self.process_status = "roll_back_Start"
+        self.process_status.append("roll_back_Start")
         self.redis_cli.hmset(self._lockkey, {'lock_task': self.record_id, 'starttime': self._operatingtime,
                                              'pub_user': self.records_instance.pub_user,
                                              'pub_current_status': 'Start pub...',
@@ -365,13 +362,13 @@ class RemoteZipReplaceWorker(object):
         RecordOfjavazip.objects.filter(pk=self.records_instance.pk).update(pub_status=4)
         if not self.have_error:
             self.stop_tomcat()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.process_status})
+            self.redis_cli.hmset(self._lockkey, {'pub_current_status': str(self.process_status)})
         if not self.have_error:
             self.rollback()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.process_status})
+            self.redis_cli.hmset(self._lockkey, {'pub_current_status': str(self.process_status)})
         if not self.have_error:
             self.start_tomcat()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.process_status})
+            self.redis_cli.hmset(self._lockkey, {'pub_current_status': str(self.process_status)})
         self.redis_cli.delete(self._lockkey)
         if self.have_error:
             RecordOfjavazip.objects.filter(pk=self.records_instance.pk).update(pub_status=-2)
@@ -380,7 +377,7 @@ class RemoteZipReplaceWorker(object):
         else:
             RecordOfjavazip.objects.filter(pk=self.records_instance.pk).update(pub_status=5)
             Fileupload.objects.filter(pk=self.fileupload_instace.pk).update(status=0)
-            self.mylogway("回滚流程结束，回滚任务成功!!!")
+            self.mylogway("回滚流程结束，回滚任务成功!!!", level='Info')
 
 # cache = TTLCache(maxsize=100, ttl=365*24*60*60)
 # @cached(cache)

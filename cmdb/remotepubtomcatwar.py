@@ -340,11 +340,11 @@ class RemoteWarReplaceWorker(object):
         if self.have_error:
             RecordOfwar.objects.filter(pk=self.records_instance.pk).update(pub_status=-2)
             Fileupload.objects.filter(pk=self.fileupload_instace.pk).update(status=-2)
-            self.mylogway("回滚流程结束，回滚任务失败!!!")
+            self.mylogway("回滚流程结束，回滚任务失败!!!", level='Error')
         else:
             RecordOfwar.objects.filter(pk=self.records_instance.pk).update(pub_status=5)
             Fileupload.objects.filter(pk=self.fileupload_instace.pk).update(status=0)
-            self.mylogway("回滚流程结束，回滚任务成功!!!")
+            self.mylogway("回滚流程结束，回滚任务成功!!!", level='Info')
 
 # cache = TTLCache(maxsize=100, ttl=365*24*60*60)
 # @cached(cache)
