@@ -78,7 +78,7 @@ def apppub(request, pk):
         messages.error(request,
                        '发布任务{0}尚未完成'.format(pub_lock['pubtask'], ), 'alert-danger')
 
-        return redirect(reverse('tmct_url_tag:file_detail', args=[pk, ]))  # 返回详情页面
+        return redirect(reverse('tmct_zip_url_tag:file_detail', args=[pk, ]))  # 返回详情页面
 
     pub_record.pub_status = 1
     pub_record.pub_user = request.user.username
@@ -91,7 +91,7 @@ def apppub(request, pk):
     threading_task = threading.Thread(target=pub_task.pip_run, )  # 多线程执行发布过程
     threading_task.start()
     messages.error(request, '提交发布任务成功，任务发布中', 'alert-success')
-    return redirect(reverse('tmct_url_tag:file_detail', args=[pk, ]))
+    return redirect(reverse('tmct_zip_url_tag:file_detail', args=[pk, ]))
 
 
 @login_required
@@ -107,23 +107,23 @@ def approllback(request, pk):
         messages.error(request,
                        '当前{0}-{1}发布通道被占用，请稍后重试'.format(pjt_info.platform, pjt_info.items, ),
                        'alert-danger')
-        return redirect(reverse('tmct_url_tag:file_detail', args=[pk, ]))
+        return redirect(reverse('tmct_zip_url_tag:file_detail', args=[pk, ]))
     if pub_record.pub_status != 2 and pub_file.status != 2:
         messages.error(request,
                        '当前版本发布内容非发布完成状态，请选择正确的回滚版本',
                        'alert-danger')
-        return redirect(reverse('tmct_url_tag:file_detail', args=[pk, ]))
+        return redirect(reverse('tmct_zip_url_tag:file_detail', args=[pk, ]))
     if pub_record.pub_status != 2 and pub_file.status == 2:
         messages.error(request, '当前版本回滚失败', 'alert-danger')
-        return redirect(reverse('tmct_url_tag:file_detail', args=[pk, ]))
+        return redirect(reverse('tmct_zip_url_tag:file_detail', args=[pk, ]))
 
     backup_ver = pub_record.backupsavedir
     pub_task = RemoteZipReplaceWorker(pjt_info.ipaddress, pub_file, pjt_info, pub_record, backup_ver=backup_ver)
     if not pub_task.checkbackdir():
         messages.error(request, '当前版本备份文件不存在，无法回滚', 'alert-danger')
-        return redirect(reverse('tmct_url_tag:file_detail', args=[pk, ]))
+        return redirect(reverse('tmct_zip_url_tag:file_detail', args=[pk, ]))
     pub_record.pub_status = 4
     pub_record.save()
     threading_task = threading.Thread(target=pub_task.rollback_run(), )  # 多线程执行发布过程
     threading_task.start()
-    return redirect(reverse('tmct_url_tag:file_detail', args=[pk, ]))
+    return redirect(reverse('tmct_zip_url_tag:file_detail', args=[pk, ]))

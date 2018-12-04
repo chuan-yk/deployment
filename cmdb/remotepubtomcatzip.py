@@ -84,11 +84,11 @@ class RemoteZipReplaceWorker(object):
         with open(file, 'r') as f:
             lines = f.readlines()
             for i in lines:
-                i.strip()  # 去掉前后空格、换行符
-                i.replace('\\', '/')
-                i.strip('/')
+                i = i.strip()  # 去掉前后空格、换行符
+                i = i.replace('\\', '/')
+                i = i.strip('/')
                 i.replace('$', '\$')
-                if not re.match(r'^#', i):
+                if not re.match(r'^#', i) and i != '':
                     readmelist.append(i)
         return readmelist
 
@@ -338,6 +338,7 @@ class RemoteZipReplaceWorker(object):
         self.records_instance.input_configs(self.readmelist)
         self.records_instance.backupsavedir = self._backup_ver
         self.records_instance.save()
+        self.redis_cli.delete(self._lockkey)
         if self.have_error:
             RecordOfjavazip.objects.filter(pk=self.records_instance.pk).update(pub_status=-1, )     # 修改发布状态
             Fileupload.objects.filter(pk=self.fileupload_instace.pk).update(status=-1, )            # 修改发布状态
