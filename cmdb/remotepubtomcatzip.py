@@ -1,26 +1,31 @@
 #!/usr/local/python3.6/bin/python3
 # -*- coding:utf-8 -*-
-
 import os
 import datetime
+import tempfile
 import shutil
+import json
 from django_redis import get_redis_connection
 
 from cmdb.models import ProjectInfo
-from tomcatwar.models import RecordOfwar
+from cmdb.mytools import file_md5sum
+from tomcatzip.models import RecordOfjavazip
 from fileupload.models import Fileupload
 
 
-class RemoteWarReplaceWorker(object):
+class RemoteZipReplaceWorker(object):
     def __init__(self, serverinfo_instance, fileupload_instace, projectinfo_instance, records_instance,
                  backup_ver='', ):
         """serverinfo_instance:服务器 ssh 实例
         fileupload_instace: 文件上传行内容
         backup_ver: 备份所在文件夹
         """
-        # Debug #fileupload_instace = Fileupload.objects.get(pk=11)
-        # Debug #projectinfo_instance = fileupload_instace.project
-        # Debug #records_instance = RecordOfwar.objects.get(pk=2)
+        # Debug #
+        fileupload_instace = Fileupload.objects.get(pk=12)
+        # Debug #
+        projectinfo_instance = fileupload_instace.project
+        # Debug #
+        records_instance = RecordOfjavazip.objects.get(pk=1)
         self.remote_server = serverinfo_instance
         self.fileupload_instace = fileupload_instace
         self.projectinfo_instance = projectinfo_instance
@@ -38,65 +43,23 @@ class RemoteWarReplaceWorker(object):
         else:
             self._backup_ver = backup_ver  # 约定平台下项目备份路径 /data/mc/[sobet_Ver_日期]
         self.redis_cli = get_redis_connection("default")  # redis 客户端
-        self.success_status = ''
+        self.process_status = []  # 进程执行状态
         self.have_error = False
         self.error_reason = ''
-        self._tmpdir = False  # 远程服务器临时文件夹
+        self._tmpdir = ''  # 远程服务器临时文件夹
+        self._localtmpdir = ''
         self._remote_filename = ''  # 远程服务器war 包文件
         self._remote_unzipdir = ''  # 远程服务器war 包解压路径
         self.pub_type = fileupload_instace.type  # 发布类型 1：静态文件
         self.record_id = self.records_instance.record_id  # '{0}:{1}:{2}:{3}'.format(self._pjtname, self._items, self.pub_type, self._pk)
         self._lockkey = '{}:{}:{}:lock'.format(self._pjtname, self._items, self.pub_type)
+        self.readmelist = []  # readme 发布文件列表
+        self.readmenewdir = []  # readme 发布文件新增文件夹
+        self.readmenewfile = []  # readme 发布文件新增文件
+        self.md5dict = {}  # 解压文件MD5记录
         self.ssh = self.remote_server.get_sshclient()
         self.sftp = self.remote_server.get_xftpclient()
         # print("debug class init:", self.shouldbackdir)
-
-    def checkfiledetail(self):
-        """检查文件详情，存redis """
-        return None
-        if self.redis_cli.exists(self.record_id):
-            # print("Debug: redis 键值 {} 已存在".format(self.record_id))
-            tmp_getall = self.redis_cli.hgetall(self.record_id, )
-            for rkey, rvalue in tmp_getall.items():
-                self.md5dict[rkey.decode()] = rvalue.decode()
-            self.cleantmp()
-            return self.md5dict
-        try:
-            shutil.unpack_archive(self._fromfile, extract_dir=self._tmpdir, format='zip')
-            if not os.path.isdir(os.path.join(self._tmpdir, '_dist')):
-                # print(os.path.isdir(os.path.join(self._tmpdir, '_dist')))
-                raise IOError('could not find _dist dir under tempdir {0}'.format(self._tmpdir))
-
-            # for root, dirs, files in os.walk(os.path.join(self._tmpdir, '_dist/'), topdown=False, followlinks=False):
-            for root, dirs, files in os.walk(self._tmpdir, topdown=False, followlinks=False):
-                for file in files:
-                    current_file = os.path.join(root, file)
-                    current_file_name = current_file.split(self._tmpdir)[-1]
-                    current_file_md5 = 'x'
-                    # print('----', current_file, current_file_name, os.path.join(root, file).split(self._tmpdir)[-1],
-                    #  current_file_md5)
-                    self.md5dict[current_file_name] = current_file_md5
-                    # print('=== debug, redis hmset', self.record_id, {'{}'.format(current_file_name): current_file_md5})
-                    self.redis_cli.hmset(self.record_id, {'{}'.format(current_file_name): current_file_md5})
-            else:
-                self.redis_cli.expire(self.record_id, 60 * 60 * 24 * 14)
-        except IOError as e:
-            print(e, "dir _dist Does not Exist")
-            return {"错误信息": "静态增量文件不包含 '_dist' 目录"}
-        except Exception as e1:
-            print(e1)
-            return {"错误信息2": str(e1)}
-        if RecordOfStatic.objects.filter(record_id=self.record_id).count() == 0:
-            pub_filemd5sum = file_md5sum(self._fromfile)
-            RecordOfStatic(pub_filemd5sum=pub_filemd5sum,
-                           items=ProjectInfo.objects.get(items=self._items, platform=self._pjtname, type=self.pub_type),
-                           record_id=self.record_id,
-                           pub_status=pub_status).save()
-        elif RecordOfStatic.objects.get(
-                record_id=self.record_id).pub_status == 0:  # RecordOfStatic Exist， pub_status = 0
-            RecordOfStatic.objects.filter(pk=self.records_instance.pk).update(pub_status=pub_status)  # 发布状态更改为3
-        self.cleantmp()
-        return self.md5dict
 
     def mylogway(self, logstr, level="Error"):
         # if level.capitalize() in ["Error", "Info", ]:  # 调整日志级别
@@ -106,7 +69,8 @@ class RemoteWarReplaceWorker(object):
 
     def myexecute(self, cmd, stdinstr=''):
         """远程命令执行，检测执行结果"""
-        self.mylogway("执行远程命令: {} , 交互参数 stdin = {}".format(cmd, stdinstr), "Debug")
+        # self.mylogway("执行远程命令: {} , 交互参数 stdin = {}".format(cmd, stdinstr), "Debug")
+        self.mylogway("执行远程命令: {} ".format(cmd, stdinstr), "Debug")
         stdin, stdout, stderr = self.ssh.exec_command(cmd)
         if stdinstr != '':  # stdin. write in
             pass
@@ -117,15 +81,85 @@ class RemoteWarReplaceWorker(object):
             raise IOError(stderr_str)
         return stdout_str
 
-    def make_ready(self):
+    def rdreadme(self, file):
+        import re
+        readmelist = []
+        with open(file, 'r') as f:
+            lines = f.readlines()
+            for i in lines:
+                i.strip()  # 去掉前后空格、换行符
+                i.replace('\\', '/')
+                i.strip('/')
+                i.replace('$', '\$')
+                if not re.match(r'^#', i):
+                    readmelist.append(i)
+        return readmelist
 
+    def transmitprocessstatus(self):
+        pass
+
+    def checkfiledetail(self):
+        """检查文件详情，存redis """
+        # 本地解压，读取readme
+        try:
+            if self.redis_cli.exists("self.record_id"):
+                md5dict = self.redis_cli.hget(self.record_id, 'md5list').decode()
+                self.md5dict = json.loads(md5dict)
+                self.readmelist = self.records_instance.output_configs()
+                self.mylogway("读取redis {} hget {}, 获取跟新文件 MD5 列表".format(self.record_id, 'md5list'), level='Debug')
+                return self.md5dict
+        except Exception as e:
+            pass
+        try:
+            self._localtmpdir = tempfile.mkdtemp(prefix=self._items + '_', suffix='class_zip')
+            shutil.unpack_archive(self._fromfile, extract_dir=self._localtmpdir, format='zip')
+            self.readmelist = self.rdreadme(os.path.join(self._localtmpdir, 'readme.txt'))  # 读取readme 内容
+            self.mylogway("读取readme.txt, readme 内容为：{}".format(str(self.readmelist)), level='info')
+            lclunziplist = os.listdir(self._localtmpdir)
+            lclunziplist.remove('readme.txt')
+            if len(lclunziplist) < len(self.readmelist):
+                self.mylogway("解压文件包含 {} 个文件，少于readme 内容，请联系更新包上传人员".format(len(lclunziplist)), level='Error')
+                raise IOError("upload file less than readme.txt ")
+            for i in self.readmelist:
+                if not os.path.isfile(os.path.join(self._localtmpdir, i)):
+                    self.mylogway("readme.txt 包含文件{}, 该文件未上传".format(i), level='Error')
+                    raise IOError("upload file less than readme.txt ")
+                if i in self.projectinfo_instance.output_configs():
+                    self.mylogway("readme.txt 包含文件{}, 与项目配置文件冲突".format(i), level='Error')
+                    raise IOError("readme.txt 包含文件{}, 与项目配置文件冲突".format(i))
+                self.md5dict[i] = file_md5sum(os.path.join(self._localtmpdir, os.path.dirname(i)))
+                self.mylogway("记录更新文件 {} MD5 = {}".format(i, self.md5dict[i]), level='Debug')
+            else:
+                self.mylogway("录入redis md5dict, hmset {} ， {}".format(self.record_id, json.dumps(self.md5dict)),
+                              level='Debug')
+                self.redis_cli.hmset(self.record_id, json.dumps(self.md5dict))
+                self.redis_cli.expire(self.record_id, 60 * 60 * 24 * 14)
+        except Exception as e:
+            self.mylogway("解压文件过程发现异常， 错误详情{}".format(e))
+            self.have_error = True
+            self.error_reason = "解压文件过程发现异常， 错误详情{}".format(e)
+
+    def make_ready(self):
+        """上传、解压、检查文件内容"""
         try:
             # 检测webapps配置文件是否完整
             for configfile in self.configlist:
                 if not self.remote_server.if_exist_file(os.path.join(self._dstdir, self._items, configfile)):
                     self.mylogway("{} not Exist, 请检查发布项目是否正确".format(configfile), level="Error")
                     raise IOError("Project_info config file list not match, 请检查配置文件是否缺失或项目不匹配")
-            # 上传&解压
+            # 调用checkfiledetail本地解压，读取readme, 检查更新文件是否与更新文件冲突
+            self.checkfiledetail()
+            if self.have_error:
+                return None
+            # 检查新增文件夹
+            for i in self.readmelist:
+                checkthefile = os.path.join(self._dstdir, self._items, i)
+                if not self.remote_server.if_exist_file(checkthefile):
+                    self.readmenewfile.append(i)
+                    if not self.remote_server.if_exist_dir(os.path.dirname(checkthefile)):
+                        self.readmenewdir.append(os.path.dirname(checkthefile))
+
+            # 上传解压
             self._tmpdir = self.myexecute("mktemp -t -d upload_{}_{}_.XXXX".format(self._pjtname, self._items))
             self.mylogway("远程服务器临时文件夹 {}".format(self._tmpdir), level="Debug")
             self._remote_filename = os.path.join(self._tmpdir, self.fileupload_instace.slug)
@@ -133,32 +167,23 @@ class RemoteWarReplaceWorker(object):
             self.sftp.put(self._fromfile, self._remote_filename)
             self.mylogway("上传文件 {} 至 {}".format(self._fromfile, self._tmpdir), level="Debug")
             self.myexecute("""if [ `which unzip 2>/dev/null`'x' == 'x' ]; then 
-                yum install -y unzip ; fi ;
-                mkdir -p {0};
-                unzip -qo {1} -d {0}""".format(self._remote_unzipdir, self._remote_filename))
+                                        yum install -y unzip ; fi ;
+                                        mkdir -p {0};
+                                        unzip -qo {1} -d {0}""".format(self._remote_unzipdir, self._remote_filename))
             self.mylogway("解压文件成功， 临时目录{}".format(self._remote_filename), level="Debug")
-            # 配置文件更新
-            for configfile in self.configlist:
-                # 检查更新内容配置目录是否完整，谨慎为好
-                if not self.remote_server.if_exist_dir(
-                        os.path.dirname(os.path.join(os.path.join(self._dstdir, self._items, configfile)))):
-                    self.mylogway("更新包中不包含 {} 目录， 请检查更新包是否正确".format(configfile), level="Error")
-                    raise IOError("更新包无{}目录".format(configfile))
-                self.myexecute("""/bin/cp {} {}""".format(os.path.join(self._dstdir, self._items, configfile),
-                                                          os.path.join(self._remote_unzipdir, configfile)))
-            self.mylogway("覆盖配置文件完成", level="Info")
 
-            # 配置文件修改功能在此补充, vim ,sed ..
         except Exception as e1:
             self.have_error = True
             self.error_reason = str(e1)
-            self.success_status = "unzip_failed"
-            self.mylogway("远程解压War文件过程异常, 详情 {}".format(e1), level="Error")
+            self.process_status = "unzip_failed"
+            self.mylogway("zip 文件不符合规范, 详情 {}".format(e1), level="Error")
+
         if not self.have_error:
-            self.success_status = 'unziped_success'
+            self.process_status = 'unziped_success'
 
     def do_backup(self):
         self.ssh = self.remote_server.get_sshclient()
+        # 备份
         try:
             self.myexecute("mkdir -p {0} {0}_mv_as_remove; chown -R {1}:{1} {0} {0}_mv_as_remove".format(
                 self._backup_ver, self.projectinfo_instance.runuser))
@@ -167,10 +192,21 @@ class RemoteWarReplaceWorker(object):
         except Exception as e3:
             self.have_error = True
             self.error_reason = str(e3)
-            self.success_status = "backup_failed"
+            self.process_status = "backup_failed"
             self.mylogway("备份文件失败: {}".format(e3), level="Error")
+            return None
+        # 新增文件夹在备份完成之后进行
+        try:
+            for i in self.readmenewdir:
+                self.mylogway("mkdir -p {}".format(os.path.join(self._dstdir, self._items, i)))
+                self.mylogway("检测到新增文件，新建文件夹: {}".format(os.path.join(self._dstdir, self._items, i)))
+        except Exception as e4:
+            self.have_error = True
+            self.error_reason = "创建新增文件夹失败" + str(e4)
+            self.mylogway("新增文件夹需手动新建失败:" + str(e4))
+            return None
         if not self.have_error:
-            self.success_status = "backup_success"
+            self.process_status = "backup_success"
 
     def stop_tomcat(self):
         """停止tomcat进程"""
@@ -182,19 +218,18 @@ class RemoteWarReplaceWorker(object):
                 self.mylogway("当前{} JAVA 进程未启动，跳出 stop 函数".format(self.fileupload_instace.slug), level="Info")
                 return None  # 进程未启动，跳出stop
             # 结束tomcat进程
-            self.myexecute("ps -ef|grep java |grep -v grep|grep {0}/conf".format(os.path.dirname(self._dstdir)) +
-                           "|awk '{print $2}' |xargs kill -9 ")
+            self.myexecute("ps -ef|grep java |grep -v grep|grep {0}/conf".format(
+                os.path.dirname(self._dstdir)) + "|awk '{print $2}' |xargs kill -9 ")
             self.mylogway("kill {} java进程成功, continue".format(self.projectinfo_instance.items), level="Info")
         except Exception as e:
             self.have_error = True
             self.mylogway("结束 tomcat 进程异常, 详情{}".format(e), level="Error")
-            self.success_status = "stop tomcat failure"
+            self.process_status = "stop tomcat failure"
         if not self.have_error:
-            self.success_status = "stop tomcat successful"
+            self.process_status = "stop tomcat successful"
 
     def start_tomcat(self):
         """Start tomcat , reuse"""
-        self.ssh = self.remote_server.get_sshclient()
         try:
             # 检查目录赋权
             self.myexecute("chown -R {0}:{0} {1}".format(self.projectinfo_instance.runuser, self._dstdir))
@@ -207,35 +242,30 @@ class RemoteWarReplaceWorker(object):
             self.mylogway("启动tomcat 进程失败,详情{}".format(e), 'Error')
             self.have_error = True
             self.error_reason = str(e)
-            self.success_status = 'Start tomcat failure'
+            self.process_status = 'Start tomcat failure'
         if not self.have_error:
-            self.success_status = 'Start tomcat success'
+            self.process_status = 'Start tomcat success'
 
     def do_cover(self):
         try:
             # 维护状态检测，在此补充
-            # 删除webapps下旧项目
-            self.myexecute("mv {0} {1}_mv_as_remove".format(os.path.join(self._dstdir, self._items), self._backup_ver))
-            try:
-                self.myexecute("mv  {0} {1}".format(self._remote_unzipdir, self._dstdir))
-            except Exception as e:
-                self.mylogway("更新文件过程异常，详情{}\n开始自动还原...".format(e), level="Error")
-                self.have_error = True
-                self.error_reason = str(e)
-                self.autoturnback()
-                self.start_tomcat()
-
-        except IOError as e1:
+            for i in self.readmelist:
+                self.mylogway("覆盖更新文件" + str(i), level='Debug')
+                self.myexecute("/bin/cp {} {}".format(self._tmpdir, self._items, i),
+                               os.path.join(self._remote_unzipdir, i))
+            self.mylogway("新增文件覆盖完成", level='Info')
+        except Exception as e:
+            self.mylogway("更新文件过程异常，详情{}\n开始自动还原...".format(e), level="Error")
             self.have_error = True
-            self.error_reason = str(e1)
+            self.error_reason = str(e)
+            self.autoturnback()
             self.start_tomcat()
-            self.success_status = 'do cover failed'
+
         if not self.have_error:
-            self.mylogway("更新文件成功", level="Info")
-            self.success_status = "renew successful"
+            self.process_status = "renew successful"
 
     def autoturnback(self):
-        """还原更新过程"""
+        """发布过程异常，还原更新过程，脏数据 mv 到 {self._backup_ver}_mv_as_remove"""
         try:
             self.myexecute("/bin/mv -b {0}/* {1}_mv_as_remove/ ;mv  {2} {0}".format(self._dstdir, self._backup_ver,
                                                                                     os.path.join(self._backup_ver,
@@ -252,21 +282,26 @@ class RemoteWarReplaceWorker(object):
             return False
 
     def rollback(self):
-        """回滚"""
+        """用户手动回滚"""
         try:
             self.mylogway("创建目录 {}_rollback".format(self._backup_ver), level='Info')
-            self.myexecute("mkdir -p  {0}_rollback; chown -R {1}:{1}  {0}_rollback".format(
-                self._backup_ver, self.projectinfo_instance.runuser))
+            self.myexecute("mkdir -p  {0}_rollback; chown -R {1}:{1}  {0}_rollback".format(self._backup_ver,
+                                                                                           self.projectinfo_instance.runuser))
             self.myexecute("/bin/mv -b {}/* {}_rollback/".format(self._dstdir, self._backup_ver))
             self.myexecute("/bin/cp -r {0} {1}".format(os.path.join(self._backup_ver, self._items), self._dstdir))
         except Exception as e:
             self.mylogway("回滚过程出现异常，原因{}".format(e), level="Info")
         if not self.have_error:
             self.mylogway("回滚功能，回滚文件完成，下一步启动JAVA进程", level="Info")
-            self.success_status = "roll file back success"
+            self.process_status = "roll file back success"
 
     def cleantmp(self):
         # shutil.rmtree(self._tmpdir)
+        try:
+            if os.path.isdir(self._localtmpdir):
+                shutil.rmtree(self._localtmpdir)
+        except Exception as e1:
+            self.mylogway("删除文件临时目录失败，原因{}".format(self._localtmpdir), level="Error")
         try:
             if len(self._tmpdir) < 4:
                 raise IOError("远程临时目录变量 {} 为空，无法删除".format(self._tmpdir))
@@ -276,49 +311,50 @@ class RemoteWarReplaceWorker(object):
             self.mylogway("删除文件临时目录失败，原因{}".format(self._tmpdir), level="Error")
 
     def pip_run(self):
-
         self.redis_cli.hmset(self._lockkey, {'lock_task': self.record_id, 'starttime': self._operatingtime,
                                              'pub_user': self.records_instance.pub_user,
                                              'pub_current_status': 'Start pub...',
                                              })
         self.redis_cli.hmset(self.record_id, {'error_detail': self.error_reason})  # 初始化，error_detail
         self.redis_cli.expire(self.record_id, 60 * 60 * 24 * 14)
-        RecordOfwar.objects.filter(pk=self.records_instance.pk).update(pub_status=1, )  # 修改发布状态
+        RecordOfjavazip.objects.filter(pk=self.records_instance.pk).update(pub_status=1, )  # 修改发布状态
         Fileupload.objects.filter(pk=self.fileupload_instace.pk).update(status=1, )  # 修改发布状态
         self.redis_cli.hmset(self._lockkey, {'pub_current_status': 'upload file to Remote server'})  # 发布过程更新状态
         if not self.have_error:
             self.make_ready()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.success_status})  # 发布过程更新状态
+            self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.process_status})  # 发布过程更新状态
         if not self.have_error:
             self.do_backup()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.success_status})  # 发布过程更新状态
+            self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.process_status})  # 发布过程更新状态
         if not self.have_error:
             self.stop_tomcat()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.success_status})
+            self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.process_status})
         if not self.have_error:
             self.do_cover()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.success_status})
+            self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.process_status})
         if not self.have_error:
             self.start_tomcat()
             self.redis_cli.hmset(self._lockkey, {'pub_current_status': 'pub successful !'})
-        self.redis_cli.delete(self._lockkey)
+            self.redis_cli.delete(self._lockkey)
         self.cleantmp()
-        RecordOfwar.objects.filter(pk=self.records_instance.pk).update(backupsavedir=self._backup_ver, )  # 更新records 记录
-        self.records_instance.refresh_from_db()  # 重新读取数据库值
+        # 更新records 记录
+        self.records_instance.input_configs(self.readmelist)
+        self.records_instance.backupsavedir = self._backup_ver
+        self.records_instance.save()
         if self.have_error:
-            RecordOfwar.objects.filter(pk=self.records_instance.pk).update(pub_status=-1, )  # 修改发布状态
-            Fileupload.objects.filter(pk=self.fileupload_instace.pk).update(status=-1, )  # 修改发布状态
-            self.redis_cli.hmset(self.record_id, {'error_detail': self.success_status + ': ' + self.error_reason})
+            RecordOfjavazip.objects.filter(pk=self.records_instance.pk).update(pub_status=-1, )     # 修改发布状态
+            Fileupload.objects.filter(pk=self.fileupload_instace.pk).update(status=-1, )            # 修改发布状态
+            self.redis_cli.hmset(self.record_id, {'error_detail': self.process_status + ': ' + self.error_reason})
             self.redis_cli.expire(self.record_id, 60 * 60 * 24 * 14)
             self.mylogway("发布流程结束，发布任务失败!!!", level="Error")
         else:
-            RecordOfwar.objects.filter(pk=self.records_instance.pk).update(pub_status=2, )  # 修改发布状态
+            RecordOfjavazip.objects.filter(pk=self.records_instance.pk).update(pub_status=2, )  # 修改发布状态
             Fileupload.objects.filter(pk=self.fileupload_instace.pk).update(status=2, )  # 修改发布状态
             self.mylogway("发布流程结束，发布任务成功!!!", level="Info")
 
     def rollback_run(self):
         self.ssh = self.remote_server.get_sshclient()
-        self.success_status = "roll_back_Start"
+        self.process_status = "roll_back_Start"
         self.redis_cli.hmset(self._lockkey, {'lock_task': self.record_id, 'starttime': self._operatingtime,
                                              'pub_user': self.records_instance.pub_user,
                                              'pub_current_status': 'Start pub...',
@@ -326,23 +362,23 @@ class RemoteWarReplaceWorker(object):
         self.redis_cli.hmset(self.record_id, {'error_detail': self.error_reason})  # 初始化，error_detail
         print("{0} Info: {1}  {2}开始回滚操作".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                                                 self.remote_server, self._dstdir))
-        RecordOfwar.objects.filter(pk=self.records_instance.pk).update(pub_status=4)
+        RecordOfjavazip.objects.filter(pk=self.records_instance.pk).update(pub_status=4)
         if not self.have_error:
             self.stop_tomcat()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.success_status})
+            self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.process_status})
         if not self.have_error:
             self.rollback()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.success_status})
+            self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.process_status})
         if not self.have_error:
             self.start_tomcat()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.success_status})
+            self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.process_status})
         self.redis_cli.delete(self._lockkey)
         if self.have_error:
-            RecordOfwar.objects.filter(pk=self.records_instance.pk).update(pub_status=-2)
+            RecordOfjavazip.objects.filter(pk=self.records_instance.pk).update(pub_status=-2)
             Fileupload.objects.filter(pk=self.fileupload_instace.pk).update(status=-2)
             self.mylogway("回滚流程结束，回滚任务失败!!!")
         else:
-            RecordOfwar.objects.filter(pk=self.records_instance.pk).update(pub_status=5)
+            RecordOfjavazip.objects.filter(pk=self.records_instance.pk).update(pub_status=5)
             Fileupload.objects.filter(pk=self.fileupload_instace.pk).update(status=0)
             self.mylogway("回滚流程结束，回滚任务成功!!!")
 

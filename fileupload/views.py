@@ -39,6 +39,7 @@ class FileuploadCreateView(LoginRequiredMixin, CreateView):
         try:
             form.instance.user = self.request.user.username
             form.instance.pt_name = Getplatform(self.request.POST['platform'])
+            # print('upload====', self.request.POST['platform'],self.request.POST['app'],self.request.POST['type'],)
             form.instance.project = ProjectInfo.objects.get(platform=self.request.POST['platform'],
                                                             items=self.request.POST['app'],
                                                             type=self.request.POST['type'], )

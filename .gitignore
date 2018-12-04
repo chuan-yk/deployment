@@ -180,3 +180,4 @@ media/
 !/frontapp/migrations/
 !/tomcatwar/migrations/__init__.py
 
+!/tomcatzip/migrations/__init__.py
