@@ -118,8 +118,10 @@ class RemoteZipReplaceWorker(object):
                 self.mylogway("解压文件包含 {} 个文件，少于readme 内容，请联系更新包上传人员".format(len(lclunziplist)), level='Error')
                 raise IOError("upload file less than readme.txt ")
             for i in self.readmelist:
-                if not os.path.isfile(os.path.join(self._localtmpdir, i)):
-                    self.mylogway("readme.txt 包含文件{}, 该文件未上传".format(i), level='Error')
+                if not os.path.isfile(os.path.join(self._localtmpdir, os.path.basename(i))):
+                    self.mylogway(
+                        "readme.txt 包含文件{}, 该文件{}未上传".format(i, os.path.join(self._localtmpdir, os.path.basename(i))),
+                        level='Error')
                     raise IOError("upload file less than readme.txt ")
                 if i in self.projectinfo_instance.output_configs():
                     self.mylogway("readme.txt 包含文件{}, 与项目配置文件冲突".format(i), level='Error')
@@ -248,8 +250,8 @@ class RemoteZipReplaceWorker(object):
             # 维护状态检测，在此补充
             for i in self.readmelist:
                 self.mylogway("覆盖更新文件" + str(i), level='Debug')
-                self.myexecute("/bin/cp {} {}".format(self._tmpdir, self._items, i),
-                               os.path.join(self._remote_unzipdir, i))
+                self.myexecute("/bin/cp {} {}".format(self._remote_unzipdir, os.path.basename(i)),
+                               os.path.join(self._dstdir, self._items, i))
             self.mylogway("新增文件覆盖完成", level='Info')
         except Exception as e:
             self.mylogway("更新文件过程异常，详情{}\n开始自动还原...".format(e), level="Error")
@@ -298,14 +300,14 @@ class RemoteZipReplaceWorker(object):
             if os.path.isdir(self._localtmpdir):
                 shutil.rmtree(self._localtmpdir)
         except Exception as e1:
-            self.mylogway("删除文件临时目录失败，原因{}".format(self._localtmpdir), level="Error")
+            self.mylogway("删除文件临时目录 {} 失败，原因{}".format(self._localtmpdir, str(e1)), level="Error")
         try:
             if len(self._tmpdir) < 4:
                 raise IOError("远程临时目录变量 {} 为空，无法删除".format(self._tmpdir))
             self.myexecute("rm -rf {}".format(self._tmpdir))
-            self.mylogway("删除文件临时目录完成， {}".format(self._tmpdir), level="Info")
+            self.mylogway("删除远程文件临时目录 {} 完成 ".format(self._tmpdir), level="Info")
         except Exception as e:
-            self.mylogway("删除文件临时目录失败，原因{}".format(self._tmpdir), level="Error")
+            self.mylogway("删除远程文件临时目录 {} 失败，原因{}".format(self._tmpdir, str(e)), level="Error")
 
     def pip_run(self):
         self.redis_cli.hmset(self._lockkey, {'lock_task': self.record_id, 'starttime': self._operatingtime,
@@ -340,8 +342,8 @@ class RemoteZipReplaceWorker(object):
         self.records_instance.save()
         self.redis_cli.delete(self._lockkey)
         if self.have_error:
-            RecordOfjavazip.objects.filter(pk=self.records_instance.pk).update(pub_status=-1, )     # 修改发布状态
-            Fileupload.objects.filter(pk=self.fileupload_instace.pk).update(status=-1, )            # 修改发布状态
+            RecordOfjavazip.objects.filter(pk=self.records_instance.pk).update(pub_status=-1, )  # 修改发布状态
+            Fileupload.objects.filter(pk=self.fileupload_instace.pk).update(status=-1, )  # 修改发布状态
             self.redis_cli.hmset(self.record_id, {'error_detail': str(self.process_status) + ': ' + self.error_reason})
             self.redis_cli.expire(self.record_id, 60 * 60 * 24 * 14)
             self.mylogway("发布流程结束，发布任务失败!!!", level="Error")
