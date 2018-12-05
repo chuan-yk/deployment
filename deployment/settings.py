@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'frontapp',
     'tomcatwar',
     'tomcatzip',
+    'tomcatjar',
     # 'django.conf.OrdersConfig'
 ]
 

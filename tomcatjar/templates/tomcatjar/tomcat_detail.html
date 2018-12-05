@@ -1,0 +1,177 @@
+{% extends 'layout.html' %}
+
+{% load staticfiles %}
+
+{% block title %}JAVA class 增量包发布文件详情{% endblock %}
+
+{% block body %}
+
+    {#    {% for info in pub_file %}#}
+    {% if pub_file %}
+        <section xmlns="http://www.w3.org/1999/html">
+            <div class="section-header">
+                <ol class="breadcrumb">
+                    {% ifequal pub_file.status 0 %}
+                        <li class="active">待发布文件详情</li>
+                    {% endifequal %}
+                    {% ifequal pub_file.status 1 %}
+                        <li class="active">文件发布中~</li>
+                    {% endifequal %}
+                {% ifequal pub_file.status 2 %}
+                        <li class="active">文件发布成功</li>
+                    {% endifequal %}
+                {% ifequal pub_file.status -1 %}
+                        <li class="active">文件发布失败</li>
+                    {% endifequal %}
+                </ol>
+            </div>
+            <div class="section-body">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="card card-printable style-default-light">
+                            <div class="card-body style-default-bright" id="print">
+                                <!-- BEGIN FILE DETAIL HEADER -->
+                                <div class="row">
+                                    <div class="col-xs-8">
+                                        <h1 class="text-light" style="margin-top: 0px; color: #f70b0b">运维自动化 <strong
+                                                class="text-accent-dark" style="color: #1ab394">{{ pub_file.app }} class 增量包文件发布</strong></h1>
+                                    </div>
+                                    <div class="col-xs-4 text-right">
+                                        <h1 class="text-light text-default-light">详情展示</h1>
+                                    </div>
+                                </div><!--end .row -->
+                                <!-- END FILE DETAIL HEADER -->
+                                <br/>
+
+                                <br/>
+
+                                <!-- BEGIN INVOICE PRODUCTS -->
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <table class="table">
+                                            {#                                            <thead>#}
+                                            <tr>
+                                                <th style="width:150px" class="text-center">上传时间:</th>
+                                                <th class="text-left">{{ pub_file.create_date }}</th>
+                                                <th style="width:140px" class="text-right">文件编号:</th>
+                                                <th style="width:180px"
+                                                    class="text-center">{{ pub_file.id }}</th>
+                                            </tr>
+
+                                            <tbody>
+                                            <tr>
+                                                <th style="width:150px" class="text-center">文件名:</th>
+                                                <th class="text-left">{{ pub_file.slug }}</th>
+                                                <th style="width:140px" class="text-right">文件MD5:</th>
+                                                <th style="width:180px"
+                                                    class="text-center"> {{ pub_record.pub_filemd5sum }}
+                                                </th>
+                                            </tr>
+                                            <tr>
+                                                <th style="width:150px" class="text-center">发布路径:</th>
+                                                <th class="text-left">{{ pjt_info.dst_file_path }}</th>
+                                                <th style="width:140px" class="text-right">服务器IP:</th>
+                                                <th style="width:180px"
+                                                    class="text-center"> {{ pjt_info.ipaddress.ip }}
+                                                </th>
+                                            </tr>
+                                            <tr>
+                                                <th style="width:150px" class="text-center">发布状态:</th>
+                                                {% ifequal pub_record.pub_status 0 %}
+                                                    <th class="text-left"> 待发布</th>
+                                                    <th style="width:140px" class="text-right">备份路径:</th>
+                                                    <th style="width:180px"
+                                                        class="text-center"> {{ pub_record.backup_file }}
+                                                    </th>
+                                                {% endifequal %}
+                                                {% ifequal pub_record.pub_status 1 %}
+                                                    <th class="text-left"> 发布中</th>
+                                                    <th style="width:140px" class="text-right">发布开始时间:</th>
+                                                    <th style="width:180px"
+                                                        class="text-center"> {{ pub_lock.starttime }}
+                                                    </th>
+                                                {% endifequal %}
+                                                {% ifequal pub_record.pub_status 2 %}
+                                                    <th class="text-left"> 发布完成</th>
+                                                    <th style="width:140px" class="text-right">备份路径:</th>
+                                                    <th style="width:180px"
+                                                        class="text-center"> {{ pub_record.backupsavedir }}
+                                                    </th>
+                                                {% endifequal %}
+                                                {% ifequal pub_record.pub_status -1 %}
+                                                    <th class="text-left"> 发布失败</th>
+                                                    <th style="width:140px" class="text-right">错误详情:</th>
+                                                    <th style="width:180px"
+                                                        class="text-center"> {{ pub_lock.error_detail }}
+                                                    </th>
+                                                {% endifequal %}
+                                            </tr>
+                                            <tr>
+                                                <td class="text-center">所属项目:</td>
+                                                <td>
+                                                    {{ pub_file.app }}
+                                                </td>
+                                                <td class="text-right">所属平台:</td>
+                                                <td class="text-center">
+                                                    {{ pub_file.platform }}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-center">任务编号:</td>
+                                                <td>
+                                                    {{ pub_file.bug_id }}
+                                                </td>
+                                                <td class="text-right">开发人员:</td>
+                                                <td class="text-center">
+                                                    {{ pub_file.user }}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-center">开发者功能描述:</td>
+                                                <td>  {{ pub_file.description }}   </td>
+                                                <td class="text-right"></td>
+                                                <td class="text-center"></td>
+                                            </tr>
+                                            </tr>
+                                            {% if pub_lock.lock %}
+                                                {# 发布锁定 开始 #}
+                                                <tr>
+                                                    <td class="text-center">当前发布内容:</td>
+                                                    <td> {{ pub_lock.pubtask }} </td>
+                                                    <td class="text-right">状态:</td>
+                                                    <td>等待发布结束</td>
+                                                </tr>
+                                            {% else %}
+                                                <tr>
+                                                    <td class="text-center">当前发布内容:</td>
+                                                    <td> 无</td>
+                                                    <td class="text-right">当前可选操作:</td>
+                                                    {% ifequal pub_record.pub_status 2 %}
+                                                        <td><a href="{% url 'tmct_zip_url_tag:pub_return' pub_file.id %}"
+                                                               class="btn  btn-info btn-rounded">回滚<i
+                                                                class="md glyphicon glyphicon-play"></i></a></td>
+                                                    {% else %}
+                                                        <td><a href="{% url 'tmct_zip_url_tag:do_pub' pub_file.id %}"
+                                                               class="btn  btn-info btn-rounded">可发布<i
+                                                                class="md glyphicon glyphicon-play"></i></a></td>
+                                                    {% endifequal %}
+                                                </tr>
+                                            {% endif %}
+
+
+                                            </tbody>
+                                        </table>
+                                    </div><!--end .col -->
+                                </div><!--end .row -->
+                                <!-- END INVOICE PRODUCTS -->
+
+                            </div><!--end .card-body -->
+                        </div><!--end .card -->
+                    </div><!--end .col -->
+                </div><!--end .row -->
+            </div><!--end .section-body -->
+        </section>
+        {#    {% endfor %}#}
+    {% endif %}
+
+{% endblock %}

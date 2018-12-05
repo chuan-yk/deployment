@@ -31,7 +31,7 @@ class RemoteZipReplaceWorker(object):
         self._fromfile = fileupload_instace.file.path  # 上传文件
         self._pjtname = projectinfo_instance.platform  # 平台名
         self._items = projectinfo_instance.items  # 项目名
-        self._backupdir = projectinfo_instance.backup_file_dir  # 约定平台备份路径，/date/mc
+        self._backupdir = projectinfo_instance.backup_file_dir  # 约定平台备份路径，/date/java_jar
         self.configlist = self.projectinfo_instance.output_configs()
         self._pk = fileupload_instace.pk  # 文件上传编号
         self._operatingtime = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -44,7 +44,7 @@ class RemoteZipReplaceWorker(object):
         self.have_error = False
         self.error_reason = ''
         self._tmpdir = ''  # 远程服务器临时文件夹
-        self._localtmpdir = ''
+        self._localtmpdir = ''      # 本地临时解压目录
         self._remote_filename = ''  # 远程服务器war 包文件
         self._remote_unzipdir = ''  # 远程服务器war 包解压路径
         self.pub_type = fileupload_instace.type  # 发布类型 1：静态文件
@@ -69,7 +69,7 @@ class RemoteZipReplaceWorker(object):
         # self.mylogway("执行远程命令: {} , 交互参数 stdin = {}".format(cmd, stdinstr), "Debug")
         self.mylogway("执行远程命令: {} ".format(cmd, stdinstr), "Debug")
         stdin, stdout, stderr = self.ssh.exec_command(cmd)
-        if stdinstr != '':  # stdin. write in
+        if stdinstr != '':  # stdin. write in, 有交互过程在此扩展
             pass
         stdout_str = stdout.read().decode().strip()
         stderr_str = stderr.read().decode()
@@ -142,11 +142,6 @@ class RemoteZipReplaceWorker(object):
     def make_ready(self):
         """上传、解压、检查文件内容"""
         try:
-            # 检测webapps配置文件是否完整
-            for configfile in self.configlist:
-                if not self.remote_server.if_exist_file(os.path.join(self._dstdir, self._items, configfile)):
-                    self.mylogway("{} not Exist, 请检查发布项目是否正确".format(configfile), level="Error")
-                    raise IOError("Project_info config file list not match, 请检查配置文件是否缺失或项目不匹配")
             # 调用checkfiledetail本地解压，读取readme, 检查更新文件是否与更新文件冲突
             self.checkfiledetail()
             if self.have_error:
