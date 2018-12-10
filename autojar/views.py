@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.views.generic import CreateView, DeleteView, ListView
 from fileupload.models import Fileupload
+from cmdb.models import ProjectInfo
 from .deploy import DeploySet
 from django_redis import get_redis_connection
 
@@ -11,7 +12,19 @@ class deploy_list(ListView):
     template_name = 'autojar/deploy_list.html'
     context_object_name = 'deploy_list'
     paginate_by = 10
-    queryset = Fileupload.objects.filter(status=0,type=3).order_by('-create_date')   #type__in=(1,2,3)
+    queryset = Fileupload.objects.filter(status=0,type=3).order_by('-create_date')
+
+class history_list(ListView):
+    model = Fileupload
+    template_name = 'autojar/history_list.html'
+    #context_object_name = 'history_list'
+    paginate_by = 10
+    queryset = Fileupload.objects.filter(status__in=(-1,2),type=3).order_by('-create_date')
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super(history_list, self).get_context_data(**kwargs)
+        context['Rollback_info'] = Fileupload.objects.filter(status__in=(-1,2),type=3).order_by('-create_date')
+        return context
 
 
 
@@ -63,12 +76,12 @@ def RunEnter(request):
         if len(result['Resultstderr'][0]) != 0:
             Fileupload.objects.filter(id=id).update(status=-1)
             messages.error(request, '发布失败！', 'alert-danger')
+            redisObj.delete(add_key)
             return render(request, 'autojar/Result.html', result)
      Fileupload.objects.filter(id=id).update(status=2)
      messages.error(request, '发布成功！', 'alert-success')
      redisObj.delete(add_key)
      return render(request,'autojar/Result.html',result)
-
 
 
 
