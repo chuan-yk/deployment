@@ -36,9 +36,9 @@ class RemoteZipReplaceWorker(object):
         self._pk = fileupload_instace.pk  # 文件上传编号
         self._operatingtime = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
         if len(backup_ver) == 0:
-            self._backup_ver = os.path.join(self._backupdir, 'war_{}_Ver_{}'.format(self._items, self._operatingtime))
+            self._backup_ver = os.path.join(self._backupdir, 'jar_{}_Ver_{}'.format(self._items, self._operatingtime))
         else:
-            self._backup_ver = backup_ver  # 约定平台下项目备份路径 /data/mc/[sobet_Ver_日期]
+            self._backup_ver = backup_ver  # 约定平台下项目备份路径 /data/mc/[jar_sobet_Ver_日期]
         self.redis_cli = get_redis_connection("default")  # redis 客户端
         self.process_status = []  # 进程执行状态
         self.have_error = False
@@ -59,6 +59,7 @@ class RemoteZipReplaceWorker(object):
         # print("debug class init:", self.shouldbackdir)
 
     def mylogway(self, logstr, level="Error"):
+        """自定义日志打印"""
         # if level.capitalize() in ["Error", "Info", ]:  # 调整日志级别
         if level.capitalize() in ["Error", "Info", "Debug", ]:  # 调整日志级别
             print("{0}   [{1}]: {2} {3} {4}".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), level,
@@ -79,6 +80,7 @@ class RemoteZipReplaceWorker(object):
         return stdout_str
 
     def rdreadme(self, file):
+        """readme 文件处理"""
         import re
         readmelist = []
         with open(file, 'r') as f:
