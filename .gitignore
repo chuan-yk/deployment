@@ -181,3 +181,4 @@ media/
 !/tomcatwar/migrations/__init__.py
 
 !/tomcatzip/migrations/__init__.py
+!/tomcatjar/migrations/__init__.py
