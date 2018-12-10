@@ -32,8 +32,8 @@ class DeploySet(object):
     def jar(self,action):
 
         datenow = datetime.datetime.now().strftime('%Y%m%d-%H%M')
-        #jarpath = os.path.join(self.proobj.get().dst_file_path,'webapps',self.appname,'lib')
-        jarpath = '/usr/local/tomcat7.0_sobet/webapps/sobet/WEB-INF/lib/'                        #windos调试
+        jarpath = os.path.join(self.proobj.get().dst_file_path,'webapps',self.appname,'lib')
+        #jarpath = '/usr/local/tomcat7.0_sobet/webapps/sobet/WEB-INF/lib/'                        #windos调试
         destpath = '/tmp/{}/{}/{}'.format(self.ptname,self.appname,self.filename)
         path = os.path.join('/tmp/',self.ptname,self.appname)
         #path = '/tmp/mc/sobet'                                                                   #windos调试
