@@ -35,7 +35,7 @@
     <section>
         <div class="section-body">
             <div class="row">
-                {% if Resultstdout %}
+                {% if not Resultstdout %}
                     <div class="line ">
                         发布详情
                     </div>
@@ -44,7 +44,7 @@
                     {% endfor %}
                 {% endif %}
 
-                {% if Resultstderr %}
+                {% if not Resultstderr  %}
                     <div class="line">
                         错误信息
                     </div>

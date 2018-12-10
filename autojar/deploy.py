@@ -21,12 +21,19 @@ class DeploySet(object):
        self.filelocal_path = Fileupload.objects.filter(id=self.id).values('file').get()['file']
        #self.filelocal_path = "E:\\新建文件夹\\jsp-apii.zip"                                       #windos调试
 
+    def __Rollbackinfo(self,bak_path,status):
+        try:
+            pass
+        except :
+            pass
+
+
 
     def jar(self,action):
 
         datenow = datetime.datetime.now().strftime('%Y%m%d-%H%M')
-        #jarpath = os.path.join(self.proobj.get().dst_file_path,'webapps',self.appname,'lib')    #windos调试
-        jarpath = '/usr/local/tomcat7.0_sobet/webapps/sobet/WEB-INF/lib/'
+        #jarpath = os.path.join(self.proobj.get().dst_file_path,'webapps',self.appname,'lib')
+        jarpath = '/usr/local/tomcat7.0_sobet/webapps/sobet/WEB-INF/lib/'                        #windos调试
         destpath = '/tmp/{}/{}/{}'.format(self.ptname,self.appname,self.filename)
         path = os.path.join('/tmp/',self.ptname,self.appname)
         #path = '/tmp/mc/sobet'                                                                   #windos调试
@@ -49,6 +56,7 @@ class DeploySet(object):
                      'Resultstderr': execResult[1][0:-1].split('\n')}
 
         if execResult[2] != 0:
+            self.__Rollbackinfo()
             return Resultdic
 
         if action == 1:
@@ -59,11 +67,8 @@ class DeploySet(object):
                 '''.format(Apppconfath=self.proobj.get().dst_file_path))
 
             print(result)
+            self.__Rollbackinfo()
         return Resultdic
 
 
-    def full(self):
-        self.action
 
-    def extra(self):
-        pass
