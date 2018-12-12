@@ -169,8 +169,8 @@ class RemoteZipReplaceWorker(object):
             # 适配现阶段jar.zip 打包方式，自动转接目录
             for ff in self.readmelist:
                 self.myexecute("mkdir -p '{}' ".format(os.path.join(self._remote_unzipdir, os.path.dirname(ff))))
-                self.myexecute("cp -r '{}' '{}' ".format(os.path.join(self._remote_unzipdir, os.path.basename(ff)),
-                                                         os.path.join(self._remote_unzipdir, os.path.dirname(ff))))
+                self.myexecute("mv '{}' '{}' ".format(os.path.join(self._remote_unzipdir, os.path.basename(ff)),
+                                                      os.path.join(self._remote_unzipdir, os.path.dirname(ff))))
             else:
                 self.myexecute("rm -f {}/readme.txt".format(self._remote_unzipdir))
         except Exception as e1:
@@ -203,7 +203,8 @@ class RemoteZipReplaceWorker(object):
         """停止tomcat进程"""
         try:
             # 检查进程
-            tpro = self.myexecute("ps -ef|grep java |grep -v grep|grep {0} ".format(os.path.join(self.tomcathome, 'conf')))
+            tpro = self.myexecute(
+                "ps -ef|grep java |grep -v grep|grep {0} ".format(os.path.join(self.tomcathome, 'conf')))
             self.mylogway("进程返回结果长度为：{}, 检测tomcat进程为{}".format(len(tpro), ': \n' + str(tpro)), level="Info")
             if not len(tpro):
                 self.mylogway("当前{} JAVA 进程未启动，跳出 stop 函数".format(self.fileupload_instace.slug), level="Info")
@@ -225,8 +226,9 @@ class RemoteZipReplaceWorker(object):
             # 检查目录赋权
             self.myexecute("chown -R {0}:{0} {1}".format(self.projectinfo_instance.runuser, self._dstdir))
             self.myexecute("su {0} -c '{1}'".format(self.projectinfo_instance.runuser,
-                                                                   os.path.join(self.tomcathome, 'bin/startup.sh')))
-            pro = self.myexecute("ps -ef|grep java |grep -v grep|grep {0}".format(os.path.join(self.tomcathome, 'conf')))
+                                                    os.path.join(self.tomcathome, 'bin/startup.sh')))
+            pro = self.myexecute(
+                "ps -ef|grep java |grep -v grep|grep {0}".format(os.path.join(self.tomcathome, 'conf')))
             if len(pro):
                 self.mylogway("启动tomcat 成功，新进程详情: \n{}".format(pro), level="Info")
         except Exception as e:
@@ -278,8 +280,10 @@ class RemoteZipReplaceWorker(object):
             self.mylogway("创建目录 {}_rollback".format(self._backup_ver), level='Info')
             self.myexecute("mkdir -p  {0}_rollback; chown -R {1}:{1}  {0}_rollback".format(self._backup_ver,
                                                                                            self.projectinfo_instance.runuser))
-            self.myexecute("/bin/mv -b {} {}_rollback/".format(os.path.join(self._dstdir, self.jarname), self._backup_ver))
-            self.myexecute("/bin/cp -r {0} {1}".format(os.path.join(self._backup_ver, self.jarname), os.path.join(self._dstdir, self.jarname)))
+            self.myexecute(
+                "/bin/mv -b {} {}_rollback/".format(os.path.join(self._dstdir, self.jarname), self._backup_ver))
+            self.myexecute("/bin/cp -r {0} {1}".format(os.path.join(self._backup_ver, self.jarname),
+                                                       os.path.join(self._dstdir, self.jarname)))
         except Exception as e:
             self.mylogway("回滚过程出现异常，原因{}".format(e), level="Info")
         if not self.have_error:
