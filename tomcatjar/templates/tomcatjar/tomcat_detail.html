@@ -147,11 +147,11 @@
                                                     <td> 无</td>
                                                     <td class="text-right">当前可选操作:</td>
                                                     {% ifequal pub_record.pub_status 2 %}
-                                                        <td><a href="{% url 'tmct_zip_url_tag:pub_return' pub_file.id %}"
+                                                        <td><a href="{% url 'tmct_jar_url_tag:pub_return' pub_file.id %}"
                                                                class="btn  btn-info btn-rounded">回滚<i
                                                                 class="md glyphicon glyphicon-play"></i></a></td>
                                                     {% else %}
-                                                        <td><a href="{% url 'tmct_zip_url_tag:do_pub' pub_file.id %}"
+                                                        <td><a href="{% url 'tmct_jar_url_tag:do_pub' pub_file.id %}"
                                                                class="btn  btn-info btn-rounded">可发布<i
                                                                 class="md glyphicon glyphicon-play"></i></a></td>
                                                     {% endifequal %}
