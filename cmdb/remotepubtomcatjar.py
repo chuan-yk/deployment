@@ -9,7 +9,7 @@ from django_redis import get_redis_connection
 
 from cmdb.models import ProjectInfo
 from cmdb.mytools import file_md5sum
-from tomcatzip.models import RecordOfjavazip
+from tomcatjar.models import RecordOfjavajar
 from fileupload.models import Fileupload
 
 
@@ -22,7 +22,7 @@ class RemoteZipReplaceWorker(object):
         """
         # Debug # fileupload_instace = Fileupload.objects.get(pk=12)
         # Debug # projectinfo_instance = fileupload_instace.project
-        # Debug # records_instance = RecordOfjavazip.objects.get(pk=1)
+        # Debug # records_instance = RecordOfjavajar.objects.get(pk=1)
         self.remote_server = serverinfo_instance
         self.fileupload_instace = fileupload_instace
         self.projectinfo_instance = projectinfo_instance
@@ -312,7 +312,7 @@ class RemoteZipReplaceWorker(object):
                                              })
         self.redis_cli.hmset(self.record_id, {'error_detail': self.error_reason})  # 初始化，error_detail
         self.redis_cli.expire(self.record_id, 60 * 60 * 24 * 14)
-        RecordOfjavazip.objects.filter(pk=self.records_instance.pk).update(pub_status=1, )  # 修改发布状态
+        RecordOfjavajar.objects.filter(pk=self.records_instance.pk).update(pub_status=1, )  # 修改发布状态
         Fileupload.objects.filter(pk=self.fileupload_instace.pk).update(status=1, )  # 修改发布状态
         self.redis_cli.hmset(self._lockkey, {'pub_current_status': 'upload file to Remote server'})  # 发布过程更新状态
         # 依次执行函数
@@ -331,13 +331,13 @@ class RemoteZipReplaceWorker(object):
         self.records_instance.save()
         self.redis_cli.delete(self._lockkey)
         if self.have_error:
-            RecordOfjavazip.objects.filter(pk=self.records_instance.pk).update(pub_status=-1, )  # 修改发布状态
+            RecordOfjavajar.objects.filter(pk=self.records_instance.pk).update(pub_status=-1, )  # 修改发布状态
             Fileupload.objects.filter(pk=self.fileupload_instace.pk).update(status=-1, )  # 修改发布状态
             self.redis_cli.hmset(self.record_id, {'error_detail': str(self.process_status) + ': ' + self.error_reason})
             self.redis_cli.expire(self.record_id, 60 * 60 * 24 * 14)
             self.mylogway("发布流程结束，发布任务失败!!!", level="Error")
         else:
-            RecordOfjavazip.objects.filter(pk=self.records_instance.pk).update(pub_status=2, )  # 修改发布状态
+            RecordOfjavajar.objects.filter(pk=self.records_instance.pk).update(pub_status=2, )  # 修改发布状态
             Fileupload.objects.filter(pk=self.fileupload_instace.pk).update(status=2, )  # 修改发布状态
             self.mylogway("发布流程结束，发布任务成功!!!", level="Info")
 
@@ -351,7 +351,7 @@ class RemoteZipReplaceWorker(object):
         self.redis_cli.hmset(self.record_id, {'error_detail': self.error_reason})  # 初始化，error_detail
         print("{0} Info: {1}  {2}开始回滚操作".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                                                 self.remote_server, self._dstdir))
-        RecordOfjavazip.objects.filter(pk=self.records_instance.pk).update(pub_status=4)
+        RecordOfjavajar.objects.filter(pk=self.records_instance.pk).update(pub_status=4)
         for myfunc in [self.stop_tomcat, self.rollback, self.start_tomcat]:
             if not self.have_error:
                 myfunc()
@@ -360,11 +360,11 @@ class RemoteZipReplaceWorker(object):
         self.redis_cli.hmset(self._lockkey, {'pub_current_status': str(self.process_status)})
         self.redis_cli.delete(self._lockkey)
         if self.have_error:
-            RecordOfjavazip.objects.filter(pk=self.records_instance.pk).update(pub_status=-2)
+            RecordOfjavajar.objects.filter(pk=self.records_instance.pk).update(pub_status=-2)
             Fileupload.objects.filter(pk=self.fileupload_instace.pk).update(status=-2)
             self.mylogway("回滚流程结束，回滚任务失败!!!")
         else:
-            RecordOfjavazip.objects.filter(pk=self.records_instance.pk).update(pub_status=5)
+            RecordOfjavajar.objects.filter(pk=self.records_instance.pk).update(pub_status=5)
             Fileupload.objects.filter(pk=self.fileupload_instace.pk).update(status=0)
             self.mylogway("回滚流程结束，回滚任务成功!!!", level='Info')
 
