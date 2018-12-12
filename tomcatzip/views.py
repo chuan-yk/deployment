@@ -66,6 +66,12 @@ def apppub(request, pk):
     pub_lock_key = '{0}:{1}:{2}:lock'.format(pjt_info.platform, pjt_info.items, pub_file.type, )  # 发布锁键值
     pub_record, created = RecordOfjavazip.objects.get_or_create(record_id=record_id, items=pjt_info, defaults={
         'pub_filemd5sum': file_as_byte_md5sum(pub_file.file.read())})
+    hlock = '{}:{}'.format(pjt_info.platform, pjt_info.items)
+    if len(redis_for_app_cli.keys('{}:1*lock'.format(hlock))):  # 同项目，WAR 未完成
+        pub_lock_key = redis_for_app_cli.keys('{}:1*lock'.format(hlock))
+        pubtask = redis_for_app_cli.hget(pub_lock_key, 'lock_task').decode()
+        messages.error(request, '全量包发布任务{0}进行中，请等待前一任务完成'.format(pubtask), 'alert-danger')
+        return redirect(reverse('tmct_zip_url_tag:file_detail', args=[pk, ]))  # 返回详情页面
     if redis_for_app_cli.exists(pub_lock_key):  # 检查同类型任务发布锁定状态
         pub_lock = {'lock': True, 'pubtask': redis_for_app_cli.hget(pub_lock_key, 'lock_task').decode(),
                     'pub_current_status': redis_for_app_cli.hget(pub_lock_key, 'pub_current_status').decode(),

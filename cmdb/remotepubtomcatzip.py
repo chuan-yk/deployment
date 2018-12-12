@@ -102,7 +102,7 @@ class RemoteZipReplaceWorker(object):
             if self.redis_cli.exists("self.record_id"):
                 md5dict = self.redis_cli.hget(self.record_id, 'md5list').decode()
                 self.md5dict = json.loads(md5dict)
-                self.readmelist = self.records_instance.output_configs()
+                self.readmelist = self.records_instance.output_changefiles()
                 self.mylogway("读取redis {} hget {}, 获取跟新文件 MD5 列表".format(self.record_id, 'md5list'), level='Debug')
                 return self.md5dict
         except Exception as e:
@@ -320,25 +320,15 @@ class RemoteZipReplaceWorker(object):
         RecordOfjavazip.objects.filter(pk=self.records_instance.pk).update(pub_status=1, )  # 修改发布状态
         Fileupload.objects.filter(pk=self.fileupload_instace.pk).update(status=1, )  # 修改发布状态
         self.redis_cli.hmset(self._lockkey, {'pub_current_status': 'upload file to Remote server'})  # 发布过程更新状态
-        if not self.have_error:
-            self.make_ready()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': str(self.process_status)})  # 发布过程更新状态
-        if not self.have_error:
-            self.do_backup()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': str(self.process_status)})  # 发布过程更新状态
-        if not self.have_error:
-            self.stop_tomcat()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': str(self.process_status)})
-        if not self.have_error:
-            self.do_cover()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': str(self.process_status)})
-        if not self.have_error:
-            self.start_tomcat()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': 'pub successful !'})
-            self.redis_cli.delete(self._lockkey)
+        for myfunc in [self.make_ready, self.do_backup, self.stop_tomcat, self.do_cover, self.start_tomcat]:
+            if not self.have_error:
+                myfunc()
+                self.redis_cli.hmset(self._lockkey, {'pub_current_status': str(self.process_status)})  # 发布过程更新状态
+        self.redis_cli.hmset(self._lockkey, {'pub_current_status': 'pub successful !'})
+        self.redis_cli.delete(self._lockkey)
         self.cleantmp()
         # 更新records 记录
-        self.records_instance.input_configs(self.readmelist)
+        self.records_instance.input_changefiles(self.readmelist)
         self.records_instance.backupsavedir = self._backup_ver
         self.records_instance.save()
         self.redis_cli.delete(self._lockkey)
@@ -364,15 +354,11 @@ class RemoteZipReplaceWorker(object):
         print("{0} Info: {1}  {2}开始回滚操作".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                                                 self.remote_server, self._dstdir))
         RecordOfjavazip.objects.filter(pk=self.records_instance.pk).update(pub_status=4)
-        if not self.have_error:
-            self.stop_tomcat()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': str(self.process_status)})
-        if not self.have_error:
-            self.rollback()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': str(self.process_status)})
-        if not self.have_error:
-            self.start_tomcat()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': str(self.process_status)})
+        for myfunc in [self.stop_tomcat, self.rollback, self.start_tomcat]:
+            if not self.have_error:
+                myfunc()
+                self.redis_cli.hmset(self._lockkey, {'pub_current_status': str(self.process_status)})  # 发布过程更新状态
+
         self.redis_cli.delete(self._lockkey)
         if self.have_error:
             RecordOfjavazip.objects.filter(pk=self.records_instance.pk).update(pub_status=-2)
