@@ -50,6 +50,7 @@ class RemoteZipReplaceWorker(object):
         self.pub_type = fileupload_instace.type  # 发布类型 3 jar 增量文件
         self.record_id = self.records_instance.record_id  # '{0}:{1}:{2}:{3}'.format(self._pjtname, self._items, self.pub_type, self._pk)
         self.jarname = os.path.splitext(self.fileupload_instace.slug)[0]  # Jar 文件名
+        self.tomcathome = self.projectinfo_instance.dst_file_path.split('webapps')[0]
         self._lockkey = '{}:{}:{}:lock:{}'.format(self._pjtname, self._items, self.pub_type, self.jarname)
         self.readmelist = []  # readme 发布文件列表
         self.md5dict = {}  # 解压文件MD5记录
@@ -202,14 +203,14 @@ class RemoteZipReplaceWorker(object):
         """停止tomcat进程"""
         try:
             # 检查进程
-            tpro = self.myexecute("ps -ef|grep java |grep -v grep|grep {0}/conf ".format(os.path.dirname(self._dstdir)))
+            tpro = self.myexecute("ps -ef|grep java |grep -v grep|grep {0} ".format(os.path.join(self.tomcathome, 'conf')))
             self.mylogway("进程返回结果长度为：{}, 检测tomcat进程为{}".format(len(tpro), ': \n' + str(tpro)), level="Info")
             if not len(tpro):
                 self.mylogway("当前{} JAVA 进程未启动，跳出 stop 函数".format(self.fileupload_instace.slug), level="Info")
                 return None  # 进程未启动，跳出stop
             # 结束tomcat进程
-            self.myexecute("ps -ef|grep java |grep -v grep|grep {0}/conf".format(
-                os.path.dirname(self._dstdir)) + "|awk '{print $2}' |xargs kill -9 ")
+            self.myexecute("ps -ef|grep java |grep -v grep|grep {0}".format(
+                os.path.join(self.tomcathome, 'conf')) + "|awk '{print $2}' |xargs kill -9 ")
             self.mylogway("kill {} java进程成功, continue".format(self.projectinfo_instance.items), level="Info")
         except Exception as e:
             self.have_error = True
@@ -223,9 +224,9 @@ class RemoteZipReplaceWorker(object):
         try:
             # 检查目录赋权
             self.myexecute("chown -R {0}:{0} {1}".format(self.projectinfo_instance.runuser, self._dstdir))
-            self.myexecute("su {0} -c '{1}/bin/startup.sh'".format(self.projectinfo_instance.runuser,
-                                                                   os.path.dirname(self._dstdir)))
-            pro = self.myexecute("ps -ef|grep java |grep -v grep|grep {0}/conf ".format(os.path.dirname(self._dstdir)))
+            self.myexecute("su {0} -c '{1}'".format(self.projectinfo_instance.runuser,
+                                                                   os.path.join(self.tomcathome, 'bin/startup.sh')))
+            pro = self.myexecute("ps -ef|grep java |grep -v grep|grep {0}".format(os.path.join(self.tomcathome, 'conf')))
             if len(pro):
                 self.mylogway("启动tomcat 成功，新进程详情: \n{}".format(pro), level="Info")
         except Exception as e:
@@ -241,7 +242,7 @@ class RemoteZipReplaceWorker(object):
             # 维护状态检测功能，在此补充
             self.myexecute("cd {}; jar -uf {} ./* ".format(self._remote_unzipdir,
                                                            os.path.join(self._dstdir, self.jarname), ))
-            self.new_filemd5 = self.myexecute("md5sum {}".format(self._dstdir, self.jarname))
+            self.new_filemd5 = self.myexecute("md5sum {}".format(os.path.join(self._dstdir, self.jarname)))
             self.mylogway("更新jar 文件成功")
         except Exception as e:
             self.mylogway("更新文件过程异常，详情{}\n开始自动还原...".format(e), level="Error")
