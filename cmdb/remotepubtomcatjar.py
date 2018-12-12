@@ -44,19 +44,18 @@ class RemoteZipReplaceWorker(object):
         self.have_error = False
         self.error_reason = ''
         self._tmpdir = ''  # 远程服务器临时文件夹
-        self._localtmpdir = ''      # 本地临时解压目录
+        self._localtmpdir = ''  # 本地临时解压目录
         self._remote_filename = ''  # 远程服务器war 包文件
         self._remote_unzipdir = ''  # 远程服务器war 包解压路径
-        self.pub_type = fileupload_instace.type  # 发布类型 1：静态文件
+        self.pub_type = fileupload_instace.type  # 发布类型 3 jar 增量文件
         self.record_id = self.records_instance.record_id  # '{0}:{1}:{2}:{3}'.format(self._pjtname, self._items, self.pub_type, self._pk)
-        self._lockkey = '{}:{}:{}:lock'.format(self._pjtname, self._items, self.pub_type)
+        self.jarname = os.path.splitext(self.fileupload_instace.slug)[0]  # Jar 文件名
+        self._lockkey = '{}:{}:{}:lock:{}'.format(self._pjtname, self._items, self.pub_type, self.jarname)
         self.readmelist = []  # readme 发布文件列表
-        self.readmenewdir = []  # readme 发布文件新增文件夹
-        self.readmenewfile = []  # readme 发布文件新增文件
         self.md5dict = {}  # 解压文件MD5记录
+        self.new_filemd5 = ''  # 更新后的jar 文件MD5
         self.ssh = self.remote_server.get_sshclient()
         self.sftp = self.remote_server.get_xftpclient()
-        # print("debug class init:", self.shouldbackdir)
 
     def mylogway(self, logstr, level="Error"):
         """自定义日志打印"""
@@ -104,37 +103,41 @@ class RemoteZipReplaceWorker(object):
             if self.redis_cli.exists("self.record_id"):
                 md5dict = self.redis_cli.hget(self.record_id, 'md5list').decode()
                 self.md5dict = json.loads(md5dict)
-                self.readmelist = self.records_instance.output_configs()
+                self.readmelist = self.records_instance.output_changefiles()
                 self.mylogway("读取redis {} hget {}, 获取跟新文件 MD5 列表".format(self.record_id, 'md5list'), level='Debug')
+                self.jarname = self.redis_cli.hget(self.record_id, 'jarname').decode()
+                self.mylogway("读取redis {} hget {}, 获取 Jar 文件名为 {}".format(self.record_id, 'jarname', self.jarname),
+                              level='Debug')
                 return self.md5dict
         except Exception as e:
             pass
         try:
-            self._localtmpdir = tempfile.mkdtemp(prefix=self._items + '_', suffix='class_zip')
+            self._localtmpdir = tempfile.mkdtemp(prefix=self._items + '_', suffix='jar_zip')
             shutil.unpack_archive(self._fromfile, extract_dir=self._localtmpdir, format='zip')
             self.readmelist = self.rdreadme(os.path.join(self._localtmpdir, 'readme.txt'))  # 读取readme 内容
             self.mylogway("读取readme.txt, readme 内容为：{}".format(str(self.readmelist)), level='info')
             lclunziplist = os.listdir(self._localtmpdir)
             lclunziplist.remove('readme.txt')
-            if len(lclunziplist) < len(self.readmelist):
-                self.mylogway("解压文件包含 {} 个文件，少于readme 内容，请联系更新包上传人员".format(len(lclunziplist)), level='Error')
+            if len(lclunziplist) != len(self.readmelist):
+                self.mylogway("""解压文件包含 {} 个文件，不匹配readme {}行记录，请联系更新包上传人员\n 
+                    解压文件为: {} , readme 内容为 {}""".format(len(lclunziplist), len(self.readmelist), lclunziplist,
+                                                        self.readmelist), level='Error')
                 raise IOError("upload file less than readme.txt ")
             for i in self.readmelist:
                 if not os.path.isfile(os.path.join(self._localtmpdir, os.path.basename(i))):
                     self.mylogway(
                         "readme.txt 包含文件{}, 该文件{}未上传".format(i, os.path.join(self._localtmpdir, os.path.basename(i))),
                         level='Error')
-                    raise IOError("upload file less than readme.txt ")
-                if i in self.projectinfo_instance.output_configs():
-                    self.mylogway("readme.txt 包含文件{}, 与项目配置文件冲突".format(i), level='Error')
-                    raise IOError("readme.txt 包含文件{}, 与项目配置文件冲突".format(i))
+                    raise IOError("upload file No match (less than) readme.txt ")
                 self.md5dict[i] = file_md5sum(os.path.join(self._localtmpdir, os.path.basename(i)))
-                self.mylogway("记录更新文件 MD5 = {} -- {} ".format(self.md5dict[i], i), level='Debug')
+                self.mylogway("记录jar: {} 增量更新文件 MD5 = {} -- {} ".format(
+                    self.jarname, self.md5dict[i], i), level='Debug')
+
             else:
                 self.mylogway("录入redis md5dict, hmset {} ， {}".format(self.record_id, json.dumps(self.md5dict)),
                               level='Debug')
 
-                self.redis_cli.hmset(self.record_id, {'md5list': json.dumps(self.md5dict)})
+                self.redis_cli.hmset(self.record_id, {'md5list': json.dumps(self.md5dict), 'jarname': self.jarname})
                 self.redis_cli.expire(self.record_id, 60 * 60 * 24 * 14)
         except Exception as e:
             self.mylogway("解压文件过程发现异常， 错误详情{}".format(e))
@@ -148,19 +151,13 @@ class RemoteZipReplaceWorker(object):
             self.checkfiledetail()
             if self.have_error:
                 return None
-            # 检查新增文件夹
-            for i in self.readmelist:
-                checkthefile = os.path.join(self._dstdir, self._items, i)
-                if not self.remote_server.if_exist_file(checkthefile):
-                    self.readmenewfile.append(i)
-                    if not self.remote_server.if_exist_dir(os.path.dirname(checkthefile)):
-                        self.readmenewdir.append(os.path.dirname(checkthefile))
-
             # 上传解压
-            self._tmpdir = self.myexecute("mktemp -t -d upload_{}_{}_.XXXX".format(self._pjtname, self._items))
-            self.mylogway("远程服务器临时文件夹 {}".format(self._tmpdir), level="Debug")
+            self._tmpdir = self.myexecute("mktemp -t -d jarupload_{}_{}_.XXXX".format(self._pjtname, self._items))
+            self.mylogway("创建远程服务器临时文件夹 {}".format(self._tmpdir), level="Debug")
             self._remote_filename = os.path.join(self._tmpdir, self.fileupload_instace.slug)
-            self._remote_unzipdir = os.path.join(self._tmpdir, self._items)
+            self._remote_unzipdir = os.path.join(self._tmpdir, self._items)  # 服务器上的 解压jar.zip 目录
+            self.myexecute("mkdir -p {}".format(self._remote_unzipdir))
+            self.mylogway("创建远程服务器解压存放临时文件夹 {}".format(self._remote_unzipdir), level="Debug")
             self.sftp.put(self._fromfile, self._remote_filename)
             self.mylogway("上传文件 {} 至 {}".format(self._fromfile, self._tmpdir), level="Debug")
             self.myexecute("""if [ `which unzip 2>/dev/null`'x' == 'x' ]; then 
@@ -168,23 +165,28 @@ class RemoteZipReplaceWorker(object):
                                         mkdir -p {0};
                                         unzip -qo {1} -d {0}""".format(self._remote_unzipdir, self._remote_filename))
             self.mylogway("解压文件成功， 临时目录{}".format(self._remote_filename), level="Debug")
-
+            # 适配现阶段jar.zip 打包方式，自动转接目录
+            for ff in self.readmelist:
+                self.myexecute("mkdir -p '{}' ".format(os.path.join(self._remote_unzipdir, os.path.dirname(ff))))
+                self.myexecute("cp -r '{}' '{}' ".format(os.path.join(self._remote_unzipdir, os.path.basename(ff)),
+                                                         os.path.join(self._remote_unzipdir, os.path.dirname(ff))))
+            else:
+                self.myexecute("rm -f {}/readme.txt".format(self._remote_unzipdir))
         except Exception as e1:
             self.have_error = True
             self.error_reason = str(e1)
             self.process_status.append("unzip_failed")
-            self.mylogway("zip 文件不符合规范, 详情 {}".format(e1), level="Error")
-
+            self.mylogway("zip 文件不符合规范 或远程解压异常, 详情 {}".format(e1), level="Error")
         if not self.have_error:
             self.process_status.append('unziped_success')
 
     def do_backup(self):
         self.ssh = self.remote_server.get_sshclient()
-        # 备份
+        # 备份单个jar 文件
         try:
             self.myexecute("mkdir -p {0} {0}_mv_as_remove; chown -R {1}:{1} {0} {0}_mv_as_remove".format(
                 self._backup_ver, self.projectinfo_instance.runuser))
-            self.myexecute("cp -r {0} {1}".format(os.path.join(self._dstdir, self._items), self._backup_ver))
+            self.myexecute("cp -r '{0}'  '{1}'".format(os.path.join(self._dstdir, self.jarname), self._backup_ver))
             self.mylogway("备份文件完成: {}".format(self._backup_ver), level="Info")
         except Exception as e3:
             self.have_error = True
@@ -192,16 +194,7 @@ class RemoteZipReplaceWorker(object):
             self.process_status.append("backup_failed")
             self.mylogway("备份文件失败: {}".format(e3), level="Error")
             return None
-        # 新增文件夹在备份完成之后进行
-        try:
-            for i in self.readmenewdir:
-                self.mylogway("mkdir -p {}".format(os.path.join(self._dstdir, self._items, i)))
-                self.mylogway("检测到新增文件，新建文件夹: {}".format(os.path.join(self._dstdir, self._items, i)))
-        except Exception as e4:
-            self.have_error = True
-            self.error_reason = "创建新增文件夹失败" + str(e4)
-            self.mylogway("新增文件夹需手动新建失败:" + str(e4))
-            return None
+
         if not self.have_error:
             self.process_status.append("backup_success")
 
@@ -245,12 +238,11 @@ class RemoteZipReplaceWorker(object):
 
     def do_cover(self):
         try:
-            # 维护状态检测，在此补充
-            for i in self.readmelist:
-                self.mylogway("覆盖更新文件" + str(i), level='Debug')
-                self.myexecute("/bin/cp '{}' '{}' ".format(os.path.join(self._remote_unzipdir, os.path.basename(i)),
-                               os.path.join(self._dstdir, self._items, i)))
-            self.mylogway("新增文件覆盖完成", level='Info')
+            # 维护状态检测功能，在此补充
+            self.myexecute("cd {}; jar -uf {} ./* ".format(self._remote_unzipdir,
+                                                           os.path.join(self._dstdir, self.jarname), ))
+            self.new_filemd5 = self.myexecute("md5sum {}".format(self._dstdir, self.jarname))
+            self.mylogway("更新jar 文件成功")
         except Exception as e:
             self.mylogway("更新文件过程异常，详情{}\n开始自动还原...".format(e), level="Error")
             self.have_error = True
@@ -264,16 +256,17 @@ class RemoteZipReplaceWorker(object):
     def autoturnback(self):
         """发布过程异常，还原更新过程，脏数据 mv 到 {self._backup_ver}_mv_as_remove"""
         try:
-            self.myexecute("/bin/mv -b {0}/* {1}_mv_as_remove/ ;mv  {2} {0}".format(self._dstdir, self._backup_ver,
-                                                                                    os.path.join(self._backup_ver,
-                                                                                                 self._items), ))
+            self.myexecute(
+                "/bin/mv -b '{0}' {1}_mv_as_remove/ ;mv {2} {0}".format(os.path.join(self._dstdir, self.jarname),
+                                                                        self._backup_ver,
+                                                                        os.path.join(self._backup_ver, self.jarname)))
             self.mylogway("自动还原完成，已恢复初始状态 ！", level="Error")
         except Exception as e:
             self.mylogway("自动还原也失败了，运维看日志排查问题吧 ！", level="Error")
 
     def checkbackdir(self):
-        """还原过程检查备份文件是否存在"""
-        if self.remote_server.if_exist_dir(os.path.join(self._backup_ver, self._items)):
+        """web 请求还原过程检查备份文件是否存在"""
+        if self.remote_server.if_exist_file(os.path.join(self._backup_ver, self.jarname)):
             return True
         else:
             return False
@@ -284,8 +277,8 @@ class RemoteZipReplaceWorker(object):
             self.mylogway("创建目录 {}_rollback".format(self._backup_ver), level='Info')
             self.myexecute("mkdir -p  {0}_rollback; chown -R {1}:{1}  {0}_rollback".format(self._backup_ver,
                                                                                            self.projectinfo_instance.runuser))
-            self.myexecute("/bin/mv -b {}/* {}_rollback/".format(self._dstdir, self._backup_ver))
-            self.myexecute("/bin/cp -r {0} {1}".format(os.path.join(self._backup_ver, self._items), self._dstdir))
+            self.myexecute("/bin/mv -b {} {}_rollback/".format(os.path.join(self._dstdir, self.jarname), self._backup_ver))
+            self.myexecute("/bin/cp -r {0} {1}".format(os.path.join(self._backup_ver, self.jarname), os.path.join(self._dstdir, self.jarname)))
         except Exception as e:
             self.mylogway("回滚过程出现异常，原因{}".format(e), level="Info")
         if not self.have_error:
@@ -317,26 +310,19 @@ class RemoteZipReplaceWorker(object):
         RecordOfjavazip.objects.filter(pk=self.records_instance.pk).update(pub_status=1, )  # 修改发布状态
         Fileupload.objects.filter(pk=self.fileupload_instace.pk).update(status=1, )  # 修改发布状态
         self.redis_cli.hmset(self._lockkey, {'pub_current_status': 'upload file to Remote server'})  # 发布过程更新状态
-        if not self.have_error:
-            self.make_ready()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': str(self.process_status)})  # 发布过程更新状态
-        if not self.have_error:
-            self.do_backup()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': str(self.process_status)})  # 发布过程更新状态
-        if not self.have_error:
-            self.stop_tomcat()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': str(self.process_status)})
-        if not self.have_error:
-            self.do_cover()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': str(self.process_status)})
-        if not self.have_error:
-            self.start_tomcat()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': 'pub successful !'})
-            self.redis_cli.delete(self._lockkey)
+        # 依次执行函数
+        for myfunc in [self.make_ready, self.do_backup, self.stop_tomcat, self.do_cover, self.start_tomcat]:
+            if not self.have_error:
+                myfunc()
+                self.redis_cli.hmset(self._lockkey, {'pub_current_status': str(self.process_status)})  # 发布过程更新状态
+        self.redis_cli.hmset(self._lockkey, {'pub_current_status': 'pub successful !'})
+        self.redis_cli.delete(self._lockkey)
         self.cleantmp()
         # 更新records 记录
-        self.records_instance.input_configs(self.readmelist)
+        self.records_instance.jarfilename = self.jarname
+        self.records_instance.input_changefiles(self.readmelist)
         self.records_instance.backupsavedir = self._backup_ver
+        self.records_instance.new_filemd5sum = self.new_filemd5
         self.records_instance.save()
         self.redis_cli.delete(self._lockkey)
         if self.have_error:
@@ -361,15 +347,12 @@ class RemoteZipReplaceWorker(object):
         print("{0} Info: {1}  {2}开始回滚操作".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                                                 self.remote_server, self._dstdir))
         RecordOfjavazip.objects.filter(pk=self.records_instance.pk).update(pub_status=4)
-        if not self.have_error:
-            self.stop_tomcat()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': str(self.process_status)})
-        if not self.have_error:
-            self.rollback()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': str(self.process_status)})
-        if not self.have_error:
-            self.start_tomcat()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': str(self.process_status)})
+        for myfunc in [self.stop_tomcat, self.rollback, self.start_tomcat]:
+            if not self.have_error:
+                myfunc()
+                self.redis_cli.hmset(self._lockkey, {'pub_current_status': str(self.process_status)})  # 发布过程更新状态
+
+        self.redis_cli.hmset(self._lockkey, {'pub_current_status': str(self.process_status)})
         self.redis_cli.delete(self._lockkey)
         if self.have_error:
             RecordOfjavazip.objects.filter(pk=self.records_instance.pk).update(pub_status=-2)

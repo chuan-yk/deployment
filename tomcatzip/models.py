@@ -20,9 +20,9 @@ class RecordOfjavazip(models.Model):
     def __str__(self):
         return 'Record for {}, {} pub_time:{}'.format(self.items, self.record_id, self.pub_time)
 
-    def input_configs(self, inputlist):
+    def input_changefiles(self, inputlist):
         """inputlist:传入字符串，写入changefiles 字段"""
         self.changefiles = json.dumps(inputlist)
 
-    def output_configs(self):
+    def output_changefiles(self):
         return json.loads(self.changefiles)

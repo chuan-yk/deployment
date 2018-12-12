@@ -286,21 +286,11 @@ class RemoteWarReplaceWorker(object):
         RecordOfwar.objects.filter(pk=self.records_instance.pk).update(pub_status=1, )  # 修改发布状态
         Fileupload.objects.filter(pk=self.fileupload_instace.pk).update(status=1, )  # 修改发布状态
         self.redis_cli.hmset(self._lockkey, {'pub_current_status': 'upload file to Remote server'})  # 发布过程更新状态
-        if not self.have_error:
-            self.make_ready()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.success_status})  # 发布过程更新状态
-        if not self.have_error:
-            self.do_backup()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.success_status})  # 发布过程更新状态
-        if not self.have_error:
-            self.stop_tomcat()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.success_status})
-        if not self.have_error:
-            self.do_cover()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.success_status})
-        if not self.have_error:
-            self.start_tomcat()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': 'pub successful !'})
+        for myfunc in [self.make_ready, self.do_backup, self.stop_tomcat, self.do_cover, self.start_tomcat]:
+            if not self.have_error:
+                myfunc()
+                self.redis_cli.hmset(self._lockkey, {'pub_current_status': str(self.process_status)})  # 发布过程更新状态
+        self.redis_cli.hmset(self._lockkey, {'pub_current_status': 'pub successful !'})
         self.redis_cli.delete(self._lockkey)
         self.cleantmp()
         RecordOfwar.objects.filter(pk=self.records_instance.pk).update(backupsavedir=self._backup_ver, )  # 更新records 记录
@@ -327,15 +317,10 @@ class RemoteWarReplaceWorker(object):
         print("{0} Info: {1}  {2}开始回滚操作".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                                                 self.remote_server, self._dstdir))
         RecordOfwar.objects.filter(pk=self.records_instance.pk).update(pub_status=4)
-        if not self.have_error:
-            self.stop_tomcat()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.success_status})
-        if not self.have_error:
-            self.rollback()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.success_status})
-        if not self.have_error:
-            self.start_tomcat()
-            self.redis_cli.hmset(self._lockkey, {'pub_current_status': self.success_status})
+        for myfunc in [self.stop_tomcat, self.rollback, self.start_tomcat]:
+            if not self.have_error:
+                myfunc()
+                self.redis_cli.hmset(self._lockkey, {'pub_current_status': str(self.process_status)})  # 发布过程更新状态
         self.redis_cli.delete(self._lockkey)
         if self.have_error:
             RecordOfwar.objects.filter(pk=self.records_instance.pk).update(pub_status=-2)
