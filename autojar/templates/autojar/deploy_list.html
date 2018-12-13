@@ -20,8 +20,18 @@
         <ul class="nav nav-tabs">
             <li class="active"><a href="{% url 'autojar:deploy_list' %}">Jar包发布</a></li>
             <li><a href="{% url 'autojar:history_list' %}">发布历史</a></li>
-
         </ul>
+        <form action={% url "autojar:deploy_list" %} method="get">
+            {% csrf_token %}
+            <label for="">平台</label>
+            <input type="text" name="platform" multiple>
+            <label for="">项目</label>
+            <input type="text" name="app" multiple>
+            <label for="">时间</label>
+            <input type="date"name="time" value=/>
+            <input type="submit" value="查询"/>
+        </form>
+
         <div class="section-body">
             <div class="row">
                 <table class="table table-striped">

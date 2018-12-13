@@ -7,12 +7,30 @@ from .deploy import DeploySet
 from django_redis import get_redis_connection
 
 
+def set_if_not_none(mapping, key, value):
+
+    if value :
+        mapping[key] = value
+
 class deploy_list(ListView):
     model = Fileupload
     template_name = 'autojar/deploy_list.html'
     context_object_name = 'deploy_list'
     paginate_by = 10
-    queryset = Fileupload.objects.filter(status=0,type=3).order_by('-create_date')
+
+    def get_queryset(self):
+        if self.request.GET:
+            sort_pt = self.request.GET.get('platform')
+            sort_app = self.request.GET.get('app')
+            sort_time = self.request.GET.get('time')
+            querystr = {}
+            set_if_not_none(querystr, 'pt_name', sort_pt)   #更新querystr字典
+            set_if_not_none(querystr, 'app', sort_app)
+            set_if_not_none(querystr, 'create_date', sort_time)
+            print(querystr)
+            return Fileupload.objects.filter(**querystr)
+        else:
+            return Fileupload.objects.all()
 
 class history_list(ListView):
     model = Fileupload
