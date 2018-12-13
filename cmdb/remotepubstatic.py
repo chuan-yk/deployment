@@ -99,7 +99,7 @@ class RemoteReplaceWorker(object):
         stdout_str = stdout.read().decode().strip()
         stderr_str = stderr.read().decode()
         if stderr_str != '':
-            self.mylogway("执行远程命令失败: {} , 交互参数 stdin = {}".format(cmd, stdinstr), "Error")
+            self.mylogway("执行远程命令失败: {} , 交互参数 stdin = {}".format(cmd, stdinstr), level="Error")
             raise IOError(stderr_str)
         return stdout_str
 
@@ -246,14 +246,14 @@ class RemoteReplaceWorker(object):
                                                       os.path.join(self._dstdir, pub_file)), level='Debug')
                 self.sftp.put(os.path.join(self._tmpdir, '_dist', pub_file), os.path.join(self._dstdir, pub_file))
         except FileNotFoundError as e:  # 捕获xftp put 过程目的文件夹不存在的异常
-            self.mylogway('Sftp put file error', e)
+            self.mylogway('Sftp put file error {}'.format(e), level='Error')
             self.have_error = True
             self.rollback(onpub=True)
             self.error_reason = 'scp {} {} Sftp put file error: {}'.format(
                 os.path.join(self._tmpdir, '_dist', pub_file), os.path.join(self._dstdir, pub_file), e)
 
         except Exception as e:
-            self.mylogway("Unknown Exception as:", e)
+            self.mylogway("Unknown Exception as: {}".format(e), level='Error')
             self.have_error = True
             self.rollback(onpub=True)
         if not self.have_error:
@@ -308,8 +308,8 @@ class RemoteReplaceWorker(object):
                 self.cleantmp()
 
         except IOError as e3:
-            self.mylogway("Unknown Exception as:", e3)
-            self.mylogway('Debug there, rollback dir {}'.format(roll_back_dir))
+            self.mylogway("Unknown Exception as: {}".format(e3), level='Error')
+            self.mylogway('Debug there, rollback dir {}'.format(roll_back_dir), level='Error')
             self.redis_cli.delete(self._lockkey)  # 回滚失败，任务结束，释放锁
             self.error_reason = str(e3)
             if not onpub:
