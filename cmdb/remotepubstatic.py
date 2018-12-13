@@ -210,7 +210,7 @@ class RemoteReplaceWorker(object):
         self.ssh = self.remote_server.get_sshclient()
         for i in self.shouldbackdir:
             if i in self.newdir:  # 新增static/commom 同级别文件夹，跳过备份过程
-                self.mylogway('新增文件夹！new  dir  {} ignore back step ， continue...'.format(i))
+                self.mylogway('新增文件夹！new  dir  {} ignore back step ， continue...'.format(i), level='Info')
                 continue
             try:
                 backupdir = os.path.join(self._backup_ver, i)  # 备份完整路径 /xxx/xx/项目/project_201YddHHMMSS/static/lottery
@@ -243,7 +243,7 @@ class RemoteReplaceWorker(object):
                 if not self.ignore_new and pub_file in self.newfile:
                     continue
                 self.mylogway('sftp put {} {}'.format(os.path.join(self._tmpdir, '_dist', pub_file),
-                                                      os.path.join(self._dstdir, pub_file)))
+                                                      os.path.join(self._dstdir, pub_file)), level='Debug')
                 self.sftp.put(os.path.join(self._tmpdir, '_dist', pub_file), os.path.join(self._dstdir, pub_file))
         except FileNotFoundError as e:  # 捕获xftp put 过程目的文件夹不存在的异常
             self.mylogway('Sftp put file error', e)
