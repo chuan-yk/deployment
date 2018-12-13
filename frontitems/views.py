@@ -28,7 +28,7 @@ def list_detail(request, pk):
     pub_file = get_object_or_404(Fileupload, pk=pk)
     pjt_info = get_object_or_404(ProjectInfo, items=pub_file.app, platform=pub_file.platform,  # 唯一任务值
                                  type=pub_file.type)
-    record_id = '{0}_{1}_{2}_{3}'.format(pjt_info.platform, pjt_info.items, '0', pk)
+    record_id = '{0}:{1}:{2}:{3}'.format(pjt_info.platform, pjt_info.items, '0', pk)
 
     if RecordOfStatic.objects.filter(record_id=record_id).count() == 0:  # 初始化插入 Record 记录
         uploadfile_md5 = file_as_byte_md5sum(pub_file.file.read())  # 上传文件Md5
@@ -46,7 +46,6 @@ def list_detail(request, pk):
                                        pjt_info,
                                        RecordOfStatic.objects.get(record_id=record_id),
                                        shouldbackdir=set(),
-                                       tmpdir='media',
                                        )
         MD5 = pub_task.checkfiledetail()
         try:
@@ -60,7 +59,7 @@ def list_detail(request, pk):
     uploadfile_detail = pub_file  # 兼顾模板写法，不同名同内容变量
     # pub_lock 发布锁状态获取
     redis_for_detail_cli = get_redis_connection("default")
-    pub_lock_key = '{0}_{1}_{2}_{3}'.format(pjt_info.platform, pjt_info.items, '0', 'lock')
+    pub_lock_key = '{0}:{1}:{2}:{3}'.format(pjt_info.platform, pjt_info.items, '0', 'lock')
     if redis_for_detail_cli.exists(pub_lock_key):  # 发布占用锁定状态,
         pub_lock = {'lock': True, 'pubtask': redis_for_detail_cli.hget(pub_lock_key, 'lock_task').decode(),
                     'pub_current_status': redis_for_detail_cli.hget(pub_lock_key, 'pub_current_status').decode(),
@@ -87,8 +86,8 @@ def pub(request, pk):
     pub_file = get_object_or_404(Fileupload, pk=pk)
     pjt_info = get_object_or_404(ProjectInfo, items=pub_file.app, platform=pub_file.platform,
                                  type=pub_file.type)
-    pub_lock_key = '{0}_{1}_{2}_{3}'.format(pjt_info.platform, pjt_info.items, '0', 'lock')  # 发布任务锁
-    record_id = '{0}_{1}_{2}_{3}'.format(pjt_info.platform, pjt_info.items, '0', pk)  # 唯一任务值
+    pub_lock_key = '{0}:{1}:{2}:{3}'.format(pjt_info.platform, pjt_info.items, '0', 'lock')  # 发布任务锁
+    record_id = '{0}:{1}:{2}:{3}'.format(pjt_info.platform, pjt_info.items, '0', pk)  # 唯一任务值
     pub_user = request.user.username
 
     if redis_for_pub_cli.exists(pub_lock_key):  # 发布锁定状态，返回占用提示
@@ -116,7 +115,6 @@ def pub(request, pk):
                                    pjt_info,
                                    pub_record,
                                    shouldbackdir=set(),
-                                   tmpdir='media',  # 解压临时文件，跟进环境调整
                                    )
 
     threading_task = threading.Thread(target=pub_task.pip_run, )  # 正式使用
@@ -132,8 +130,8 @@ def pubresult(request, pk):
     pub_file = get_object_or_404(Fileupload, pk=pk)
     pjt_info = get_object_or_404(ProjectInfo, items=pub_file.app, platform=pub_file.platform,
                                  type=pub_file.type)
-    pub_lock_key = '{0}_{1}_{2}_{3}'.format(pjt_info.platform, pjt_info.items, '0', 'lock')  # 发布任务锁
-    record_id = '{0}_{1}_{2}_{3}'.format(pjt_info.platform, pjt_info.items, '0', pk)  # 唯一任务值
+    pub_lock_key = '{0}:{1}:{2}:{3}'.format(pjt_info.platform, pjt_info.items, '0', 'lock')  # 发布任务锁
+    record_id = '{0}:{1}:{2}:{3}'.format(pjt_info.platform, pjt_info.items, '0', pk)  # 唯一任务值
     try:
         redis_detail = {'lock_task': redis_for_pub_cli.hget(pub_lock_key, 'lock_task').decode(),
                         'pub_current_status': redis_for_pub_cli.hget(pub_lock_key, 'pub_current_status').decode(),
@@ -172,8 +170,8 @@ def pubreturn(request, pk):
     pjt_info = get_object_or_404(ProjectInfo, items=pub_file.app, platform=pub_file.platform,
                                  type=pub_file.type)
 
-    record_id = '{0}_{1}_{2}_{3}'.format(pjt_info.platform, pjt_info.items, '0', pk)  # 唯一任务值
-    pub_lock_key = '{0}_{1}_{2}_{3}'.format(pjt_info.platform, pjt_info.items, '0', 'lock')  # 发布任务锁
+    record_id = '{0}:{1}:{2}:{3}'.format(pjt_info.platform, pjt_info.items, '0', pk)  # 唯一任务值
+    pub_lock_key = '{0}:{1}:{2}:{3}  '.format(pjt_info.platform, pjt_info.items, '0', 'lock')  # 发布任务锁
     pub_record = get_object_or_404(RecordOfStatic, record_id=record_id, )
 
     if pub_record.pub_status != 2 or len(pub_record.backuplist) == 0 or len(pub_record.backupsavedir) == 0: # 检验当前任务是否已发布
@@ -194,7 +192,6 @@ def pubreturn(request, pk):
                                    pub_record,
                                    shouldbackdir=shouldbackdir,
                                    backup_ver=backup_ver,
-                                   tmpdir='media',  # 解压临时文件，跟进环境调整
                                    )
     if not pub_task.checkbackdir():
         messages.error(request,

@@ -83,11 +83,32 @@ class RemoteReplaceWorker(object):
         self._tmpdir = tempfile.mkdtemp(prefix=self._items + '_', suffix='_django')
         self.md5dict = {}
         self.pub_type = 0  # 发布类型 0：静态文件
-        self.record_id = '{0}_{1}_{2}_{3}'.format(self._pjtname, self._items, self.pub_type, self._pk)
-        self._lockkey = '{}_{}_{}_lock'.format(self._pjtname, self._items, self.pub_type)
-        self.ssh = None
-        self.sftp = None
+        self.record_id = '{0}:{1}:{2}:{3}'.format(self._pjtname, self._items, self.pub_type, self._pk)
+        self._lockkey = '{}:{}:{}:lock'.format(self._pjtname, self._items, self.pub_type)
+        self.ssh = self._remote_server.get_sshclient()
+        self.sftp = self._remote_server.get_xftpclient()
         # print("debug class init:", self.shouldbackdir)
+
+    def myexecute(self, cmd, stdinstr=''):
+        """远程命令执行，检测执行结果"""
+        # self.mylogway("执行远程命令: {} , 交互参数 stdin = {}".format(cmd, stdinstr), "Debug")
+        self.mylogway("执行远程命令: {} ".format(cmd, stdinstr), "Debug")
+        stdin, stdout, stderr = self.ssh.exec_command(cmd)
+        if stdinstr != '':  # stdin. write in, 有交互过程在此扩展
+            pass
+        stdout_str = stdout.read().decode().strip()
+        stderr_str = stderr.read().decode()
+        if stderr_str != '':
+            self.mylogway("执行远程命令失败: {} , 交互参数 stdin = {}".format(cmd, stdinstr), "Error")
+            raise IOError(stderr_str)
+        return stdout_str
+
+    def mylogway(self, logstr, level="Error"):
+        """自定义日志打印"""
+        # if level.capitalize() in ["Error", "Info", ]:  # 调整日志级别
+        if level.capitalize() in ["Error", "Info", "Debug", ]:  # 调整日志级别
+            print("{0}   [{1}]: {2} {3} {4}".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), level,
+                                                    self.remote_server, self.record_id, logstr))
 
     def checkfiledetail(self):
         """检查文件详情，存redis """
@@ -101,11 +122,12 @@ class RemoteReplaceWorker(object):
             return self.md5dict
 
         try:
+            self.mylogway("解压文件 {} 到 {} ".format(self._fromfile, self._tmpdir), level='Info')
             shutil.unpack_archive(self._fromfile, extract_dir=self._tmpdir, format='zip')
             if not os.path.isdir(os.path.join(self._tmpdir, '_dist')):
                 # print(os.path.isdir(os.path.join(self._tmpdir, '_dist')))
+                self.mylogway("解压文件不包含 _dist 文件，请联系开发检查上传文件是否有误！", level='Error')
                 raise IOError('could not find _dist dir under tempdir {0}'.format(self._tmpdir))
-
             # for root, dirs, files in os.walk(os.path.join(self._tmpdir, '_dist/'), topdown=False, followlinks=False):
             for root, dirs, files in os.walk(self._tmpdir, topdown=False, followlinks=False):
                 for file in files:
@@ -139,8 +161,10 @@ class RemoteReplaceWorker(object):
 
     def make_ready(self):
         try:
+            self.mylogway("解压文件 {} 到 {} ".format(self._fromfile, self._tmpdir), level='Info')
             shutil.unpack_archive(self._fromfile, extract_dir=self._tmpdir, format='zip')
             if not os.path.isdir(os.path.join(self._tmpdir, '_dist')):
+                self.mylogway("解压文件不包含 _dist 文件，请联系开发检查上传文件是否有误！", level='Error')
                 raise IOError('could not find _dist dir under tempdir {0}'.format(self._tmpdir))
             for root, dirs, files in os.walk(os.path.join(self._tmpdir, '_dist/'), topdown=False, followlinks=False):
                 for dir in dirs:
@@ -149,65 +173,56 @@ class RemoteReplaceWorker(object):
                 for file in files:
                     self.unzipfilelist.append(os.path.join(root.split('_dist/')[1], file))  #
             # 需备份文件夹
-            print("debug make ready unzipdirlist:", self.unzipdirlist)
+            self.mylogway("解压文件 {} 完成！".format(self._fromfile), level='Info')
             for seconddir in self.unzipdirlist:
                 if seconddir.split('/').__len__() < 3 and seconddir != 'static':
                     self.shouldbackdir.add(seconddir)
             print("debug make ready shouldbackdir:", self.shouldbackdir)
             for file in self.unzipfilelist:
-                if self.redis_cli.hget("{0}:{1}:{2}".format(self._pjtname, self._items, file), "Exist"):    # redis 文件是否存在
+                the_redis_key = "{0}:{1}:{2}:file:{3}".format(self._pjtname, self._items, self.pub_type, file)
+                if self.redis_cli.hget(the_redis_key, "Exist"):  # redis 文件是否存在
                     continue
-                elif self._remote_server.if_exist_file(os.path.join(self._dstdir, file)):   # 远程检查文件是否存在
-                    self.redis_cli.hmset("{0}:{1}:{2}".format(self._pjtname, self._items, file),
-                                         {"Exist": True, "Type": 'f'})
+                elif self._remote_server.if_exist_file(os.path.join(self._dstdir, file)):  # 远程检查文件是否存在
+                    self.redis_cli.hmset(the_redis_key, {"Exist": "True", "Type": 'f'})
                     continue
                 else:
-                    self.redis_cli.hmset("{0}:{1}:{2}".format(self._pjtname, self._items, file),
-                                         {"Type": 'f'})
+                    self.redis_cli.hmset(the_redis_key, {"Type": 'f'})
                     self.newfile.append(file)
+            self.mylogway("检测新增文件 : {}！".format(self.newfile), level='Info')
             for the_dir in self.unzipdirlist:
-                if self.redis_cli.hget("{0}:{1}:{2}".format(self._pjtname, self._items, the_dir), "Exist"):     # redis 文件目录是否存在
+                the_redis_key = "{0}:{1}:{2}:dir:{3}".format(self._pjtname, self._items, self.pub_type, the_dir)
+                if self.redis_cli.hget(the_redis_key, "Exist"):  # redis 文件目录是否存在
                     continue
-                elif self._remote_server.if_exist_dir(os.path.join(self._dstdir, the_dir)):                     # 远程检查目录是否存在
-                    self.redis_cli.hmset("{0}:{1}:{2}".format(self._pjtname, self._items, the_dir),
-                                         {"Exist": True, "Type": 'd'})
+                elif self._remote_server.if_exist_dir(os.path.join(self._dstdir, the_dir)):  # 远程检查目录是否存在
+                    self.redis_cli.hmset(the_redis_key, {"Exist": "True", "Type": 'd'})
                     continue
                 else:
-                    self.redis_cli.hmset("{0}:{1}:{2}".format(self._pjtname, self._items, the_dir),
-                                         {"Type": 'd'})
+                    self.redis_cli.hmset(the_redis_key, {"Type": 'd'})
                     self.newdir.append(the_dir)
+            self.mylogway("检测新增文件夹 : {}！".format(self.newdir), level='Info')
         except Exception as e1:
             self.have_error = True
-            print('Error e1:', e1)
+            self.mylogway("解压文件异常，错误详情 : {}".format(e1), level='Error')
         finally:
             self.success_status = 'unziped_success'
 
     def do_backup(self):
         self.ssh = self._remote_server.get_sshclient()
         for i in self.shouldbackdir:
-            if i in self.newdir:            # 新增文件跳过备份过程
-                print('new  dir  {} ignore back step ， continue...'.format(i))
+            if i in self.newdir:  # 新增static/commom 同级别文件夹，跳过备份过程
+                self.mylogway('新增文件夹！new  dir  {} ignore back step ， continue...'.format(i))
                 continue
             try:
                 backupdir = os.path.join(self._backup_ver, i)  # 备份完整路径 /xxx/xx/项目/project_201YddHHMMSS/static/lottery
-                stdin, stdout, stderr = self.ssh.exec_command("mkdir -p {}".format(backupdir))
-                stderr_txt = stderr.read().decode()
-                if stderr_txt != '':
-                    raise IOError(stderr_txt)
-                stdin, stdout, stderr = self.ssh.exec_command(
-                    "/bin/cp -r {0}/*  {1}/".format(os.path.join(self._dstdir, i), backupdir))
-                stderr_txt = stderr.read().decode()
-                if stderr_txt != '':
-                    raise IOError(stderr_txt)
+                self.myexecute("mkdir -p {}".format(backupdir))
+                self.myexecute("/bin/cp -r {0}/*  {1}/".format(os.path.join(self._dstdir, i), backupdir))
                 self.backuplist.append(backupdir)
             except Exception as e:
-                print('backup catch Exception', e)
+                self.myexecute("备份静态文件出错，错误详情{}".format(e))
                 self.success_status = 'backup_fail'
                 self.have_error = True
         else:
-            if self.have_error:
-                self.success_status = 'backup_fail'
-            else:
+            if not self.have_error:
                 self.success_status = 'backup_success'
 
     def do_cover(self):
@@ -222,34 +237,30 @@ class RemoteReplaceWorker(object):
                 """"创建新建文件夹"""
                 for ndir in self.newdir:
                     abspath_path = os.path.join(self._dstdir, ndir)
-                    stdin, stdout, stderr = self.ssh.exec_command('mkdir -p {}'.format(abspath_path))
-                    stderr_txt2 = stderr.read().decode()
-                    if stderr_txt2 != '':
-                        raise IOError(stderr_txt2)
+                    self.myexecute("mkdir -p '{}'".format(abspath_path))
             for pub_file in self.unzipfilelist:
                 # ignore == False, 不覆盖新增文件
                 if not self.ignore_new and pub_file in self.newfile:
                     continue
-                # print("Debug: cover file {}".format(pubfile))
-                print('sftp put {} {}'.format(os.path.join(self._tmpdir, '_dist', pub_file),
-                                              os.path.join(self._dstdir, pub_file)))
+                self.mylogway('sftp put {} {}'.format(os.path.join(self._tmpdir, '_dist', pub_file),
+                                                      os.path.join(self._dstdir, pub_file)))
                 self.sftp.put(os.path.join(self._tmpdir, '_dist', pub_file), os.path.join(self._dstdir, pub_file))
         except FileNotFoundError as e:  # 捕获xftp put 过程目的文件夹不存在的异常
-            print('Sftp put file error', e)
+            self.mylogway('Sftp put file error', e)
             self.have_error = True
             self.rollback(onpub=True)
             self.error_reason = 'scp {} {} Sftp put file error: {}'.format(
                 os.path.join(self._tmpdir, '_dist', pub_file), os.path.join(self._dstdir, pub_file), e)
 
         except Exception as e:
-            print("Unknown Exception as:", e)
+            self.mylogway("Unknown Exception as:", e)
             self.have_error = True
             self.rollback(onpub=True)
         if not self.have_error:
             self._remote_server.sshclient_close()
             self._remote_server.xftpclient_close()
             self.success_status = 'pub_success'
-            print("{} 发布完成！".format(self._fromfile))
+            self.mylogway("{} 发布完成！".format(self._fromfile))
 
     def checkbackdir(self):
         """检查备份文件是否存在"""
@@ -279,22 +290,13 @@ class RemoteReplaceWorker(object):
         try:
             for tdir in self.shouldbackdir:  # 还原过程, 先mv, 再还原
                 roll_back_dir_add = os.path.join(roll_back_dir, tdir)
-                stdin, stdout, stderr = self.ssh.exec_command('mkdir -p {}'.format(roll_back_dir_add))
-                stderr_txt3 = stderr.read().decode()
-                if stderr_txt3 != '':
-                    raise IOError(stderr_txt3)
-                stdin, stdout, stderr = self.ssh.exec_command(
-                    "mv {}/* {}".format(os.path.join(self._dstdir, tdir), roll_back_dir_add))
-                stderr_txt3 = stderr.read().decode()
-                if stderr_txt3 != '':
-                    raise IOError(stderr_txt3)
-                stdin, stdout, stderr = self.ssh.exec_command("mv {}/* {}".format(os.path.join(self._backup_ver, tdir),
-                                                                                  os.path.join(self._dstdir, tdir)))
-                stderr_txt3 = stderr.read().decode()
-                if stderr_txt3 != '':
-                    raise IOError(stderr_txt3)
-                print("debug Function rollback: mv {}/* {}".format(os.path.join(self._backup_ver, tdir),
-                                                                   os.path.join(self._dstdir, tdir)))
+                self.myexecute('mkdir -p {}'.format(roll_back_dir_add))
+                self.myexecute("mv {}/* {}".format(os.path.join(self._dstdir, tdir), roll_back_dir_add))
+                self.myexecute(
+                    "mv {}/* {}".format(os.path.join(self._backup_ver, tdir), os.path.join(self._dstdir, tdir)))
+
+                self.mylogway("debug Function rollback: mv {}/* {}".format(os.path.join(self._backup_ver, tdir),
+                                                                os.path.join(self._dstdir, tdir)), level="Info")
 
             if not onpub:  # 直接调用回滚操作
                 self.redis_cli.delete(self._lockkey)  # 回滚完成，释放发布lock
@@ -306,8 +308,8 @@ class RemoteReplaceWorker(object):
                 self.cleantmp()
 
         except IOError as e3:
-            print("Unknown Exception as:", e3)
-            print('Debug there, rollback dir {}'.format(roll_back_dir))
+            self.mylogway("Unknown Exception as:", e3)
+            self.mylogway('Debug there, rollback dir {}'.format(roll_back_dir))
             self.redis_cli.delete(self._lockkey)  # 回滚失败，任务结束，释放锁
             self.error_reason = str(e3)
             if not onpub:
