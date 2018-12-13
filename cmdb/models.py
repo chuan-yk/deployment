@@ -1,10 +1,10 @@
 import json
-
-from django.db import models
 import paramiko
+from django.db import models
+from deployment.settings import key
 
-key = "sshkey\\id_rsa"
-# key = "/root/.ssh/id_rsa"
+
+
 # pkey=paramiko.RSAKey.from_private_key_file(key,password='******')
 pkey = paramiko.RSAKey.from_private_key_file(key)
 

@@ -49,7 +49,7 @@ class RemoteReplaceWorker(object):
         # fileupload_instace = Fileupload.objects.get(pk=4)
         # debug # projectinfo_instance = fileupload_instace.project
         # records_instance = RecordOfStatic.objects.get(pk=2)
-        self._remote_server = serverinfo_instance
+        self.remote_server = serverinfo_instance
         self._fileupload_instace = fileupload_instace
         self._projectinfo_instance = projectinfo_instance
         self._records_instance = records_instance
@@ -85,8 +85,8 @@ class RemoteReplaceWorker(object):
         self.pub_type = 0  # 发布类型 0：静态文件
         self.record_id = '{0}:{1}:{2}:{3}'.format(self._pjtname, self._items, self.pub_type, self._pk)
         self._lockkey = '{}:{}:{}:lock'.format(self._pjtname, self._items, self.pub_type)
-        self.ssh = self._remote_server.get_sshclient()
-        self.sftp = self._remote_server.get_xftpclient()
+        self.ssh = self.remote_server.get_sshclient()
+        self.sftp = self.remote_server.get_xftpclient()
         # print("debug class init:", self.shouldbackdir)
 
     def myexecute(self, cmd, stdinstr=''):
@@ -182,7 +182,7 @@ class RemoteReplaceWorker(object):
                 the_redis_key = "{0}:{1}:{2}:file:{3}".format(self._pjtname, self._items, self.pub_type, file)
                 if self.redis_cli.hget(the_redis_key, "Exist"):  # redis 文件是否存在
                     continue
-                elif self._remote_server.if_exist_file(os.path.join(self._dstdir, file)):  # 远程检查文件是否存在
+                elif self.remote_server.if_exist_file(os.path.join(self._dstdir, file)):  # 远程检查文件是否存在
                     self.redis_cli.hmset(the_redis_key, {"Exist": "True", "Type": 'f'})
                     continue
                 else:
@@ -193,7 +193,7 @@ class RemoteReplaceWorker(object):
                 the_redis_key = "{0}:{1}:{2}:dir:{3}".format(self._pjtname, self._items, self.pub_type, the_dir)
                 if self.redis_cli.hget(the_redis_key, "Exist"):  # redis 文件目录是否存在
                     continue
-                elif self._remote_server.if_exist_dir(os.path.join(self._dstdir, the_dir)):  # 远程检查目录是否存在
+                elif self.remote_server.if_exist_dir(os.path.join(self._dstdir, the_dir)):  # 远程检查目录是否存在
                     self.redis_cli.hmset(the_redis_key, {"Exist": "True", "Type": 'd'})
                     continue
                 else:
@@ -207,7 +207,7 @@ class RemoteReplaceWorker(object):
             self.success_status = 'unziped_success'
 
     def do_backup(self):
-        self.ssh = self._remote_server.get_sshclient()
+        self.ssh = self.remote_server.get_sshclient()
         for i in self.shouldbackdir:
             if i in self.newdir:  # 新增static/commom 同级别文件夹，跳过备份过程
                 self.mylogway('新增文件夹！new  dir  {} ignore back step ， continue...'.format(i))
@@ -230,8 +230,8 @@ class RemoteReplaceWorker(object):
         :param: self.ignore_new, 忽略新增
         :return:
         """
-        self.ssh = self._remote_server.get_sshclient()
-        self.sftp = self._remote_server.get_xftpclient()
+        self.ssh = self.remote_server.get_sshclient()
+        self.sftp = self.remote_server.get_xftpclient()
         try:
             if self.ignore_new:
                 """"创建新建文件夹"""
@@ -257,17 +257,17 @@ class RemoteReplaceWorker(object):
             self.have_error = True
             self.rollback(onpub=True)
         if not self.have_error:
-            self._remote_server.sshclient_close()
-            self._remote_server.xftpclient_close()
+            self.remote_server.sshclient_close()
+            self.remote_server.xftpclient_close()
             self.success_status = 'pub_success'
-            self.mylogway("{} 发布完成！".format(self._fromfile))
+            self.mylogway("{} 发布完成！".format(self._fromfile), level='Info')
 
     def checkbackdir(self):
         """检查备份文件是否存在"""
         if len(self.shouldbackdir) == 0:
             return False
         for tdir in self.shouldbackdir:
-            if not self._remote_server.if_exist_dir(os.path.join(self._backup_ver, tdir)):
+            if not self.remote_server.if_exist_dir(os.path.join(self._backup_ver, tdir)):
                 return False
         else:
             return True
@@ -277,7 +277,7 @@ class RemoteReplaceWorker(object):
         :param: onpub 正常发布状态， 出现失败回滚
         :return:
         """
-        self.ssh = self._remote_server.get_sshclient()
+        self.ssh = self.remote_server.get_sshclient()
         if onpub:
             self.success_status = 'pub_fail'
         else:
@@ -317,8 +317,8 @@ class RemoteReplaceWorker(object):
                                      {'error_detail': str(self.success_status) + '  ' + self.error_reason})
                 RecordOfStatic.objects.filter(pk=self._records_instance.pk).update(pub_status=-2, )  # 回滚失败， -2
 
-        self._remote_server.sshclient_close()
-        self._remote_server.xftpclient_close()
+        self.remote_server.sshclient_close()
+        self.remote_server.xftpclient_close()
 
     def cleantmp(self):
         shutil.rmtree(self._tmpdir)

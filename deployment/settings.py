@@ -50,7 +50,6 @@ INSTALLED_APPS = [
     'frontitems',
     'autojar',
     'cmdb',
-    'django_crontab',
     'fileupload',
     'frontapp',
     'tomcatwar',
@@ -183,13 +182,8 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True # 关闭浏览器，则COOKIE失效
 # redis session backend
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"
-
-
-# 定时任务
-CRONJOBS = [
-
-    ('01 00 * * *', 'autojar.crontab.deloldfile')
-]
+key = "sshkey\\id_rsa"
+# key = "/root/.ssh/id_rsa"
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR,'media')
