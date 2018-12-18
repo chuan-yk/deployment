@@ -198,8 +198,8 @@ class RemoteZipReplaceWorker(object):
         # 新增文件夹在备份完成之后进行
         try:
             for i in self.readmenewdir:
-                self.mylogway("mkdir -p {}".format(os.path.join(self._dstdir, self._items, i)))
-                self.mylogway("检测到新增文件，新建文件夹: {}".format(os.path.join(self._dstdir, self._items, i)))
+                self.myexecute("mkdir -p {}".format(os.path.join(self._dstdir, self._items, i)))
+                self.mylogway("检测到新增文件，新建文件夹: {}".format(os.path.join(self._dstdir, self._items, i)), level='Info')
         except Exception as e4:
             self.have_error = True
             self.error_reason = "创建新增文件夹失败" + str(e4)

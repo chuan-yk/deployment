@@ -36,7 +36,8 @@ def list_detail(request, pk):
     pjt_info = get_object_or_404(ProjectInfo, items=pub_file.app, platform=pub_file.platform,
                                  type=pub_file.type)
     record_id = '{0}:{1}:{2}:{3}'.format(pjt_info.platform, pjt_info.items, pub_file.type, pk)  # 唯一任务值mc_apk_1_pk
-    pub_lock_key = '{0}:{1}:{2}:lock'.format(pjt_info.platform, pjt_info.items, pub_file.type, )  # 发布锁键值
+    pub_lock_key = '{0}:{1}:{2}:lock:{3}'.format(pjt_info.platform, pjt_info.items, pub_file.type,
+                                                 os.path.splitext(pub_file.slug)[0])  # 发布锁键值
     pub_record, created = RecordOfjavajar.objects.get_or_create(record_id=record_id, items=pjt_info, defaults={
         'pub_filemd5sum': file_as_byte_md5sum(pub_file.file.read())})
 
@@ -63,8 +64,8 @@ def apppub(request, pk):
     pjt_info = get_object_or_404(ProjectInfo, items=pub_file.app, platform=pub_file.platform,
                                  type=pub_file.type)
     record_id = '{0}:{1}:{2}:{3}'.format(pjt_info.platform, pjt_info.items, pub_file.type, pk)  # 唯一任务值mc_apk_4_pk
-    pub_lock_key = '{0}:{1}:{2}:lock:{}'.format(pjt_info.platform, pjt_info.items, pub_file.type,
-                                                pjt_info.dst_file_path.split('webapps')[0])  # 发布锁键值
+    pub_lock_key = '{0}:{1}:{2}:lock:{3}'.format(pjt_info.platform, pjt_info.items, pub_file.type,
+                                                os.path.splitext(pub_file.slug)[0])  # 发布锁键值
     pub_record, created = RecordOfjavajar.objects.get_or_create(record_id=record_id, items=pjt_info, defaults={
         'pub_filemd5sum': file_as_byte_md5sum(pub_file.file.read())})
     hlock = '{}:{}'.format(pjt_info.platform, pjt_info.items)
@@ -108,7 +109,8 @@ def approllback(request, pk):
     pjt_info = get_object_or_404(ProjectInfo, items=pub_file.app, platform=pub_file.platform,
                                  type=pub_file.type)
     record_id = '{0}:{1}:{2}:{3}'.format(pjt_info.platform, pjt_info.items, pub_file.type, pk)  # 唯一任务值mc_apk_4_pk
-    pub_lock_key = '{0}:{1}:{2}:lock'.format(pjt_info.platform, pjt_info.items, pub_file.type, )  # 发布锁键值
+    pub_lock_key = '{0}:{1}:{2}:lock:{3}'.format(pjt_info.platform, pjt_info.items, pub_file.type,
+                                                 os.path.splitext(pub_file.slug)[0])  # 发布锁键值
     pub_record, created = RecordOfjavajar.objects.get_or_create(record_id=record_id, items=pjt_info, defaults={
         'pub_filemd5sum': file_as_byte_md5sum(pub_file.file.read())})
     if redis_for_app_cli.exists(pub_lock_key):  # 检查同类型任务发布锁定状态
