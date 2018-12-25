@@ -244,11 +244,11 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False  # 是否传递给上级记录器
         },
-        # 'django.default': {
-        #     'handlers': ['default', 'console'],
-        #     'level': 'INFO',
-        #     'propagate': True
-        # },
+        'django.default': {
+            'handlers': ['default', 'console'],
+            'level': 'INFO',
+            'propagate': True
+        },
         'django.request': {
             'handlers': ['request_handler'],
             'level': 'DEBUG',

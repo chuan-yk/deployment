@@ -42,7 +42,7 @@ class RemoteWarReplaceWorker(object):
         else:
             self._backup_ver = backup_ver  # 约定平台下项目备份路径 /data/mc/[sobet_Ver_日期]
         self.redis_cli = get_redis_connection("default")  # redis 客户端
-        self.success_status = ''
+        self.process_status = ''
         self.have_error = False
         self.error_reason = ''
         self._tmpdir = False  # 远程服务器临时文件夹
@@ -158,10 +158,10 @@ class RemoteWarReplaceWorker(object):
         except Exception as e1:
             self.have_error = True
             self.error_reason = str(e1)
-            self.success_status = "unzip_failed"
+            self.process_status = "unzip_failed"
             self.mylogway("远程解压War文件过程异常, 详情 {}".format(e1), level="Error")
         if not self.have_error:
-            self.success_status = 'unziped_success'
+            self.process_status = 'unziped_success'
 
     def do_backup(self):
         self.ssh = self.remote_server.get_sshclient()
@@ -173,10 +173,10 @@ class RemoteWarReplaceWorker(object):
         except Exception as e3:
             self.have_error = True
             self.error_reason = str(e3)
-            self.success_status = "backup_failed"
+            self.process_status = "backup_failed"
             self.mylogway("备份文件失败: {}".format(e3), level="Error")
         if not self.have_error:
-            self.success_status = "backup_success"
+            self.process_status = "backup_success"
 
     def stop_tomcat(self):
         """停止tomcat进程"""
@@ -194,9 +194,9 @@ class RemoteWarReplaceWorker(object):
         except Exception as e:
             self.have_error = True
             self.mylogway("结束 tomcat 进程异常, 详情{}".format(e), level="Error")
-            self.success_status = "stop tomcat failure"
+            self.process_status = "stop tomcat failure"
         if not self.have_error:
-            self.success_status = "stop tomcat successful"
+            self.process_status = "stop tomcat successful"
 
     def start_tomcat(self):
         """Start tomcat , reuse"""
@@ -213,9 +213,9 @@ class RemoteWarReplaceWorker(object):
             self.mylogway("启动tomcat 进程失败,详情{}".format(e), 'Error')
             self.have_error = True
             self.error_reason = str(e)
-            self.success_status = 'Start tomcat failure'
+            self.process_status = 'Start tomcat failure'
         if not self.have_error:
-            self.success_status = 'Start tomcat success'
+            self.process_status = 'Start tomcat success'
 
     def do_cover(self):
         try:
@@ -235,10 +235,10 @@ class RemoteWarReplaceWorker(object):
             self.have_error = True
             self.error_reason = str(e1)
             self.start_tomcat()
-            self.success_status = 'do cover failed'
+            self.process_status = 'do cover failed'
         if not self.have_error:
             self.mylogway("更新文件成功", level="Info")
-            self.success_status = "renew successful"
+            self.process_status = "renew successful"
 
     def autoturnback(self):
         """还原更新过程"""
@@ -269,7 +269,7 @@ class RemoteWarReplaceWorker(object):
             self.mylogway("回滚过程出现异常，原因{}".format(e), level="Info")
         if not self.have_error:
             self.mylogway("回滚功能，回滚文件完成，下一步启动JAVA进程", level="Info")
-            self.success_status = "roll file back success"
+            self.process_status = "roll file back success"
 
     def cleantmp(self):
         # shutil.rmtree(self._tmpdir)
@@ -304,7 +304,7 @@ class RemoteWarReplaceWorker(object):
         if self.have_error:
             RecordOfwar.objects.filter(pk=self.records_instance.pk).update(pub_status=-1, )  # 修改发布状态
             Fileupload.objects.filter(pk=self.fileupload_instace.pk).update(status=-1, )  # 修改发布状态
-            self.redis_cli.hmset(self.record_id, {'error_detail': self.success_status + ': ' + self.error_reason})
+            self.redis_cli.hmset(self.record_id, {'error_detail': self.process_status + ': ' + self.error_reason})
             self.redis_cli.expire(self.record_id, 60 * 60 * 24 * 14)
             self.mylogway("发布流程结束，发布任务失败!!!", level="Error")
         else:
@@ -314,7 +314,7 @@ class RemoteWarReplaceWorker(object):
 
     def rollback_run(self):
         self.ssh = self.remote_server.get_sshclient()
-        self.success_status = "roll_back_Start"
+        self.process_status = "roll_back_Start"
         self.redis_cli.hmset(self._lockkey, {'lock_task': self.record_id, 'starttime': self._operatingtime,
                                              'pub_user': self.records_instance.pub_user,
                                              'pub_current_status': 'Start pub...',
