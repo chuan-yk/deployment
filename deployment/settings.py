@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
 import os
-
+import logging
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -152,7 +152,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/1.10/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-#USE_TZ=False
+# USE_TZ=False
 TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
@@ -182,8 +182,83 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True # 关闭浏览器，则COOKIE失效
 # redis session backend
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"
-key = "sshkey\\id_rsa"
-# key = "/root/.ssh/id_rsa"
+# 服务器秘钥
+key = "/root/.devopssh/id_rsa"
+# 上传目录
+MEDIA_URL = '/release/'
+MEDIA_ROOT = "/data/release"
+# 日志设置
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'standard': {
+            'format': '%(asctime)s  [%(levelname)s]- %(message)s'
+        },
+        'request_format': {
+            'format': '%(asctime)s  %(message)s'
+        }
+    },
+    'filters': {
+        # 当日志错误为 ERROR 时修改日志格式
+    },
+    'handlers': {
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler',
+            'include_html': True,
+        },
+        'default': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR + '/logs/', 'deployment_run.log'),
+            'maxBytes': 1024 * 1024 * 5,  # 5 MB
+            'backupCount': 5,
+            'formatter': 'standard',
+        },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'request_format'
+        },
+        'request_handler': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR + '/logs/', 'access_http.log'),
+            'maxBytes': 1024 * 1024 * 5,  # 5 MB
+            'backupCount': 5,
+            'formatter': 'standard',
+        },
+        'scprits_handler': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR + '/logs/', 'script.log'),
+            'maxBytes': 1024 * 1024 * 5,  # 5 MB
+            'backupCount': 5,
+            'formatter': 'standard',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['default', 'console'],
+            'level': 'INFO',
+            'propagate': False  # 是否传递给上级记录器
+        },
+        # 'django.default': {
+        #     'handlers': ['default', 'console'],
+        #     'level': 'INFO',
+        #     'propagate': True
+        # },
+        'django.request': {
+            'handlers': ['request_handler'],
+            'level': 'DEBUG',
+            'propagate': False
+        },
+        'django.scripts': {  # 脚本专用日志
+            'handlers': ['scprits_handler'],
+            'level': 'DEBUG',
+            'propagate': False
+        },
+    }
+}
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR,'media')

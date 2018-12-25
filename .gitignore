@@ -183,4 +183,4 @@ media/
 !/tomcatzip/migrations/__init__.py
 !/tomcatjar/migrations/__init__.py
 
-/logs/
+/logs/*

@@ -4,11 +4,15 @@
 import os
 import datetime
 import shutil
+import logging
 from django_redis import get_redis_connection
-
 from cmdb.models import ProjectInfo
 from tomcatwar.models import RecordOfwar
 from fileupload.models import Fileupload
+
+
+# Django logger
+logger = logging.getLogger('django.scripts')
 
 
 class RemoteWarReplaceWorker(object):
@@ -99,10 +103,12 @@ class RemoteWarReplaceWorker(object):
         return self.md5dict
 
     def mylogway(self, logstr, level="Error"):
-        # if level.capitalize() in ["Error", "Info", ]:  # 调整日志级别
-        if level.capitalize() in ["Error", "Info", "Debug", ]:  # 调整日志级别
-            print("{0}   [{1}]: {2} {3} {4}".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), level,
-                                                    self.remote_server, self.record_id, logstr))
+        if level.capitalize() == 'Error':
+            logger.error("{} {} {}".format(self.remote_server, self.record_id, logstr))
+        if level.capitalize() == 'Info':
+            logger.info("{} {} {}".format(self.remote_server, self.record_id, logstr))
+        if level.capitalize() == 'Debug':
+            logger.debug("{} {} {}".format(self.remote_server, self.record_id, logstr))
 
     def myexecute(self, cmd, stdinstr=''):
         """远程命令执行，检测执行结果"""
