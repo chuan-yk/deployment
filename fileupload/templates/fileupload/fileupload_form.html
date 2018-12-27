@@ -50,10 +50,10 @@
                                         <option value={{ i }}>{{ i }}</option>
                                     {% endfor %}
                                 </select>
-                                <label for="">任务ID</label>
+                                <label for="">任务ID(必填int型，如禅道任务ID)</label>
                                 <input type="text" name="bug_id" multiple>
 
-                                <label for="">功能描述</label>
+                                <label for="">功能描述(选填)</label>
                                 <input type="text" name="description" multiple>
                             </div>
                             <!-- Redirect browsers with JavaScript disabled to the origin page -->
@@ -108,6 +108,8 @@
                             </div>
                             <div class="panel-body">
                                 <ul>
+                                    <li>任务ID： 必填， 数字类型，建议与禅道ID一致，方便识别</li>
+                                    <li>功能描述：说明内容，选填，建议填写方便识别</li>
                                     <li>You can <strong>drag &amp; drop</strong> files from your desktop on this webpage
                                         (see <a
                                                 href="https://github.com/blueimp/jQuery-File-Upload/wiki/Browser-support">Browser
