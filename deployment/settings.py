@@ -239,21 +239,6 @@ LOGGING = {
         },
     },
     'loggers': {
-        'django': {
-            'handlers': ['default', 'console'],
-            'level': 'INFO',
-            'propagate': False  # 是否传递给上级记录器
-        },
-        'django.default': {
-            'handlers': ['default', 'console'],
-            'level': 'INFO',
-            'propagate': True
-        },
-        'django.request': {
-            'handlers': ['request_handler'],
-            'level': 'DEBUG',
-            'propagate': False
-        },
         'django.scripts': {  # 脚本专用日志
             'handlers': ['scprits_handler'],
             'level': 'DEBUG',
