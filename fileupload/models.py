@@ -29,7 +29,6 @@ class Fileupload(models.Model):
     slug = models.SlugField(max_length=50, blank=True)
     pubuser = models.CharField(max_length=100, default=None, null=True)
 
-
     def __str__(self):
         return self.file.name
 

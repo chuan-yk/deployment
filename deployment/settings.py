@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'tomcatwar',
     'tomcatzip',
     'tomcatjar',
+    'domains',
     # 'django.conf.OrdersConfig'
 ]
 
