@@ -37,4 +37,5 @@ urlpatterns = [
     url(r'tomcatjar/', include('tomcatjar.urls')),
     path('upload/', include('fileupload.urls')),
     url(r'^favicon\.ico$', RedirectView.as_view(url='/static/img/favicon.ico')),
+    url(r'domain/', include('domains.urls'))
 ]

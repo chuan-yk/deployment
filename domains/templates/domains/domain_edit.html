@@ -1,0 +1,109 @@
+{% extends 'layout.html' %}
+{% load widget_tweaks %}
+{% block title %} 解析域名详情编辑 {% endblock %}
+{% block body %}
+    <section>
+        <div class="section-body">
+            <div class="row">
+                <!-- BEGIN  - FORM -->
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-head style-primary">
+                            <header>解析域名详情</header>
+                            <div class="tools">
+                                <a class="btn btn-icon-toggle btn-collapse"><i class="fa fa-angle-down"></i></a>
+                                <a class="btn btn-icon-toggle btn-close"><i class="md md-close"></i></a>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <form class="form" role="form" action="" method="post"> {% csrf_token %}
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <header>域名信息</header>
+                                        <div class="form-group floating-label">
+                                            {{ form.domain | add_class:'form-control' }}
+                                            <label for="regular2">子域名</label>
+                                        </div>
+                                        <div class="form-group floating-label">
+                                            {{ form.platform | add_class:'form-control' }}
+                                            <label for="regular2">平台</label>
+                                        </div>
+                                        <div class="form-group floating-label">
+                                            {{ form.port | add_class:'form-control' }}
+                                            <label for="regular2">访问端口</label>
+                                        </div>
+                                        <div class="form-group floating-label">
+                                            {{ form.server | add_class:'form-control' | attr:'rows:2' }}
+                                            <label for="textarea2">服务器IP</label>
+                                        </div>
+                                        <div class="form-group floating-label">
+                                            {{ form.cdn | add_class:'form-control' | attr:'rows:2' }}
+                                            <label for="textarea2">是否启用第三方CDN</label>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-12">
+                                                <div class="form-group">
+                                                    {{ form.update_time  | add_class:'form-control' | attr:'type:date' }}
+                                                    <label for="regular2">采购日期</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <header>HTTPS证书信息</header>
+
+                                        <div class="form-group">
+                                            {{ domain_ssl_info.start_time }}
+                                            <label for="regular2">HTTPS证书起始时间</label>
+                                        </div>
+                                        <div class="form-group floating-label">
+                                            {{ domain_ssl_info.expire_time }}
+                                            <label for="textarea2">HTTPS证书过期时间</label>
+                                        </div>
+                                        <div class="form-group floating-label">
+                                            {% ifequal domain_ssl_info.multi_cr 0 %}
+                                                单域名证书
+                                            {% else %}
+                                                多域名证书
+                                            {% endifequal %}
+                                            <label for="textarea2">证书类型(单|多域名)</label>
+                                        </div>
+                                        <div class="form-group floating-label">
+                                            {% if multi_list %}
+                                                {{ multi_list }}
+                                            {% else %}
+                                                无
+                                            {% endif %}
+                                            <label for="textarea2">同证书域名</label>
+                                        </div>
+                                        <div class="form-group floating-label">
+                                            <a href="{% url 'domains:domain_ssl_flush' domain_ssl_info.id %}"><span style="color:red" >点击刷新域名HTTPS证书信息</span></a>
+                                            <label for="textarea2">刷新HTTPS证书信息</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <hr>
+                                        <b>备注:</b>
+                                        <div class="form-group floating-label">
+                                            {{ form.note | add_class:'form-control' | attr:'rows:2' }}
+                                            {#  <label for="textarea2">备注</label>#}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="card-actionbar-row">
+                                            <input type="submit" class="btn btn-flat btn-primary ink-reaction"
+                                                   value="提交修改">
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div><!--end .card-body -->
+                    </div><!--end .card -->
+                </div><!--end .col -->
+                <!-- END FORM -->
+
+            </div><!--end .row -->
+        </div><!--end .section-body -->
+    </section>
+
+{% endblock %}

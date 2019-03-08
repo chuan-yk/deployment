@@ -4,7 +4,6 @@ from django.db import models
 from deployment.settings import key
 
 
-
 # pkey=paramiko.RSAKey.from_private_key_file(key,password='******')
 pkey = paramiko.RSAKey.from_private_key_file(key)
 
@@ -14,6 +13,12 @@ class ServerInfo(models.Model):
     ip = models.GenericIPAddressField(protocol='ipv4')
     port = models.IntegerField(default=22)
     username = models.CharField(max_length=50, default='root')
+    platform = models.CharField(max_length=50, null=True, blank=True, help_text="所属平台")
+    sys_type = models.IntegerField(default=1, help_text="操作系统 1-linux，2-windows")
+    purchase_time = models.DateField(null=True, blank=True, help_text="采购时间")
+    region = models.CharField(max_length=20, null=True, blank=True, help_text="区域")
+    third_cdn = models.IntegerField(default=0, help_text="是否第三方CDN服务器， 0-否，1-是")
+    note = models.CharField(max_length=100, default='', null=True, blank=True, help_text="备注")
 
     def __str__(self):
         return 'Server {}:{}'.format(self.ip, self.port)

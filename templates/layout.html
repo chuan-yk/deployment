@@ -192,8 +192,23 @@
                     <!--start submenu -->
 
                 </li><!--end /menu-li -->
+                <li class="gui-folder">
+                    <a>
+                        <div class="gui-icon"><i class="fa fa-user"></i></div>
+                        <span class="title">资产管理</span>
+                    </a>
+                    <!--start submenu -->
+                    <ul>
+                       {% comment %} <li><a href="{% url 'change_password' %}"><span class="title">项目发布</span></a></li>{% endcomment %}
+                        <li><a href="{% url 'domains:node' %}"><span class="title">解析IP列表</span></a></li>
+                        <li><a href="{% url 'domains:primary' %}"><span class="title">域名资产管理</span></a></li>
+                        <li><a href="{% url 'domains:domain_list' %}"><span class="title">域名解析管理</span></a></li>
+                        <li><a href="{% url 'domains:domain_list_ssl' %}"><span class="title">域名证书管理</span></a></li>
+                    </ul><!--end /submenu -->
+                </li><!--end /menu-li -->
             </ul><!--end .main-menu -->
             <!-- END MAIN MENU -->
+
 
             <div class="menubar-foot-panel">
                 <small class="no-linebreak hidden-folded">

@@ -1,6 +1,7 @@
 django==2.0.0
-django-redis
-django_crontab
-paramiko
-django-widget-tweaks
-pymysql
+django-redis==4.10.0
+django_crontab==0.7.1
+paramiko==2.4.2
+django-widget-tweaks==1.4.3
+pymysql==0.9.3
+dnspython=1.16.0

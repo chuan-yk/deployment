@@ -1,0 +1,145 @@
+{% extends 'layout.html' %}
+
+{% block title %} 域名域名列表 {% endblock %}
+
+{% block body %}
+    <section>
+        <div class="section-body">
+            <!-- BEGIN DATATABLE 2 -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-head style-primary">
+                            <header>域名域名列表</header>
+                            <div class="tools">
+                                <a class="btn btn-icon-toggle btn-collapse"><i class="fa fa-angle-down"></i></a>
+                                <a class="btn btn-icon-toggle btn-close"><i class="md md-close"></i></a>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <form class="form" role="form" action="" method="GET"> {% csrf_token %}
+                                <table>
+                                    <tbody>
+                                    <tr>
+                                        <td>&nbsp&nbsp&nbsp&nbsp&nbspIP地址:</td>
+                                        <td>
+                                            <input value="{{ q_domain }}" type="text" id="q_domain" name="q_domain" maxlength="16"
+                                                   placeholder="域名模糊查询">
+                                        </td>
+                                        <td>&nbsp&nbsp&nbsp&nbsp&nbsp备注:</td>
+                                        <td>
+                                            <input value="{{ q_note }}" type="text" id="q_note" name="q_note" maxlength="16"
+                                                   placeholder="备注模糊查询">
+                                        </td>
+                                    </tr>
+
+                                    </tbody>
+                                </table>
+                                <br>
+                                <div class="col-md-12">
+                                    <div class="col-md-2">
+                                        <div class="card-actionbar-row">
+                                            <a href="{% url 'domains:primary_domain_add' %}"
+                                               class="btn btn-flat btn-primary ink-reaction"><span
+                                                    class="title">新增主域名记录</span></a>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="card-actionbar-row">
+                                            <a href="{% url 'domains:primary_domain_import' %}"
+                                                    {#  <a href="#" onclick="return confirm('导入功能待完善')"#}
+                                               class="btn btn-flat btn-primary ink-reaction">
+                                                <span class="title">导入主域名记录</span></a>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="card-actionbar-row">
+                                            <a href="{% url 'domains:primary_domain_export' %}"
+                                               class="btn btn-flat btn-primary ink-reaction">
+                                                <span class="title">导出主域名记录</span></a>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="card-actionbar-row">
+                                            <p class="btn btn-flat btn-primary ink-reaction"><span
+                                                    class="title">查询共 {{ domains.count }} 条</span></p>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="card-actionbar-row">
+                                            <a href="{% url 'domains:primary' %}"
+                                               class="btn btn-flat btn-primary ink-reaction"><span
+                                                    class="title">重置查询</span></a>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="card-actionbar-row">
+                                            <input type="submit" class="btn btn-flat btn-primary ink-reaction"
+                                                   value="开始查询">
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                            <hr>
+                            <hr>
+                            <hr>
+                            <div class="table-responsive">
+                                <table id="datatable1" class="table order-column hover">
+                                    <thead>
+                                    <tr>
+                                        <th>编号</th>
+                                        <th width="160px">主域名</th>
+                                        <th>平台</th>
+                                        <th>采购时间</th>
+                                        <th>到期时间</th>
+                                        <th>使用状态</th>
+                                        <th>备注</th>
+                                        <th width="260px" align="center">操作选项</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for domain in domains %}
+                                        <tr class="gradeX">
+                                            <td>{{ domain.id }}</td>
+                                            <td>{{ domain.primary }}</td>
+                                            <td>{{ domain.platform | default_if_none:"未记录" }}</td>
+                                            <td>{{ domain.start_time |default_if_none:"未记录" }}</td>
+                                            <td>{{ domain.expire_time |default_if_none:"未记录" }}</td>
+                                            {% ifequal domain.status 0 %}
+                                                <td>未使用</td>
+                                            {% endifequal %}
+                                            {% ifequal domain.status 1 %}
+                                                <td>使用中</td>
+                                            {% endifequal %}
+                                            {% ifequal domain.status 2 %}
+                                                <td>被墙|拦截</td>
+                                            {% endifequal %}
+                                            {% ifequal domain.status 3 %}
+                                                <td>停用</td>
+                                            {% endifequal %}
+                                            <td>{{ domain.note }}</td>
+                                            <td>
+                                                <a href="{% url 'domains:primary_domain_edit' domain.id %}"
+                                                   class="btn ink-reaction btn-floating-action btn-warning"><i
+                                                        class="md md-edit"></i> </a>
+                                                <a href="#" class="btn ink-reaction btn-floating-action btn-danger"
+                                                   onclick="return confirm('暂不提供删除功能')"><i class="md md-delete"></i>
+                                                </a>
+                                            </td>
+
+
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div><!--end .table-responsive -->
+                        </div>
+                    </div>
+                </div><!--end .col -->
+            </div><!--end .row -->
+            <!-- END DATATABLE 2 -->
+
+        </div><!--end .section-body -->
+    </section>
+{% endblock %}
