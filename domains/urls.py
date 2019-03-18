@@ -16,8 +16,8 @@ urlpatterns = [
     url(r'^primarydomain/(?P<pk>\d+)/edit/$', views.primary_edit, name='primary_domain_edit'),      # 域名资产编辑
     url(r'^primarydomain/add/$', views.pry_add, name='primary_domain_add'),      # 域名资产新增
     url(r'^list/$', views.domain_list, name='domain_list'),             # 所有域名列表
-    url(r'^list/ssl/$', views.domain_list_ssl, name='domain_list_ssl'),             # 所有域名列表
+    url(r'^list/ssl/$', views.domain_list_ssl, name='domain_list_ssl'),             # 所有SSL域名列表
     url(r'^list/(?P<pk>\d+)/edit/$', views.domain_edit, name='domain_edit'),    # 域名信息编辑
-    url(r'^list/add/$', views.domain_add, name='domain_add'),           # 域名信息编辑
-    url(r'^list/ssl/(?P<pk>\d+)/flush/$', views.domain_ssl_flush, name='domain_ssl_flush'),       # 域名信息编辑
+    url(r'^list/add/$', views.domain_add, name='domain_add'),           # 域名信息新增
+    url(r'^list/ssl/(?P<pk>\d+)/flush/$', views.domain_ssl_flush, name='domain_ssl_flush'),       # 域名信息更新
 ]

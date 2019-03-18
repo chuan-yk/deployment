@@ -188,63 +188,38 @@ key = "/root/.devopssh/id_rsa"
 # 上传目录
 MEDIA_URL = '/release/'
 MEDIA_ROOT = "/data/release"
-# 日志设置
+# logging
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
-        'standard': {
-            'format': '%(asctime)s  [%(levelname)s]- %(message)s'
-        },
-        'request_format': {
-            'format': '%(asctime)s  %(message)s'
+        'verbose': {
+            'format': '%(asctime)s  %(levelname)s  %(message)s'
         }
     },
-    'filters': {
-        # 当日志错误为 ERROR 时修改日志格式
-    },
     'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            'class': 'django.utils.log.AdminEmailHandler',
-            'include_html': True,
-        },
-        'default': {
+        'run_handler': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR + '/logs/', 'deployment_run.log'),
+            # 'filename': os.path.join(BASE_DIR + '/logs/', 'script.log'),
+            'filename': os.path.join('/tmp/', 'script.log'),
             'maxBytes': 1024 * 1024 * 5,  # 5 MB
             'backupCount': 5,
-            'formatter': 'standard',
-        },
-        'console': {
-            'level': 'INFO',
-            'class': 'logging.StreamHandler',
-            'formatter': 'request_format'
-        },
-        'request_handler': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR + '/logs/', 'access_http.log'),
-            'maxBytes': 1024 * 1024 * 5,  # 5 MB
-            'backupCount': 5,
-            'formatter': 'standard',
-        },
-        'scprits_handler': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR + '/logs/', 'script.log'),
-            'maxBytes': 1024 * 1024 * 5,  # 5 MB
-            'backupCount': 5,
-            'formatter': 'standard',
+            'formatter': 'verbose'
         },
     },
     'loggers': {
-        'django.scripts': {  # 脚本专用日志
-            'handlers': ['scprits_handler'],
+        'tasks': {
+            'handlers': ['run_handler'],
             'level': 'DEBUG',
-            'propagate': False
+            'propagate': True,
         },
-    }
+        'runlog': {
+            'handlers': ['run_handler'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
 }
+logdft = logging.getLogger('runlog')
 

@@ -40,7 +40,23 @@
 
                                     </tbody>
                                 </table>
+
+                                <div>
+                                    <div class="col-md-2"></div>
+                                    <div class="col-md-2"></div>
+                                    <div class="col-md-2"></div>
+                                    <div class="col-md-2"></div>
+                                    <div class="col-md-2"></div>
+                                    <div class="col-md-2">
+                                        <div class="card-actionbar-row">
+                                            <a href="{% url 'domains:domain_ssl_flush' 0 %}"
+                                               class="btn btn-flat btn-primary ink-reaction"><span
+                                                    class="title">刷新全部域名信息</span></a>
+                                        </div>
+                                    </div>
+                                </div>
                                 <br>
+
                                 <div class="col-md-12">
                                     <div class="col-md-2">
                                         <div class="card-actionbar-row">
@@ -116,8 +132,24 @@
                                             <td>{{ domain.server.ip }}</td>
                                             <td>{{ domain.port }}</td>
                                             <td>{{ domain.update_time | default_if_none:"未记录" }}</td>
-                                            <td>{{ domain.encryption }}</td>
-                                            <td>{{ domain.platform }}</td>
+                                            <td>
+                                                {% ifequal domain.encryption 0 %}
+                                                    未加密
+                                                {% endifequal %}
+                                            {% ifequal domain.encryption 1 %}
+                                                    加密(正常)
+                                                {% endifequal %}
+                                            {% ifequal domain.encryption 2 %}
+                                                    加密(被墙)
+                                                {% endifequal %}
+                                            {% ifequal domain.encryption 3 %}
+                                                    加密(过期)
+                                                {% endifequal %}
+                                            {% ifequal domain.encryption 4 %}
+                                                    <span style="color: red" title="即将过期请尽快更新证书">加密(将过期)</span>
+                                                {% endifequal %}
+                                            </td>
+                                            <td>{{ domain.server.server_set.count }}</td>
                                             <td>{{ domain.server.region | default_if_none:"未记录" }}</td>
                                             {% ifequal domain.server.third_cdn 0 %}
                                                 <td>项目IP</td>
@@ -129,8 +161,11 @@
                                                 <a href="{% url 'domains:domain_edit' domain.id %}"
                                                    class="btn ink-reaction btn-floating-action btn-warning"><i
                                                         class="md md-edit"></i> </a>
-                                                <a href="#" class="btn ink-reaction btn-floating-action btn-danger"
-                                                   onclick="return confirm('暂不提供删除功能')"><i class="md md-delete"></i>
+                                                <a href="{% url 'domains:domain_ssl_flush' domain.id %}"
+                                                   class="btn  ink-reaction btn-floating-action btn-primary-light"><i class="md md-autorenew"></i></a>
+                                                <a href="#"
+                                                   class="btn ink-reaction btn-floating-action btn-danger"
+                                                   onclick="return confirm('暂不提供删除功能')"><i class="md md-delete "></i>
                                                 </a>
                                             </td>
 

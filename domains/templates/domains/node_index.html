@@ -113,7 +113,7 @@
                                                 <td>Windows</td>
                                             {% endifequal %}
                                             <td>{{ node.purchase_time |default_if_none:"未记录" }}</td>
-                                            <td>{{ node.port }}</td>
+                                            <td><span style="color: red"><a href="{% url 'domains:domain_list' %}?q_ip={{ node.ip }}">{{ node.server_set.count }}</a></span></td>
                                             <td>{{ node.region |default_if_none:"未记录" }}</td>
                                             {% ifequal node.third_cdn 0 %}
                                                 <td>项目IP</td>

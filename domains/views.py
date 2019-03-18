@@ -1,5 +1,5 @@
 from django.db.models import Q
-from django.shortcuts import render, HttpResponse, redirect
+from django.shortcuts import render, HttpResponse, redirect, get_list_or_404, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .domain_tools import manual_execute
@@ -188,7 +188,23 @@ def domain_list(request):
 
 @login_required
 def domain_list_ssl(request):
-    return HttpResponse('test')
+    query_conditions = [Q(id__gt=0), ~Q(encryption=0)]
+    content = {'q_ip': '', 'q_note': '', 'q_domain': ''}
+    if request.GET.get('q_ip'):
+        q_ip = request.GET.get('q_ip')
+        query_conditions.append(Q(server__ip__contains=q_ip))
+        content['q_ip'] = q_ip
+    if request.GET.get('q_domain'):
+        q_domain = request.GET.get('q_domain')
+        query_conditions.append(Q(domain__contains=q_domain))
+        content['q_domain'] = q_domain
+    if request.GET.get('q_note'):
+        q_note = request.GET.get('q_note')
+        query_conditions.append(Q(note__contains=q_note))
+        content['q_note'] = q_note
+
+    content['domains'] = DomainList.objects.filter(*query_conditions)
+    return render(request, 'domains/domain_ssl_index.html', content)
 
 
 @login_required
@@ -225,7 +241,7 @@ def domain_add(request):
             form = DomainListAddForm(request.POST)
             if form.is_valid():
                 new_form = form.save(commit=False)
-                new_form = domain_add_new_relate(new_form)
+                new_form = domain_add_new_relate(new_form)      # 新增过程中默认解析单个域名DNS，HTTPS证书信息
                 try:
                     new_form.save()
                     return redirect('/domain/list/', messages.success(request, '更新域名成功', 'alert-success'))
@@ -243,4 +259,14 @@ def domain_add(request):
 
 @login_required
 def domain_ssl_flush(request, pk):
-    return HttpResponse('test')
+
+    if pk == '0':
+        domains = DomainList.objects.all()
+        print("domain_ssl_flush开始刷新全部域名信息")
+    else:
+        domains = get_list_or_404(DomainList, pk=pk)
+        print("domain_ssl_flush开始刷新域名{}信息".format(domains[0].domain))
+
+    messages.info(request, '刷新任务执行中', 'alert-success')
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+

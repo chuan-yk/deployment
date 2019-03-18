@@ -58,7 +58,7 @@ class DomainListForm(ModelForm):
 
     class Meta:
         model = DomainList
-        fields = ['domain', 'platform', 'cdn', 'server', 'port', 'update_time', 'note']
+        fields = ['domain', 'platform', 'cdn', 'server', 'port', 'note']
         required = ['domain', 'cdn', 'port', ]
         widgets = {'update_time': forms.DateInput(attrs={'type': 'date'}),
                    'start_time': forms.DateInput(attrs={'type': 'date'}),
@@ -74,7 +74,7 @@ class DomainListAddForm(ModelForm):
 
     class Meta:
         model = DomainList
-        fields = ['domain', 'platform', 'cdn', 'port', 'update_time', 'note']
+        fields = ['domain', 'platform', 'cdn', 'port', 'note']
         widgets = {'update_time': forms.DateInput(attrs={'type': 'date'}),
                    'start_time': forms.DateInput(attrs={'type': 'date'}),
                    'expire_time': forms.DateInput(attrs={'type': 'date'}), }  # 修改template input字段类型
