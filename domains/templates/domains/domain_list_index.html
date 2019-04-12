@@ -67,7 +67,7 @@
                                     </div>
                                     <div class="col-md-2">
                                         <div class="card-actionbar-row">
-                                            <a href="{% url 'domains:node_import' %}"
+                                            <a href="{% url 'domains:domain_import' %}"
                                                     {#  <a href="#" onclick="return confirm('导入功能待完善')"#}
                                                class="btn btn-flat btn-primary ink-reaction">
                                                 <span class="title">导入域名记录</span></a>
@@ -118,7 +118,8 @@
                                         <th>启用HTTPS</th>
                                         <th>同服务器域名数</th>
                                         <th>服务器地区</th>
-                                        <th>属第三方</th>
+                                        <th>是否第三方CDN</th>
+                                        <th>更新时间</th>
                                         <th>备注</th>
                                         <th width="260px" align="center">操作选项</th>
                                     </tr>
@@ -156,6 +157,7 @@
                                             {% else %}
                                                 <td>第三方IP</td>
                                             {% endifequal %}
+                                            <td>{{ domain.update_time }}</td>
                                             <td>{{ domain.note }}</td>
                                             <td>
                                                 <a href="{% url 'domains:domain_edit' domain.id %}"

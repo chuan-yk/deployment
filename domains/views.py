@@ -1,13 +1,22 @@
+import threading
+import xlrd
+import logging
 from django.db.models import Q
-from django.shortcuts import render, HttpResponse, redirect, get_list_or_404, HttpResponseRedirect
+from django.shortcuts import render, HttpResponse, redirect, HttpResponseRedirect
+from django.shortcuts import get_list_or_404, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .domain_tools import manual_execute
 from cmdb.models import ServerInfo
 from .models import PrimaryDomain, DomainList
 from .forms import ServerInfoForm, PrimaryDomainForm, DomainListForm, DomainListAddForm
+from .domain_tools import init_server_info, init_primary_domain, init_domain
 from .domain_tools import ssl_certificate_info, get_remote_addr, get_dns_resolver, analysis_primary_domain
 from .domain_tools import domain_add_new_relate
+from .domain_tools import multiple_flush
+
+
+loger = logging.getLogger('runlog')
 
 
 def tmp_analysis(request):
@@ -72,6 +81,7 @@ def node_add(request):
     if request.POST:
         try:
             form = ServerInfoForm(request.POST)
+            attr = dict()
             if form.is_valid():
                 if form.save():
                     return redirect('/domain/node', messages.success(request, '更新IP成功', 'alert-success'))
@@ -241,12 +251,15 @@ def domain_add(request):
             form = DomainListAddForm(request.POST)
             if form.is_valid():
                 new_form = form.save(commit=False)
-                new_form = domain_add_new_relate(new_form)      # 新增过程中默认解析单个域名DNS，HTTPS证书信息
                 try:
-                    new_form.save()
-                    return redirect('/domain/list/', messages.success(request, '更新域名成功', 'alert-success'))
+                    add_result = domain_add_new_relate(new_form)  # 新增过程中默认解析单个域名DNS，HTTPS证书信息
+                    if add_result['status']:
+                        return redirect('/domain/list/', messages.success(request, add_result['msg'], 'alert-success'))
+                    else:
+                        return redirect('/domain/list/',
+                                        messages.error(request, '更新域名失败, {}'.format(add_result['msg']), 'alert-danger'))
                 except Exception as e:
-                    return redirect('/domain/list/', messages.error(request, '更新域名失败, {}'.format(e), 'alert-danger'))
+                    return redirect('/domain/list/', messages.error(request, '更新域名错误, {}'.format(e), 'alert-danger'))
             else:
                 return redirect('/domain/list/', messages.error(request, '输入数据格式不正确', 'alert-danger'))
         except Exception as e:
@@ -259,14 +272,50 @@ def domain_add(request):
 
 @login_required
 def domain_ssl_flush(request, pk):
-
     if pk == '0':
-        domains = DomainList.objects.all()
+        domains = DomainList.objects.filter(Q(been_deleted__exact=False))
+        threading_task = threading.Thread(target=multiple_flush, args=(domains,))  # 多线程执行发布过程
+        threading_task.start()
         print("domain_ssl_flush开始刷新全部域名信息")
     else:
-        domains = get_list_or_404(DomainList, pk=pk)
-        print("domain_ssl_flush开始刷新域名{}信息".format(domains[0].domain))
+        domain = get_object_or_404(DomainList, pk=pk)
+        print("domain_ssl_flush开始刷新域名{}信息".format(domain.domain))
+        flush_result = domain_add_new_relate(domain)
+        if flush_result['status']:
+            messages.success(request, flush_result['msg'], 'alert-success')
+        else:
+            messages.error(request, flush_result['msg'], 'alert-danger')
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
     messages.info(request, '刷新任务执行中', 'alert-success')
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
+
+@login_required
+def domains_import(request):
+    """批量导入"""
+    if request.method == 'POST':
+        try:
+            the_file = request.FILES.get('thefile')
+            wb = xlrd.open_workbook(filename=None, file_contents=the_file.read(), formatting_info=True)  # xls文件
+            table = wb.sheets()[0]
+            new_list = [i for i in range(table.nrows-1)]
+            for i in range(1, table.nrows):
+                new_list[i-2] = DomainList(domain=str(table.cell_value(i, 0).strip()),
+                                           port=int(table.cell_value(i, 1)) or 80,
+                                           note=table.cell_value(i, 4),
+                                           cdn=table.cell_value(i, 5),
+                                           platform=str(table.cell_value(i, 6).strip())
+                                           )
+
+            loger.debug("读取上传表格完成，{}".format(new_list))
+            multiple_flush(new_list)
+            # 用完记得删除
+            wb.release_resources()
+            del wb
+        except Exception as e:
+            messages.error(request, str(e), 'alert-danger')
+            loger.error('request 上传文件导入失败， 错误原因{}'.format(str(e)))
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    else:
+        return render(request, 'domains/upload.html')

@@ -20,4 +20,5 @@ urlpatterns = [
     url(r'^list/(?P<pk>\d+)/edit/$', views.domain_edit, name='domain_edit'),    # 域名信息编辑
     url(r'^list/add/$', views.domain_add, name='domain_add'),           # 域名信息新增
     url(r'^list/ssl/(?P<pk>\d+)/flush/$', views.domain_ssl_flush, name='domain_ssl_flush'),       # 域名信息更新
+    url(r'^list/import/$', views.domains_import, name='domain_import')      # 域名信息批量导入
 ]

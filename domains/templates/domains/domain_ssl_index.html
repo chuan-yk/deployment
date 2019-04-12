@@ -116,13 +116,13 @@
                                         <th>平台</th>
                                         <th>解析地址</th>
                                         <th>端口</th>
-                                        <th>域名解析时间</th>
                                         <th>HTTPS证书起始时间</th>
                                         <th>HTTPS证书到期时间</th>
                                         <th>HTTPS证书状态</th>
                                         <th>同服务器域名数</th>
                                         <th>服务器地区</th>
-                                        <th>属第三方</th>
+                                        <th>是否第三方</th>
+                                        <th>更新时间</th>
                                         <th>备注</th>
                                         <th width="260px" align="center">操作选项</th>
                                     </tr>
@@ -135,7 +135,6 @@
                                             <td>{{ domain.platform | default_if_none:"未记录" }}</td>
                                             <td>{{ domain.server.ip }}</td>
                                             <td>{{ domain.port }}</td>
-                                            <td>{{ domain.update_time | default_if_none:"未记录" }}</td>
                                             <td>{{ domain.start_time }}</td>
                                             <td>{{ domain.expire_time }}</td>
                                             <td>
@@ -162,6 +161,7 @@
                                             {% else %}
                                                 <td>第三方IP</td>
                                             {% endifequal %}
+                                            <td>{{ domain.update_time | default_if_none:"未记录" }}</td>
                                             <td>{{ domain.note }}</td>
                                             <td>
                                                 <a href="{% url 'domains:domain_edit' domain.id %}"

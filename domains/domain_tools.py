@@ -1,14 +1,14 @@
 import socket
 import dns.resolver
+import logging
 # import os, django
 import requests
 import ssl
 import datetime
 import time
-
+from django.db.models import Q
 from cmdb.models import ServerInfo
 from domains.models import PrimaryDomain, DomainList
-from deployment.settings import logdft
 
 
 # 查询DNS解析
@@ -80,7 +80,10 @@ def init_server_info(ip, query_region=False, **attr):
         headers = {'User-Agent': 'curl/7.62.0', }
         url = 'https://ip.cn/?ip={}'.format(ip)
         r = requests.get(url, headers=headers)
-        attr['region'] = r.content.decode().strip().split('来自:')[1].strip()
+        try:
+            attr['region'] = r.content.decode().strip().split('来自:')[1].strip()
+        except IndexError:
+            print("Warnning init_server_info 自动解析IP所属地， 请求IP.CN 响应异常")
     the_server, created = ServerInfo.objects.get_or_create(ip=ip, defaults={'port': attr.get('port', 22),
                                                                             'username': attr.get('username', 'root'),
                                                                             'platform': attr.get('platform'),
@@ -95,29 +98,39 @@ def init_server_info(ip, query_region=False, **attr):
 
 # 初始化Domain records信息记录(指定解析IP)
 def init_domain(domain, server_id, port, analysis=False, **attr):
-    if analysis:    # 自动解析域名证书
+    primary_name = analysis_primary_domain(domain)
+    tmp_attr = dict()
+    primary_domain, created = init_primary_domain(primary_name, **tmp_attr)
+    attr['primary_domain'] = primary_domain
+    if analysis:  # 自动解析域名证书
         ip = ServerInfo.objects.get(pk=server_id).ip
         info = ssl_certificate_info(domain, ip, port)
+        print("debug init_domain分析域名{} 结果为{}".format(domain, info))
         attr['encryption'] = info.get('status')
-        attr['start_time'] = info.get('start_time')
-        attr['expire_time'] = info.get('expire_time')
+        if attr['encryption'] == 1:
+            attr['start_time'] = info.get('start_time').date()
+            attr['expire_time'] = info.get('expire_time').date()
         if info['multi_name']:
             attr['multi_cr'] = 1
             attr['multi_list'] = info.get('multi_name')
     the_domain, created = DomainList.objects.get_or_create(domain=domain, server_id=server_id, port=port,
-                                                           defaults={'platform': attr.get('platform'),
-                                                                     'cdn': attr.get('cdn', 0),
-                                                                     'encryption': attr.get('encryption', 0),
-                                                                     'multi_cr': attr.get('multi_cr', 0),
-                                                                     'multi_list': attr.get('multi_list'),
-                                                                     'start_time': attr.get('start_time'),
-                                                                     'expire_time': attr.get('expire_time'),
-                                                                     'been_deleted': attr.get('been_deleted', False),
-                                                                     'note': attr.get('note'), }
-                                                           )
+                                                           defaults={'primary_domain': attr.get('primary_domain'), })
+    # 已有记录更新最新值或保持不变
+    the_domain.platform = attr.get('platform') or the_domain.platform
+    the_domain.cdn = attr.get('cdn') or the_domain.cdn
+    the_domain.note = attr.get('note') or the_domain.note
+    the_domain.encryption = attr.get('encryption') or the_domain.encryption
+    the_domain.multi_cr = attr.get('multi_cr') or the_domain.multi_cr
+    the_domain.multi_list = attr.get('multi_list') or the_domain.multi_list
+    the_domain.start_time = attr.get('start_time') or the_domain.start_time
+    the_domain.expire_time = attr.get('expire_time') or the_domain.expire_time
+    the_domain.save()
+    print("Debug init_domain: {}:{} on IP {} OK".format(domain, port, ip))
     return the_domain, created
 
 
+# ssl 证书解析
+# def ssl_certificate_info(domain, port=443):
 def ssl_certificate_info(domain, ip, port=443):
     """
     传入域名和指定解析IP,返回证书信息
@@ -126,9 +139,8 @@ def ssl_certificate_info(domain, ip, port=443):
         ‘start_time’: '证书生效时间',
         'expire_time': '证书过期时间'',
         ‘multi_name’: '共用证书的域名list' }
-    #  django.db.utils.IntegrityError: 主键冲突错误
     """
-    logdft('ssl_certificate_info check on {} {}， IP： {}'.format(domain, port, ip))
+    # logdft('ssl_certificate_info check on {} {}， IP： {}'.format(domain, port, ip))
     info = {'status': 0, 'start_time': '', 'expire_time': '', 'multi_name': [], }
     ssl_date_fmt = r'%b %d %H:%M:%S %Y %Z'
     try:
@@ -137,6 +149,7 @@ def ssl_certificate_info(domain, ip, port=443):
             socket.socket(socket.AF_INET),
             server_hostname=domain, )
         conn.settimeout(3.0)  # 超时时间3秒
+        print("debug, ssl_certificate_info analysis {} on IP {}, ".format(domain, ip, ))
         conn.connect((ip, port))
         ssl_info = conn.getpeercert()
         info['status'] = 1
@@ -168,29 +181,63 @@ def ssl_certificate_info(domain, ip, port=443):
     # ConnectionResetError , 被墙或被强其它情况导致连接不通
     except ConnectionResetError:
         info['status'] = 2
-        print('{} {} ConnectionResetError , Reset connect , pass '.format(domain, port))
+        print('Error {} {} ConnectionResetError , Reset connect , pass '.format(domain, port))
         return info
     # socket.timeout: timed out, 连接不通等待时间过长
     except socket.timeout:
         info['status'] = 2
-        print('{} {} socket.timeout: timed out , pass '.format(domain, port))
+        print('Error {} {} socket.timeout: timed out , pass '.format(domain, port))
+        return info
+    except OSError:
+        info['status'] = 2
+        print('Error {} {} OSError:  overpass '.format(domain, port))
+        return info
+    except Exception as e:
+        info['status'] = 2
+        print('Error {} {} unknown Error:  {} '.format(domain, port, e))
         return info
     finally:
         if conn:
             conn.close()
 
 
-# 新增域名自动解析
+# 新增域名自动解析|刷新域名信息
 def domain_add_new_relate(m):
-    primary_domain = analysis_primary_domain(m.domain)
-    i_primary_domain, created = PrimaryDomain.objects.get_or_create(primary=primary_domain)
-    m.primary_domain = i_primary_domain
-    # 关联解析地址
-    i_remote_addr = get_remote_addr(m.domain)[1]
-    i_server, created = ServerInfo.objects.get_or_create(ip=i_remote_addr, )
-    print(i_server)
-    m.server = i_server
-    return m
+    print("start Add domain: {}".format(m.domain))
+    argv = {'platform': m.platform, 'cdn': m.cdn, 'note': m.note, }
+    # 初始化IP 信息
+    ips = get_remote_addr(m.domain)[2]
+    print("relate domain: {}, IPS= {}".format(m.domain, ips))
+    if len(ips) == 0:
+        return {'status': False, 'records': 0, "msg": "无法解析域名", }
+    # 解析域名
+    domain_add_list = []
+    for ip in ips:
+        print("debug domain_add_new_relate, current IP:", ip)
+        # 初始化Server数据库
+        # i_server, created = init_server_info(ip, query_region=False, **argv)
+        i_server, created = init_server_info(ip, query_region=True, **argv)
+        the_domain, created = init_domain(m.domain, i_server.id, m.port, analysis=True, **argv)
+        domain_add_list.append(the_domain)
+        print("debug domain_add_list=", domain_add_list)
+    # 自动删除过期|旧的解析地址
+    auto_del_count = 0
+    for d in DomainList.objects.filter(Q(domain__exact=m.domain), Q(port__exact=m.port)):
+        if d.server.ip not in ips:
+            d.been_deleted = True
+            d.save()
+            auto_del_count += 1
+            print("Auto delete Invalid doamin records {} in {}".format(m.domain, d.domain))
+
+    return {'status': True, 'records': len(domain_add_list),
+            "msg": "更新域名成功，共更新{}条记录，自动删除无效记录{}条".format(len(domain_add_list), auto_del_count), }
+
+
+# 多域名批量执行
+def multiple_flush(dms):
+    for d in dms:
+        print("Info Start Add or Flush domain: {}".format(d.domain))
+        domain_add_new_relate(d)
 
 
 def manual_execute(all_domains):

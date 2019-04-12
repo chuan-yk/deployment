@@ -3,7 +3,6 @@ import paramiko
 from django.db import models
 from deployment.settings import key
 
-
 # pkey=paramiko.RSAKey.from_private_key_file(key,password='******')
 pkey = paramiko.RSAKey.from_private_key_file(key)
 
@@ -97,7 +96,7 @@ class ProjectInfo(models.Model):
     def __str__(self):
         return '{}:{}'.format(self.platform_cn, self.items)
 
-    items = models.CharField(default='sobet', max_length=100, help_text='项目名称，如sobet，lottery，admin')
+    items = models.CharField(default='sobet', max_length=100, help_text='项目名称，如sobet，lottery，admin', )
     platform = models.CharField(max_length=100, default='', help_text='平台名称，如MC\MD\CYQ')
     platform_cn = models.CharField(max_length=100, default='', help_text='中文名')
     package_name = models.CharField(max_length=100, default='', help_text='合法包名，允许字段为空')
